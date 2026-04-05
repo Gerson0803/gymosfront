@@ -1,36 +1,112 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GymOS Frontend MVP
 
-## Getting Started
+GymOS is a frontend MVP for gym administrators to manage clients and monitor retention risk.
 
-First, run the development server:
+## Tech Stack
+
+- Next.js 16 (App Router)
+- React 19 + TypeScript
+- Tailwind CSS v4
+- Lucide React icons
+
+## Features
+
+### Gestión de Miembros
+- Dashboard con métricas de retención y churn predictivo
+- Tabla de miembros con búsqueda, filtros y exportación CSV
+- Tracking de check-ins y frecuencia de asistencia
+- Cálculo automático de riesgo de abandono (churn risk)
+- Alertas inteligentes de retención
+
+### Pipeline de Ventas
+- Embudo de ventas con 6 etapas (drag & drop)
+- Gestión de leads y prospectos
+- Tracking de conversión y probabilidades
+- Atribución de fuentes (Instagram, Google, Referidos, etc.)
+
+### Gestión de Equipamiento
+- Inventario completo de equipos del gym
+- Estados: Operativo, En Mantenimiento, Fuera de Servicio, Nuevo
+- Tracking de mantenimientos preventivos y correctivos
+- Alertas de próximo mantenimiento
+- Categorización por tipo (Cardio, Pesas, Máquinas, Funcional)
+- Historial de uso y horas de operación
+
+### Analytics Avanzados
+- Gráficos interactivos con Recharts
+- Distribución de riesgo de churn
+- Embudo de ventas visual
+- Tipos de membresía
+- Estado del equipamiento en tiempo real
+
+## Status Logic
+
+- Active: attended within 7 days
+- At Risk: no attendance for 8-21 days
+- Inactive: no attendance for more than 21 days
+
+## Project Structure
+
+```text
+src/
+	app/
+		(dashboard)/
+			clients/
+				page.tsx              # Gestión de miembros
+			equipment/
+				page.tsx              # Gestión de equipamiento
+			pipeline/
+				page.tsx              # Pipeline de ventas
+			layout.tsx
+			page.tsx                  # Dashboard principal
+		globals.css
+		layout.tsx
+	components/
+		clients/
+			enhanced-clients-table.tsx
+		dashboard/
+			enhanced-dashboard.tsx
+		equipment/
+			equipment-table.tsx
+		pipeline/
+			sales-pipeline.tsx
+		layout/
+			app-shell.tsx
+			sidebar.tsx
+	context/
+		clients-context.tsx           # Legacy (no usado)
+	lib/
+		validations.ts                # Zod schemas
+	store/
+		useGymStore.ts                # Zustand store con persistencia
+	types/
+		client.ts                     # Tipos TypeScript
+```
+
+## Installation
+
+```bash
+npm install
+```
+
+## Run Locally
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Production Build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm run start
+```
 
-## Learn More
+## Notes
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- This MVP uses Zustand with localStorage persistence for demonstration purposes.
+- Data persists across browser refreshes.
+- Built with Next.js 16, React 19, and Tailwind CSS v4.
+- Includes predictive churn risk algorithm, sales pipeline, and equipment management.
