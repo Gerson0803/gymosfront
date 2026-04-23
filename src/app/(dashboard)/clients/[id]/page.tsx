@@ -4,21 +4,21 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ArrowLeft, PencilLine } from "lucide-react";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { useClients } from "@/context/clients-context";
-import { getClientStatus, getLastAttendance, getRiskLabel } from "@/lib/client-status";
-import { formatDate } from "@/lib/utils";
+import { useMembers } from \"@/context/members-context\";
+import { getClientStatus, getLastAttendance, getRiskLabel } from \"@/lib/client-status\";
+import { formatDate } from \"@/lib/utils\";
 
 export default function ClientDetailPage() {
   const params = useParams<{ id: string }>();
-  const { getClientById } = useClients();
-  const client = getClientById(params.id);
+  const { getMemberById } = useMembers();
+  const member = getMemberById(params.id);
 
-  if (!client) {
+  if (!member) {
     return (
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
-        <h2 className="text-xl font-semibold text-slate-900">Client not found</h2>
-        <p className="mt-2 text-sm text-slate-500">
-          The client record does not exist in this local MVP dataset.
+      <section className=\"rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm\">
+        <h2 className=\"text-xl font-semibold text-slate-900\">Member not found</h2>
+        <p className=\"mt-2 text-sm text-slate-500\">
+          The member record does not exist.
         </p>
         <Link
           href="/clients"
@@ -30,16 +30,16 @@ export default function ClientDetailPage() {
     );
   }
 
-  const status = getClientStatus(client);
-  const riskLabel = getRiskLabel(client);
-  const lastAttendance = getLastAttendance(client);
+  const status = getClientStatus(member);
+  const riskLabel = getRiskLabel(member);
+  const lastAttendance = getLastAttendance(member);
 
   return (
-    <div className="space-y-4">
-      <section className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className=\"space-y-4\">
+      <section className=\"flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm\">
         <div>
-          <div className="mb-1 flex items-center gap-2">
-            <h2 className="text-2xl font-semibold text-slate-900">{client.name}</h2>
+          <div className=\"mb-1 flex items-center gap-2\">
+            <h2 className=\"text-2xl font-semibold text-slate-900\">{member.name}</h2>
             <StatusBadge status={status} />
           </div>
           <p className="text-sm text-slate-500">{riskLabel}</p>
@@ -51,10 +51,10 @@ export default function ClientDetailPage() {
             className="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
           >
             <ArrowLeft size={15} />
-            Clients
+            Members
           </Link>
           <Link
-            href={`/clients/${client.id}/edit`}
+            href={`/clients/${member.id}/edit`}
             className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-3 py-2 text-sm font-semibold text-white transition hover:bg-slate-700"
           >
             <PencilLine size={15} />

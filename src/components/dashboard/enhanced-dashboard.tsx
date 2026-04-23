@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { useGymStore } from '@/store/useGymStore';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { Users, TrendingDown, DollarSign, AlertTriangle, CheckCircle } from 'lucide-react';
@@ -8,6 +8,14 @@ import { Users, TrendingDown, DollarSign, AlertTriangle, CheckCircle } from 'luc
 const COLORS = ['#10b981', '#f59e0b', '#ef4444'];
 
 export default function EnhancedDashboard() {
+
+  useEffect(() => {
+   fetch(`${process.env.NEXT_PUBLIC_API_URL}/members`)
+    .then(res => res.json())
+    .then(data => console.log("DATA:", data))
+    .catch(err => console.error("ERROR:", err));
+  }, []);
+
   const { clients, leads, alerts, equipment } = useGymStore();
 
   const metrics = useMemo(() => {

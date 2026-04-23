@@ -2,12 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { useClients } from "@/context/clients-context";
-import type { AttendanceRecord, Client } from "@/types/client";
+import toast from \"react-hot-toast\";
+import { useMembers } from \"@/context/members-context\";
+import type { AttendanceRecord, Member } from \"@/types/member\";
 
 type ClientFormProps = {
-  mode: "create" | "edit";
-  initialClient?: Client;
+  mode: \"create\" | \"edit\";
+  initialMember?: Member;
 };
 
 type FormState = {
@@ -32,52 +33,73 @@ function toAttendanceText(attendance: AttendanceRecord[]): string {
   return attendance.map((record) => record.date).join("\n");
 }
 
-export function ClientForm({ mode, initialClient }: ClientFormProps) {
+export function ClientForm({ mode, initialMember }: ClientFormProps) {
   const router = useRouter();
-  const { addClient, updateClient } = useClients();
+  const { addMember, updateMember } = useMembers();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const defaultState = useMemo<FormState>(
     () => ({
-      name: initialClient?.name ?? "",
-      email: initialClient?.email ?? "",
-      phone: initialClient?.phone ?? "",
+      name: initialMember?.name ?? "",
+      email: initialMember?.email ?? "",
+      phone: initialMember?.phone ?? "",
       joinedAt:
-        initialClient?.joinedAt ?? new Date().toISOString().slice(0, 10),
-      goal: initialClient?.goal ?? "",
-      notes: initialClient?.notes ?? "",
-      attendance: initialClient ? toAttendanceText(initialClient.attendance) : "",
+        initialMember?.joinedAt ?? new Date().toISOString().slice(0, 10),
+      goal: initialMember?.goal ?? "",
+      notes: initialMember?.notes ?? "",
+      attendance: initialMember ? toAttendanceText(initialMember.attendance) : "",
     }),
-    [initialClient],
+    [initialMember],
   );
 
   const [form, setForm] = useState<FormState>(defaultState);
 
-  function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setIsSubmitting(true);
 
-    const payload = {
-      name: form.name,
-      email: form.email,
-      phone: form.phone,
-      joinedAt: form.joinedAt,
-      goal: form.goal,
-      notes: form.notes,
-      attendance: parseAttendance(form.attendance),
-    };
+    try {
+      const payload = {
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        joinedAt: form.joinedAt,
+        goal: form.goal as any,
+        notes: form.notes,
+        attendance: parseAttendance(form.attendance),
+        status: "active" as const,
+        membershipStatus: "activo" as const,
+        membershipType: "basica" as const,
+        experienceLevel: "principiante" as const,
+        checkInsLast30Days: 0,
+        averageCheckInsPerWeek: 0,
+        churnRiskScore: 0,
+        churnRiskLevel: "bajo" as const,
+        monthlyPrice: 0,
+      };
 
-    if (mode === "create") {
-      const client = addClient(payload);
-      router.push(`/clients/${client.id}`);
-      return;
-    }
+      if (mode === "create") {
+        const member = await addMember(payload);
+        toast.success("Member created successfully");
+        router.push(`/clients/${member.id}`);
+        return;
+      }
 
-    if (!initialClient) {
-      return;
-    }
+      if (!initialMember) {
+        return;
+      }
 
-    const client = updateClient(initialClient.id, payload);
-    if (client) {
-      router.push(`/clients/${client.id}`);
+      const member = await updateMember(initialMember.id, payload);
+      if (member) {
+        toast.success("Member updated successfully");
+        router.push(`/clients/${member.id}`);
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "An error occurred";
+      toast.error(message);
+      console.error("Form submission error:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -170,13 +192,15 @@ export function ClientForm({ mode, initialClient }: ClientFormProps) {
       <div className="flex flex-wrap items-center gap-3 pt-2">
         <button
           type="submit"
-          className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700"
+          disabled={isSubmitting}
+          className=\"rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed\"
         >
-          {mode === "create" ? "Create Client" : "Save Changes"}
+          {isSubmitting ? \"Saving...\" : mode === \"create\" ? \"Create Member\" : \"Save Changes\"}
         </button>
         <button
-          type="button"
-          className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+          type=\"button\"
+          disabled={isSubmitting}
+          className=\"rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed\"
           onClick={() => router.back()}
         >
           Cancel
@@ -184,4 +208,4 @@ export function ClientForm({ mode, initialClient }: ClientFormProps) {
       </div>
     </form>
   );
-}
+}\n\n// Export with original name for backward compatibility\nexport const MemberForm = ClientForm;
