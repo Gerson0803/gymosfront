@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, TrendingUp, Wrench } from 'lucide-react';
+import { LayoutDashboard, Users, TrendingUp, Wrench, LogOut } from 'lucide-react';
+import { logout } from '@/lib/api';
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -13,6 +14,10 @@ const navigation = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+
+  const handleLogout = () => {
+    logout();
+  };
 
   return (
     <aside className="fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200">
@@ -41,7 +46,15 @@ export default function Sidebar() {
           })}
         </nav>
 
-        <div className="border-t border-slate-200 p-4">
+        <div className="border-t border-slate-200 p-4 space-y-3">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 rounded-lg transition"
+          >
+            <LogOut className="h-5 w-5 text-slate-400" />
+            Cerrar sesión
+          </button>
+          
           <div className="rounded-lg bg-slate-50 p-3">
             <p className="text-xs font-medium text-slate-600">v2.0 - Fusion Edition</p>
             <p className="mt-1 text-xs text-slate-500">Next.js 16 + React 19</p>

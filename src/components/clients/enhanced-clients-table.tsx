@@ -1,46 +1,63 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { useGymStore } from '@/store/useGymStore';
-import { Search, Filter, Download, AlertTriangle, CheckCircle, TrendingDown, Edit, Trash2 } from 'lucide-react';
+import { useMembers } from '@/context/members-context';
+import { checkinMember } from '@/lib/api';
+import { Search, Filter, Download, AlertTriangle, CheckCircle, TrendingDown, Edit, Trash2, Loader } from 'lucide-react';
 import toast from 'react-hot-toast';
+import Link from 'next/link';
 
 export default function EnhancedClientsTable() {
-  const { clients, updateClient, deleteClient, recordCheckIn } = useGymStore();
+  const { members, loading, error, deleteMember, refreshMembers } = useMembers();
   const [search, setSearch] = useState('');
   const [riskFilter, setRiskFilter] = useState<string>('all');
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [checkingInId, setCheckingInId] = useState<string | null>(null);
 
-  const filteredClients = useMemo(() => {
-    return clients.filter((client) => {
+  const filteredMembers = useMemo(() => {
+    return members.filter((member) => {
       const matchesSearch = 
-        client.name.toLowerCase().includes(search.toLowerCase()) ||
-        client.email.toLowerCase().includes(search.toLowerCase());
+        member.name.toLowerCase().includes(search.toLowerCase()) ||
+        member.email.toLowerCase().includes(search.toLowerCase());
       
-      const matchesRisk = riskFilter === 'all' || client.churnRiskLevel === riskFilter;
+      const matchesRisk = riskFilter === 'all' || member.churnRiskLevel === riskFilter;
       
       return matchesSearch && matchesRisk;
     });
-  }, [clients, search, riskFilter]);
+  }, [members, search, riskFilter]);
 
-  const handleCheckIn = (clientId: string) => {
-    recordCheckIn(clientId, 60, ['pesas', 'cardio']);
-    toast.success('✅ Check-in registrado');
+  const handleCheckIn = async (memberId: string) => {
+    setCheckingInId(memberId);
+    try {
+      await checkinMember(memberId);
+      toast.success('✅ Check-in registrado');
+      await refreshMembers();
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al registrar check-in';
+      toast.error(errorMessage);
+    } finally {
+      setCheckingInId(null);
+    }
   };
 
-  const handleDelete = (id: string) => {
-    deleteClient(id);
-    toast.success('Miembro eliminado');
-    setDeleteConfirmId(null);
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteMember(id);
+      toast.success('Miembro eliminado');
+      setDeleteConfirmId(null);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al eliminar miembro';
+      toast.error(errorMessage);
+    }
   };
 
   const exportToCSV = () => {
     const headers = ['Nombre', 'Email', 'Teléfono', 'Membresía', 'Estado', 'Riesgo Churn', 'Último Check-in'];
-    const rows = filteredClients.map(c => [
-      c.name, c.email, c.phone, c.membershipType, c.status, c.churnRiskLevel, c.lastCheckIn || 'Nunca'
+    const rows = filteredMembers.map(m => [
+      m.name, m.email, m.phone || 'N/A', m.membershipType, m.status, m.churnRiskLevel, m.lastCheckIn ? new Date(m.lastCheckIn).toLocaleDateString('es-CO') : 'Nunca'
     ]);
     
-    const csvContent = [headers, ...rows].map(row => row.join(',')).join('\n');
+    const csvContent = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
@@ -68,16 +85,52 @@ export default function EnhancedClientsTable() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <Loader className="h-8 w-8 text-blue-600 animate-spin mx-auto mb-2" />
+          <p className="text-slate-600">Cargando miembros...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-xl border border-red-200 bg-red-50 p-6">
+        <div className="flex items-start gap-3">
+          <AlertTriangle className="h-6 w-6 text-red-600 mt-1" />
+          <div>
+            <h3 className="text-lg font-semibold text-red-900">Error al cargar miembros</h3>
+            <p className="mt-1 text-sm text-red-700">{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-xl font-semibold text-slate-900">Miembros</h2>
-          <p className="text-sm text-slate-500">{filteredClients.length} miembros encontrados</p>
+          <p className="text-sm text-slate-500">{filteredMembers.length} miembros encontrados</p>
         </div>
-        <button onClick={exportToCSV} className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition">
-          <Download className="w-4 h-4" /> Exportar CSV
-        </button>
+        <div className="flex gap-2">
+          <button 
+            onClick={exportToCSV} 
+            className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition"
+          >
+            <Download className="w-4 h-4" /> Exportar CSV
+          </button>
+          <Link 
+            href="/clients/new"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+          >
+            + Nuevo Miembro
+          </Link>
+        </div>
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row">
@@ -122,40 +175,40 @@ export default function EnhancedClientsTable() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
-              {filteredClients.map((client) => (
-                <tr key={client.id} className="hover:bg-slate-50 transition">
+              {filteredMembers.map((member) => (
+                <tr key={member.id} className="hover:bg-slate-50 transition">
                   <td className="px-4 py-3">
                     <div>
-                      <p className="font-medium text-slate-900">{client.name}</p>
-                      <p className="text-xs text-slate-500">{client.email}</p>
+                      <p className="font-medium text-slate-900">{member.name}</p>
+                      <p className="text-xs text-slate-500">{member.email}</p>
                     </div>
                   </td>
                   <td className="px-4 py-3">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 capitalize">
-                      {client.membershipType}
+                      {member.membershipType}
                     </span>
-                    <p className="text-xs text-slate-500 mt-1">${client.monthlyPrice.toLocaleString()}/mes</p>
+                    <p className="text-xs text-slate-500 mt-1">${(member.monthlyPrice || 0).toLocaleString()}/mes</p>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(client.status)}`}>
-                      {client.status === 'active' ? 'Activo' : client.status === 'at-risk' ? 'En Riesgo' : 'Inactivo'}
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(member.status)}`}>
+                      {member.status === 'active' ? 'Activo' : member.status === 'at-risk' ? 'En Riesgo' : 'Inactivo'}
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <div className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold border ${getRiskColor(client.churnRiskLevel)}`}>
-                      {client.churnRiskLevel === 'critico' && <AlertTriangle className="h-3 w-3" />}
-                      {client.churnRiskLevel === 'bajo' && <CheckCircle className="h-3 w-3" />}
-                      {client.churnRiskLevel.toUpperCase()} ({client.churnRiskScore}%)
+                    <div className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold border ${getRiskColor(member.churnRiskLevel)}`}>
+                      {member.churnRiskLevel === 'critico' && <AlertTriangle className="h-3 w-3" />}
+                      {member.churnRiskLevel === 'bajo' && <CheckCircle className="h-3 w-3" />}
+                      {member.churnRiskLevel.toUpperCase()} ({member.churnRiskScore}%)
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <p className="text-sm text-slate-900">{client.averageCheckInsPerWeek}x/semana</p>
-                    <p className="text-xs text-slate-500">{client.checkInsLast30Days} en 30 días</p>
+                    <p className="text-sm text-slate-900">{member.averageCheckInsPerWeek}x/semana</p>
+                    <p className="text-xs text-slate-500">{member.checkInsLast30Days} en 30 días</p>
                   </td>
                   <td className="px-4 py-3">
-                    {client.lastCheckIn ? (
+                    {member.lastCheckIn ? (
                       <p className="text-sm text-slate-600">
-                        {new Date(client.lastCheckIn).toLocaleDateString('es-CO')}
+                        {new Date(member.lastCheckIn).toLocaleDateString('es-CO')}
                       </p>
                     ) : (
                       <p className="text-sm text-slate-400">Nunca</p>
@@ -164,14 +217,26 @@ export default function EnhancedClientsTable() {
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-2">
                       <button
-                        onClick={() => handleCheckIn(client.id)}
-                        className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition"
+                        onClick={() => handleCheckIn(member.id)}
+                        disabled={checkingInId === member.id}
+                        className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition disabled:opacity-50"
                         title="Registrar check-in"
                       >
-                        <CheckCircle className="w-4 h-4" />
+                        {checkingInId === member.id ? (
+                          <Loader className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <CheckCircle className="w-4 h-4" />
+                        )}
                       </button>
+                      <Link
+                        href={`/clients/${member.id}/edit`}
+                        className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                        title="Editar"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Link>
                       <button
-                        onClick={() => setDeleteConfirmId(client.id)}
+                        onClick={() => setDeleteConfirmId(member.id)}
                         className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition"
                         title="Eliminar"
                       >

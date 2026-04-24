@@ -165,3 +165,33 @@ export async function PATCH<T>(
 export async function DELETE<T>(endpoint: string): Promise<T> {
   return apiRequest<T>(endpoint, { method: "DELETE" });
 }
+
+// AUTH endpoints
+export async function login(email: string, password: string) {
+  try {
+    const response = await apiRequest<{
+      success: boolean;
+      data: { token: string; user: { id: string; email: string; name: string; role: string } };
+    }>("/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (response.success && response.data.token) {
+      setAuthToken(response.data.token);
+      return response.data;
+    }
+
+    throw new Error(response.data?.token ? "No token received" : "Login failed");
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Login failed";
+    throw new Error(errorMessage);
+  }
+}
+
+export function logout() {
+  clearAuthToken();
+  if (typeof window !== "undefined") {
+    window.location.href = "/login";
+  }
+}

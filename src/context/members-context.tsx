@@ -13,9 +13,10 @@ import {
   createMember as createMemberAPI,
   updateMember as updateMemberAPI,
   deleteMember as deleteMemberAPI,
+  getAuthToken,
+  logout,
 } from "@/lib/api";
 import type { Member } from "@/types/member";
-import { mockClients } from "@/lib/mock-data";
 
 type MemberInput = Omit<Member, "id" | "createdAt" | "updatedAt">;
 
@@ -23,6 +24,7 @@ type MembersContextValue = {
   members: Member[];
   loading: boolean;
   error: string | null;
+  isAuthenticated: boolean;
   addMember: (payload: MemberInput) => Promise<Member>;
   updateMember: (id: string, payload: Partial<MemberInput>) => Promise<Member | null>;
   getMemberById: (id: string) => Member | undefined;
@@ -32,34 +34,26 @@ type MembersContextValue = {
 
 const MembersContext = createContext<MembersContextValue | null>(null);
 
-// Convert mock data to Member type for initial state
-function convertMockData(): Member[] {
-  return (mockClients as any[]).map((client: any) => ({
-    ...client,
-    status: client.status || "active",
-    membershipStatus: "activo",
-    checkInsLast30Days: client.attendance?.length || 0,
-    averageCheckInsPerWeek: 2,
-    churnRiskScore: 0,
-    churnRiskLevel: "bajo",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  }));
-}
-
 export function MembersProvider({ children }: { children: ReactNode }) {
-  const [members, setMembers] = useState<Member[]>(convertMockData());
-  const [loading, setLoading] = useState(false);
+  const [members, setMembers] = useState<Member[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const refreshMembers = async () => {
     setLoading(true);
     setError(null);
     try {
       const data = await getMembers();
-      setMembers(Array.isArray(data) ? data : data.data || []);
+      console.log('RAW DATA:', JSON.stringify(data));
+      const raw = data as any;
+      const list = Array.isArray(raw) ? raw : raw.data?.members || raw.data?.items || raw.data || raw.items || [];
+      setMembers(list);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to load members";
+      if (errorMessage.includes("401") || errorMessage.includes("Unauthorized")) {
+        logout();
+      }
       setError(errorMessage);
       console.error("Error refreshing members:", err);
     } finally {
@@ -68,8 +62,14 @@ export function MembersProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    // Optional: uncomment to fetch members on mount
-    // refreshMembers();
+    const token = getAuthToken();
+    if (token) {
+      setIsAuthenticated(true);
+      refreshMembers();
+    } else {
+      setIsAuthenticated(false);
+      setLoading(false);
+    }
   }, []);
 
   const value = useMemo<MembersContextValue>(
@@ -77,12 +77,13 @@ export function MembersProvider({ children }: { children: ReactNode }) {
       members,
       loading,
       error,
+      isAuthenticated,
       addMember: async (payload) => {
         try {
           const response = await createMemberAPI(payload);
-          const newMember = response.data || response;
-          setMembers((current) => [newMember, ...current]);
-          return newMember;
+          const newMember = (response as any).data || response;
+          setMembers((current) => [newMember as Member, ...current]);
+          return newMember as Member;
         } catch (err) {
           const errorMessage = err instanceof Error ? err.message : "Failed to create member";
           setError(errorMessage);
@@ -92,15 +93,11 @@ export function MembersProvider({ children }: { children: ReactNode }) {
       updateMember: async (id, payload) => {
         try {
           const response = await updateMemberAPI(id, payload);
-          const updatedMember = response.data || response;
-
+          const updatedMember = (response as any).data || response;
           setMembers((current) =>
-            current.map((member) =>
-              member.id === id ? updatedMember : member
-            )
+            current.map((member) => (member.id === id ? (updatedMember as Member) : member))
           );
-
-          return updatedMember;
+          return updatedMember as Member;
         } catch (err) {
           const errorMessage = err instanceof Error ? err.message : "Failed to update member";
           setError(errorMessage);
@@ -111,9 +108,7 @@ export function MembersProvider({ children }: { children: ReactNode }) {
       deleteMember: async (id) => {
         try {
           await deleteMemberAPI(id);
-          setMembers((current) =>
-            current.filter((member) => member.id !== id)
-          );
+          setMembers((current) => current.filter((member) => member.id !== id));
         } catch (err) {
           const errorMessage = err instanceof Error ? err.message : "Failed to delete member";
           setError(errorMessage);
@@ -122,7 +117,7 @@ export function MembersProvider({ children }: { children: ReactNode }) {
       },
       refreshMembers,
     }),
-    [members, loading, error]
+    [members, loading, error, isAuthenticated]
   );
 
   return (
@@ -132,10 +127,8 @@ export function MembersProvider({ children }: { children: ReactNode }) {
 
 export function useMembers() {
   const context = useContext(MembersContext);
-
   if (!context) {
     throw new Error("useMembers must be used within MembersProvider");
   }
-
   return context;
 }
