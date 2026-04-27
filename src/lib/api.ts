@@ -9,7 +9,6 @@ let authToken: string | null = null;
 
 export function setAuthToken(token: string) {
   authToken = token;
-  // Store token in localStorage for persistence
   if (typeof window !== "undefined") {
     localStorage.setItem("authToken", token);
   }
@@ -137,7 +136,6 @@ export async function exportMembersCSV() {
   return response.blob();
 }
 
-// Generic helper functions for flexibility
 export async function GET<T>(endpoint: string): Promise<T> {
   return apiRequest<T>(endpoint, { method: "GET" });
 }
