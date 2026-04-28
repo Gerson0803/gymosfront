@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import toast from 'react-hot-toast';
@@ -12,10 +12,10 @@ import {
   useSensors,
   PointerSensor,
 } from '@dnd-kit/core';
-import { useGymStore } from '@/store/useGymStore';
 import { leadSchema, type LeadFormData } from '@/lib/validations';
 import { Lead, LeadStatus } from '@/types/client';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Loader } from 'lucide-react';
+import { getLeads, createLead, updateLeadApi, deleteLeadApi, moveLeadStage } from '@/lib/api';
 
 const stages: { id: LeadStatus; label: string; color: string }[] = [
   { id: 'nuevo', label: 'Leads Nuevos', color: 'bg-slate-100 border-slate-300' },
@@ -27,7 +27,9 @@ const stages: { id: LeadStatus; label: string; color: string }[] = [
 ];
 
 export default function SalesPipeline() {
-  const { leads, moveLead, addLead, updateLead, deleteLead } = useGymStore();
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [editingLead, setEditingLead] = useState<Lead | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
@@ -55,14 +57,38 @@ export default function SalesPipeline() {
     return values;
   }, [leadsByStage]);
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  useEffect(() => {
+    const loadLeads = async () => {
+      try {
+        const data = await getLeads();
+        const raw = data as any;
+        const list = Array.isArray(raw) ? raw
+          : raw.data?.leads || raw.data?.items || raw.data || raw.leads || [];
+        setLeads(list);
+      } catch (err) {
+        setError('Error al cargar leads');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadLeads();
+  }, []);
+
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over) return;
     const leadId = active.id as string;
     const newStatus = over.id as LeadStatus;
     if (!stages.find((s) => s.id === newStatus)) return;
-    moveLead(leadId, newStatus);
-    toast.success(newStatus === 'cerrado_ganado' ? '🎉 ¡Nueva membresía vendida!' : 'Lead movido');
+    const previousLeads = [...leads];
+    setLeads(leads.map(l => l.id === leadId ? {...l, status: newStatus} : l));
+    try {
+      await moveLeadStage(leadId, newStatus);
+      toast.success(newStatus === 'cerrado_ganado' ? '🎉 ¡Nueva membresía vendida!' : 'Lead movido');
+    } catch (err) {
+      setLeads(previousLeads);
+      toast.error('Error al mover lead');
+    }
   };
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<LeadFormData>({
@@ -70,17 +96,25 @@ export default function SalesPipeline() {
     defaultValues: { budget: 0 },
   });
 
-  const onSubmit = (data: LeadFormData) => {
-    if (editingLead) {
-      updateLead(editingLead.id, data);
-      toast.success('Lead actualizado');
-    } else {
-      addLead(data);
-      toast.success('Lead creado');
+  const onSubmit = async (data: LeadFormData) => {
+    try {
+      if (editingLead) {
+        await updateLeadApi(editingLead.id, data as any);
+        setLeads(leads.map(l => l.id === editingLead.id ? {...l, ...data} : l));
+        toast.success('Lead actualizado');
+      } else {
+        const response = await createLead(data as any);
+        const raw = response as any;
+        const newLead = raw.data || raw;
+        setLeads([...leads, newLead]);
+        toast.success('Lead creado');
+      }
+      setIsPanelOpen(false);
+      setEditingLead(null);
+      reset({ budget: 0 });
+    } catch (err) {
+      toast.error('Error al guardar lead');
     }
-    setIsPanelOpen(false);
-    setEditingLead(null);
-    reset({ budget: 0 });
   };
 
   const handleEdit = (lead: Lead) => {
@@ -89,11 +123,25 @@ export default function SalesPipeline() {
     setIsPanelOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    deleteLead(id);
-    toast.success('Lead eliminado');
-    setDeleteConfirmId(null);
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteLeadApi(id);
+      setLeads(leads.filter(l => l.id !== id));
+      toast.success('Lead eliminado');
+      setDeleteConfirmId(null);
+    } catch (err) {
+      toast.error('Error al eliminar lead');
+    }
   };
+
+  if (loading) return (
+    <div className="flex justify-center items-center p-12">
+      <Loader className="animate-spin h-8 w-8 text-blue-600" />
+    </div>
+  );
+  if (error) return (
+    <div className="text-red-600 p-4 rounded-lg bg-red-50 border border-red-200">{error}</div>
+  );
 
   return (
     <div className="space-y-6">
