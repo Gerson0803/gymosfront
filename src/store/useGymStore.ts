@@ -343,6 +343,7 @@ interface GymState {
   leads: Lead[];
   alerts: RetentionAlert[];
   equipment: Equipment[];
+  gymName: string;
   
   // Client actions
   addClient: (client: Omit<Client, 'id' | 'createdAt' | 'updatedAt' | 'churnRiskScore' | 'churnRiskLevel' | 'attendance'>) => void;
@@ -368,6 +369,9 @@ interface GymState {
   scheduleMaintenance: (equipmentId: string, maintenance: Omit<MaintenanceRecord, 'id' | 'equipmentId' | 'createdAt'>) => void;
   completeMaintenance: (equipmentId: string, maintenanceId: string) => void;
   
+  // Settings actions
+  setGymName: (name: string) => void;
+  
   // Utilities
   calculateChurnRisk: (client: Client) => { score: number; level: ChurnRiskLevel };
   calculateStatus: (lastCheckIn?: string) => ClientStatus;
@@ -380,6 +384,7 @@ export const useGymStore = create<GymState>()(
       leads: initialLeads,
       alerts: initialAlerts,
       equipment: initialEquipment,
+      gymName: 'GymOS',
 
       // Client actions
       addClient: (clientData) => {
@@ -653,6 +658,10 @@ export const useGymStore = create<GymState>()(
           }),
         }));
       },
+
+      setGymName: (name: string) => {
+        set({ gymName: name.trim() || 'GymOS' });
+      },
     }),
     {
       name: 'gymos-storage',
@@ -661,6 +670,7 @@ export const useGymStore = create<GymState>()(
         leads: state.leads,
         alerts: state.alerts,
         equipment: state.equipment,
+        gymName: state.gymName,
       }),
     }
   )

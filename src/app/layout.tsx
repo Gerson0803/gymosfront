@@ -3,6 +3,7 @@ import { Manrope, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Toaster } from 'react-hot-toast';
 import { MembersProvider } from '@/context/members-context';
+import TitleUpdater from '@/components/layout/title-updater';
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -31,6 +32,7 @@ export default function RootLayout({
     >
       <body className="min-h-full bg-slate-100 text-slate-900 font-sans">
         <MembersProvider>
+          <TitleUpdater />
           {children}
           <Toaster position="top-right" />
         </MembersProvider>
