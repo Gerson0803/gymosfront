@@ -1,13 +1,15 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { useGymStore } from '@/store/useGymStore';
-import { Search, Filter, Wrench, AlertTriangle, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
+import { Search, Filter, Wrench, AlertTriangle, CheckCircle, XCircle, Clock, Loader } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Equipment, EquipmentStatus } from '@/types/client';
+import { getEquipment, updateEquipmentApi } from '@/lib/api';
 
 export default function EquipmentTable() {
-  const { equipment, updateEquipment, deleteEquipment } = useGymStore();
+  const [equipment, setEquipment] = useState<Equipment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -24,6 +26,23 @@ export default function EquipmentTable() {
       return matchesSearch && matchesCategory && matchesStatus;
     });
   }, [equipment, search, categoryFilter, statusFilter]);
+
+  useEffect(() => {
+    const loadEquipment = async () => {
+      try {
+        const data = await getEquipment();
+        const raw = data as any;
+        const list = Array.isArray(raw) ? raw
+          : raw.data?.equipment || raw.data?.items || raw.data || raw.equipment || [];
+        setEquipment(list);
+      } catch (err) {
+        setError('Error al cargar equipamiento');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadEquipment();
+  }, []);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -57,10 +76,26 @@ export default function EquipmentTable() {
     return { text: `En ${daysUntil} días`, color: 'text-green-600', icon: CheckCircle };
   };
 
-  const handleStatusChange = (id: string, newStatus: string) => {
-    updateEquipment(id, { status: newStatus as EquipmentStatus });
-    toast.success('Estado actualizado');
+  const handleStatusChange = async (id: string, newStatus: string) => {
+    const previousEquipment = [...equipment];
+    setEquipment(equipment.map(eq => eq.id === id ? {...eq, status: newStatus as EquipmentStatus} : eq));
+    try {
+      await updateEquipmentApi(id, { status: newStatus });
+      toast.success('Estado actualizado');
+    } catch (err) {
+      setEquipment(previousEquipment);
+      toast.error('Error al actualizar estado');
+    }
   };
+
+  if (loading) return (
+    <div className="flex justify-center items-center p-12">
+      <Loader className="animate-spin h-8 w-8 text-blue-600" />
+    </div>
+  );
+  if (error) return (
+    <div className="text-red-600 p-4 rounded-lg bg-red-50 border border-red-200">{error}</div>
+  );
 
   return (
     <div className="space-y-4">

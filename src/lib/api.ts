@@ -193,3 +193,31 @@ export function logout() {
     window.location.href = "/login";
   }
 }
+
+// LEADS
+export async function getLeads() {
+  return apiRequest('/leads');
+}
+export async function createLead(data: Record<string, unknown>) {
+  return apiRequest('/leads', { method: 'POST', body: JSON.stringify(data) });
+}
+export async function updateLeadApi(id: string, data: Record<string, unknown>) {
+  return apiRequest(`/leads/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+}
+export async function deleteLeadApi(id: string) {
+  return apiRequest(`/leads/${id}`, { method: 'DELETE' });
+}
+export async function moveLeadStage(id: string, status: string) {
+  return apiRequest(`/leads/${id}`, { method: 'PATCH', body: JSON.stringify({ status }) });
+}
+
+// EQUIPMENT
+export async function getEquipment() {
+  return apiRequest('/equipment');
+}
+export async function updateEquipmentApi(id: string, data: Record<string, unknown>) {
+  return apiRequest(`/equipment/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+}
+export async function deleteEquipmentApi(id: string) {
+  return apiRequest(`/equipment/${id}`, { method: 'DELETE' });
+}
