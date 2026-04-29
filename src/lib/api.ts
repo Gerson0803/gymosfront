@@ -215,9 +215,12 @@ export async function moveLeadStage(id: string, status: string) {
 export async function getEquipment() {
   return apiRequest('/equipment');
 }
+export async function createEquipment(data: Record<string, unknown>) {
+  return apiRequest('/equipment', { method: 'POST', body: JSON.stringify(data) });
+}
 export async function updateEquipmentApi(id: string, data: Record<string, unknown>) {
   return apiRequest(`/equipment/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
 }
-export async function deleteEquipmentApi(id: string) {
+export async function deleteEquipment(id: string) {
   return apiRequest(`/equipment/${id}`, { method: 'DELETE' });
 }
