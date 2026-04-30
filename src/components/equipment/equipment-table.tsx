@@ -6,9 +6,10 @@ import toast from 'react-hot-toast';
 import { Equipment, EquipmentStatus } from '@/types/client';
 import { getEquipment, createEquipment, updateEquipmentApi, deleteEquipment } from '@/lib/api';
 
-type EquipmentFormData = Omit<Equipment, 'id' | 'createdAt' | 'updatedAt' | 'price' | 'totalUsageHours'> & {
+type EquipmentFormData = Omit<Equipment, 'id' | 'createdAt' | 'updatedAt' | 'price' | 'totalUsageHours' | 'maintenanceIntervalDays'> & {
   price: number | '';
   totalUsageHours: number | '';
+  maintenanceIntervalDays: number | '';
 };
 
 export default function EquipmentTable() {
@@ -25,7 +26,7 @@ export default function EquipmentTable() {
   const [formData, setFormData] = useState<EquipmentFormData>({
     name: '', category: 'cardio', brand: '', model: '', serialNumber: '', location: '',
     price: '', status: 'nuevo', purchaseDate: new Date().toISOString().split('T')[0],
-    maintenanceIntervalDays: 90, nextMaintenance: new Date().toISOString().split('T')[0],
+    maintenanceIntervalDays: '', nextMaintenance: new Date().toISOString().split('T')[0],
     totalUsageHours: '', notes: '', maintenanceHistory: []
   });
 
@@ -100,7 +101,7 @@ export default function EquipmentTable() {
     setFormData({
       name: '', category: 'cardio', brand: '', model: '', serialNumber: '', location: '',
       price: '', status: 'nuevo', purchaseDate: new Date().toISOString().split('T')[0],
-      maintenanceIntervalDays: 90, nextMaintenance: new Date().toISOString().split('T')[0],
+      maintenanceIntervalDays: '', nextMaintenance: new Date().toISOString().split('T')[0],
       totalUsageHours: '', notes: '', maintenanceHistory: []
     });
     setIsCreateModalOpen(true);
@@ -118,7 +119,7 @@ export default function EquipmentTable() {
       price: eq.price ?? '',
       status: eq.status,
       purchaseDate: eq.purchaseDate || new Date().toISOString().split('T')[0],
-      maintenanceIntervalDays: eq.maintenanceIntervalDays || 90,
+      maintenanceIntervalDays: eq.maintenanceIntervalDays ?? '',
       nextMaintenance: eq.nextMaintenance || new Date().toISOString().split('T')[0],
       totalUsageHours: eq.totalUsageHours ?? '',
       notes: eq.notes || '',
@@ -134,7 +135,7 @@ export default function EquipmentTable() {
       ...formData,
       price: formData.price === '' ? undefined : Number(formData.price),
       totalUsageHours: formData.totalUsageHours === '' ? undefined : Number(formData.totalUsageHours),
-      maintenanceIntervalDays: Number(formData.maintenanceIntervalDays),
+      maintenanceIntervalDays: formData.maintenanceIntervalDays === '' ? 90 : Number(formData.maintenanceIntervalDays),
     };
     try {
       if (editingEquipment) {
@@ -297,7 +298,7 @@ export default function EquipmentTable() {
                 <input type="number" placeholder="Precio (COP)" value={formData.price} onChange={(e) => setFormData({...formData, price: e.target.value === '' ? '' : Number(e.target.value)})} className="rounded-lg border border-slate-300 px-4 py-2" />
                 <input type="number" placeholder="Horas de uso" value={formData.totalUsageHours} onChange={(e) => setFormData({...formData, totalUsageHours: e.target.value === '' ? '' : Number(e.target.value)})} className="rounded-lg border border-slate-300 px-4 py-2" />
                 <input type="date" value={formData.purchaseDate} onChange={(e) => setFormData({...formData, purchaseDate: e.target.value})} className="rounded-lg border border-slate-300 px-4 py-2" />
-                <input type="number" placeholder="Intervalo mantenimiento (días)" value={formData.maintenanceIntervalDays} onChange={(e) => setFormData({...formData, maintenanceIntervalDays: Number(e.target.value)})} className="rounded-lg border border-slate-300 px-4 py-2" />
+                <input type="number" placeholder="Días entre mantenimientos (ej: 90)" value={formData.maintenanceIntervalDays} onChange={(e) => setFormData({...formData, maintenanceIntervalDays: e.target.value === '' ? '' : Number(e.target.value)})} className="rounded-lg border border-slate-300 px-4 py-2" />
                 <input type="date" value={formData.nextMaintenance} onChange={(e) => setFormData({...formData, nextMaintenance: e.target.value})} className="rounded-lg border border-slate-300 px-4 py-2" />
               </div>
               <textarea placeholder="Notas" rows={3} value={formData.notes} onChange={(e) => setFormData({...formData, notes: e.target.value})} className="w-full rounded-lg border border-slate-300 px-4 py-2" />
