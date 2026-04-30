@@ -2,6 +2,7 @@
 
 import {
   createContext,
+  useCallback,
   useContext,
   useMemo,
   useState,
@@ -40,7 +41,7 @@ export function MembersProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const refreshMembers = async () => {
+  const refreshMembers = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -59,7 +60,7 @@ export function MembersProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     const token = getAuthToken();
@@ -71,6 +72,18 @@ export function MembersProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    const handleMembersRefresh = () => {
+      void refreshMembers();
+    };
+
+    window.addEventListener("members:refresh", handleMembersRefresh);
+
+    return () => {
+      window.removeEventListener("members:refresh", handleMembersRefresh);
+    };
+  }, [refreshMembers]);
 
   const value = useMemo<MembersContextValue>(
     () => ({

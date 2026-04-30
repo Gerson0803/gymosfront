@@ -665,6 +665,7 @@ export const useGymStore = create<GymState>()(
     }),
     {
       name: 'gymos-storage',
+      version: 1,
       partialize: (state) => ({
         clients: state.clients,
         leads: state.leads,
@@ -672,6 +673,32 @@ export const useGymStore = create<GymState>()(
         equipment: state.equipment,
         gymName: state.gymName,
       }),
+      migrate: (persistedState: any, version: number) => {
+        // Si está vacío o no es objeto, retornar undefined para usar valores por defecto
+        if (!persistedState || typeof persistedState !== 'object') {
+          return undefined;
+        }
+        // Asegurar que todas las propiedades requeridas existan
+        return {
+          ...persistedState,
+          clients: persistedState.clients || initialClients,
+          leads: persistedState.leads || initialLeads,
+          alerts: persistedState.alerts || initialAlerts,
+          equipment: persistedState.equipment || initialEquipment,
+          gymName: persistedState.gymName || 'GymOS',
+        };
+      },
+      // Evita crash si el localStorage contiene JSON inválido.
+      deserialize: (str: string) => {
+        try {
+          return JSON.parse(str);
+        } catch (err) {
+          try {
+            localStorage.removeItem('gymos-storage');
+          } catch {}
+          return {};
+        }
+      },
     }
   )
 );

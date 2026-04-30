@@ -4,9 +4,9 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ArrowLeft, PencilLine } from "lucide-react";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { useMembers } from \"@/context/members-context\";
-import { getClientStatus, getLastAttendance, getRiskLabel } from \"@/lib/client-status\";
-import { formatDate } from \"@/lib/utils\";
+import { useMembers } from "@/context/members-context";
+import { getClientStatus, getLastAttendance, getRiskLabel } from "@/lib/client-status";
+import { formatDate } from "@/lib/utils";
 
 export default function ClientDetailPage() {
   const params = useParams<{ id: string }>();
@@ -15,9 +15,9 @@ export default function ClientDetailPage() {
 
   if (!member) {
     return (
-      <section className=\"rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm\">
-        <h2 className=\"text-xl font-semibold text-slate-900\">Member not found</h2>
-        <p className=\"mt-2 text-sm text-slate-500\">
+      <section className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
+        <h2 className="text-xl font-semibold text-slate-900">Member not found</h2>
+        <p className="mt-2 text-sm text-slate-500">
           The member record does not exist.
         </p>
         <Link
@@ -35,11 +35,11 @@ export default function ClientDetailPage() {
   const lastAttendance = getLastAttendance(member);
 
   return (
-    <div className=\"space-y-4\">
-      <section className=\"flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm\">
+    <div className="space-y-4">
+      <section className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <div>
-          <div className=\"mb-1 flex items-center gap-2\">
-            <h2 className=\"text-2xl font-semibold text-slate-900\">{member.name}</h2>
+          <div className="mb-1 flex items-center gap-2">
+            <h2 className="text-2xl font-semibold text-slate-900">{member.name}</h2>
             <StatusBadge status={status} />
           </div>
           <p className="text-sm text-slate-500">{riskLabel}</p>
