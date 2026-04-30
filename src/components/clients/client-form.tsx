@@ -43,16 +43,15 @@ export function ClientForm({ mode, initialMember }: ClientFormProps) {
     setIsSubmitting(true);
     try {
       const payload = {
-        ...form,
-        joinedAt: new Date().toISOString().split('T')[0],
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        goal: form.goal,
+        experienceLevel: form.experienceLevel,
+        membershipType: form.membershipType,
         monthlyPrice: Number(form.monthlyPrice),
-        status: 'active' as const,
-        membershipStatus: 'activo' as const,
-        checkInsLast30Days: 0,
-        averageCheckInsPerWeek: 0,
-        churnRiskScore: 0,
-        churnRiskLevel: 'bajo' as const,
-        attendance: [],
+        assignedTrainer: form.assignedTrainer,
+        notes: form.notes,
       };
       if (mode === 'create') {
         const member = await addMember(payload);

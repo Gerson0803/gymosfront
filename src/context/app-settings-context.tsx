@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useLayoutEffect, useState } from 'react';
 
 type Theme = 'light' | 'dark';
 
@@ -40,13 +40,17 @@ export function AppSettingsProvider({ children }: { children: React.ReactNode })
   useEffect(() => {
     if (!mounted) return;
     localStorage.setItem('appSettings', JSON.stringify({ theme, gymName }));
-    
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
   }, [theme, gymName, mounted]);
+
+  useLayoutEffect(() => {
+    if (!mounted) return;
+
+    const root = document.documentElement;
+    const body = document.body;
+
+    root.classList.toggle('dark', theme === 'dark');
+    body.classList.toggle('dark', theme === 'dark');
+  }, [theme, mounted]);
 
   const setTheme = (newTheme: Theme) => setThemeState(newTheme);
   const setGymName = (name: string) => setGymNameState(name);
