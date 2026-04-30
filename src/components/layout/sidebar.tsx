@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, TrendingUp, Wrench, LogOut } from 'lucide-react';
+
+import { LayoutDashboard, Users, TrendingUp, Wrench, LogOut, Moon, Sun, QrCode } from 'lucide-react';
 import { logout } from '@/lib/api';
 import { useAppSettings } from '@/context/app-settings-context';
 import { useState } from 'react';
@@ -11,6 +12,7 @@ import toast from 'react-hot-toast';
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Miembros', href: '/clients', icon: Users },
+  { name: 'Check-in', href: '/checkin', icon: QrCode },
   { name: 'Pipeline Ventas', href: '/pipeline', icon: TrendingUp },
   { name: 'Equipamiento', href: '/equipment', icon: Wrench },
 ];

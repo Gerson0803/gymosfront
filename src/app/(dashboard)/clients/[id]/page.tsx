@@ -17,7 +17,10 @@ export default function ClientDetailPage() {
     return (
       <section className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
         <h2 className="text-xl font-semibold text-slate-900">Member not found</h2>
-        <p className="mt-2 text-sm text-slate-500">The member record does not exist.</p>
+
+        <p className="mt-2 text-sm text-slate-500">
+          The member record does not exist.
+        </p>
         <Link
           href="/clients"
           className="mt-4 inline-flex rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
