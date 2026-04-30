@@ -222,8 +222,8 @@ export default function SalesPipeline() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">Pipeline de Ventas</h2>
-          <p className="text-sm text-slate-600 mt-1">Arrastra leads entre etapas para gestionar ventas</p>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Pipeline de Ventas</h2>
+          <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">Arrastra leads entre etapas para gestionar ventas</p>
         </div>
         <button onClick={() => setIsPanelOpen(true)} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
           <Plus className="w-4 h-4" /> Nuevo Lead

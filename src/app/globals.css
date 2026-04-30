@@ -18,6 +18,17 @@
   --font-mono: var(--font-space-grotesk);
 }
 
+html.dark {
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  --surface: #0f172a;
+  --surface-muted: #111827;
+  --border: #334155;
+  --active: #22c55e;
+  --risk: #f59e0b;
+  --inactive: #fecaca;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

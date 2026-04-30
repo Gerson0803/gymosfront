@@ -23,7 +23,7 @@ export function AppSettingsProvider({ children }: { children: React.ReactNode })
   const [theme, setThemeState] = useState<Theme>('light');
   const [gymName, setGymNameState] = useState('GymOS');
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const saved = localStorage.getItem('appSettings');
     if (saved) {
       try {

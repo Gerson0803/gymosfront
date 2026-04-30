@@ -1,13 +1,13 @@
 import type { Client } from "@/types/client";
 
-export const mockClients: Client[] = [
+export const mockClients = [
   {
     id: "cl-001",
     name: "Amelia Reyes",
     email: "amelia.reyes@gymos.app",
     phone: "+1 555-0136",
     joinedAt: "2025-10-14",
-    goal: "Fat loss",
+    goal: "perder_peso",
     notes: "Prefers morning sessions and HIIT blocks.",
     attendance: [
       { date: "2026-04-03", note: "Strength circuit" },
@@ -21,7 +21,7 @@ export const mockClients: Client[] = [
     email: "noah.patel@gymos.app",
     phone: "+1 555-0118",
     joinedAt: "2025-08-02",
-    goal: "Muscle gain",
+    goal: "ganar_musculo",
     notes: "Works out after office hours.",
     attendance: [
       { date: "2026-03-23", note: "Push day" },
@@ -35,7 +35,7 @@ export const mockClients: Client[] = [
     email: "sofia.coleman@gymos.app",
     phone: "+1 555-0190",
     joinedAt: "2025-04-12",
-    goal: "General conditioning",
+    goal: "salud_general",
     notes: "Requested check-ins every Tuesday.",
     attendance: [
       { date: "2026-03-05", note: "Circuit" },
@@ -49,7 +49,7 @@ export const mockClients: Client[] = [
     email: "liam.beck@gymos.app",
     phone: "+1 555-0172",
     joinedAt: "2026-01-20",
-    goal: "Athletic performance",
+    goal: "rendimiento",
     attendance: [
       { date: "2026-04-04", note: "Plyometrics" },
       { date: "2026-04-02", note: "Sprint drills" },
@@ -62,7 +62,7 @@ export const mockClients: Client[] = [
     email: "maya.singh@gymos.app",
     phone: "+1 555-0144",
     joinedAt: "2025-11-08",
-    goal: "Posture and mobility",
+    goal: "salud_general",
     attendance: [
       { date: "2026-03-29", note: "Mobility" },
       { date: "2026-03-22", note: "Yoga flow" },
@@ -75,7 +75,7 @@ export const mockClients: Client[] = [
     email: "daniel.ortiz@gymos.app",
     phone: "+1 555-0161",
     joinedAt: "2025-02-18",
-    goal: "Weight maintenance",
+    goal: "resistencia",
     notes: "Travel schedule affects attendance.",
     attendance: [
       { date: "2026-02-27", note: "Light full body" },
@@ -89,7 +89,7 @@ export const mockClients: Client[] = [
     email: "grace.kim@gymos.app",
     phone: "+1 555-0150",
     joinedAt: "2025-07-22",
-    goal: "Endurance",
+    goal: "resistencia",
     attendance: [
       { date: "2026-04-01", note: "Intervals" },
       { date: "2026-03-27", note: "Rowing" },
@@ -102,7 +102,7 @@ export const mockClients: Client[] = [
     email: "ethan.brooks@gymos.app",
     phone: "+1 555-0125",
     joinedAt: "2024-12-10",
-    goal: "Rehabilitation",
+    goal: "salud_general",
     notes: "Recovering from shoulder strain.",
     attendance: [
       { date: "2026-03-18", note: "Assisted movement" },

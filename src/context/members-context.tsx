@@ -18,7 +18,8 @@ import {
 } from "@/lib/api";
 import type { Member } from "@/types/member";
 
-type MemberInput = Omit<Member, "id" | "createdAt" | "updatedAt">;
+type MemberInput = Partial<Omit<Member, "id" | "createdAt" | "updatedAt">> &
+  Pick<Member, "name" | "email" | "phone" | "goal" | "experienceLevel" | "membershipType" | "monthlyPrice">;
 
 type MembersContextValue = {
   members: Member[];
