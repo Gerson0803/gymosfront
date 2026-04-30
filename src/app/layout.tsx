@@ -31,7 +31,7 @@ export default function RootLayout({
       lang="en"
       className={`${manrope.variable} ${spaceGrotesk.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors">
+      <body className="min-h-full bg-white text-slate-900 font-sans transition-colors">
         <AppSettingsProvider>
           <MembersProvider>
             <TitleUpdater />

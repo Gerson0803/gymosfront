@@ -114,13 +114,13 @@ export default function EnhancedClientsTable() {
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Miembros</h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">{filteredMembers.length} miembros encontrados</p>
+          <h2 className="text-xl font-semibold text-slate-900">Miembros</h2>
+          <p className="text-sm text-slate-500">{filteredMembers.length} miembros encontrados</p>
         </div>
         <div className="flex gap-2">
           <button 
             onClick={exportToCSV} 
-            className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
+            className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition"
           >
             <Download className="w-4 h-4" /> Exportar CSV
           </button>
@@ -141,7 +141,7 @@ export default function EnhancedClientsTable() {
             placeholder="Buscar por nombre o email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg bg-white text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:text-slate-100 dark:placeholder-gray-400 dark:border-slate-600"
+            className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg bg-white text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
         <div className="relative">
@@ -149,7 +149,7 @@ export default function EnhancedClientsTable() {
           <select
             value={riskFilter}
             onChange={(e) => setRiskFilter(e.target.value)}
-            className="pl-10 pr-8 py-2 border border-slate-300 rounded-lg bg-white text-slate-900 focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-600"
+            className="pl-10 pr-8 py-2 border border-slate-300 rounded-lg bg-white text-slate-900 focus:ring-2 focus:ring-blue-500"
           >
             <option value="all">Todos los riesgos</option>
             <option value="bajo">Bajo riesgo</option>
@@ -160,34 +160,34 @@ export default function EnhancedClientsTable() {
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm dark:border-slate-700 dark:bg-slate-900">
+      <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-slate-50 border-b border-slate-200 dark:bg-slate-800 dark:border-slate-700">
+            <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Miembro</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Membresía</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Estado</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Riesgo Churn</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Frecuencia</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Último Check-in</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Acciones</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Miembro</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Membresía</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Estado</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Riesgo Churn</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Frecuencia</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Último Check-in</th>
+                <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+            <tbody className="divide-y divide-slate-200">
               {filteredMembers.map((member) => (
-                <tr key={member.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+                <tr key={member.id} className="hover:bg-slate-50 transition">
                   <td className="px-4 py-3">
                     <div>
-                      <p className="font-medium text-slate-900 dark:text-slate-100">{member.name}</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">{member.email}</p>
+                      <p className="font-medium text-slate-900">{member.name}</p>
+                      <p className="text-xs text-slate-500">{member.email}</p>
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 capitalize dark:bg-blue-900/60 dark:text-blue-200">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 capitalize">
                       {member.membershipType}
                     </span>
-                    <p className="text-xs text-slate-500 mt-1 dark:text-slate-400">${(member.monthlyPrice || 0).toLocaleString()}/mes</p>
+                    <p className="text-xs text-slate-500 mt-1">${(member.monthlyPrice || 0).toLocaleString()}/mes</p>
                   </td>
                   <td className="px-4 py-3">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(member.status)}`}>
@@ -207,11 +207,11 @@ export default function EnhancedClientsTable() {
                   </td>
                   <td className="px-4 py-3">
                     {member.lastCheckIn ? (
-                      <p className="text-sm text-slate-600 dark:text-slate-300">
+                      <p className="text-sm text-slate-600">
                         {new Date(member.lastCheckIn).toLocaleDateString('es-CO')}
                       </p>
                     ) : (
-                      <p className="text-sm text-slate-400 dark:text-slate-500">Nunca</p>
+                      <p className="text-sm text-slate-400">Nunca</p>
                     )}
                   </td>
                   <td className="px-4 py-3 text-right">
@@ -253,11 +253,11 @@ export default function EnhancedClientsTable() {
 
       {deleteConfirmId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-xl p-6 max-w-md w-full mx-4">
+          <div className="bg-white text-slate-900 rounded-xl p-6 max-w-md w-full mx-4">
             <h3 className="text-lg font-semibold mb-2">¿Eliminar miembro?</h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">Esta acción no se puede deshacer.</p>
+            <p className="text-sm text-slate-600 mb-4">Esta acción no se puede deshacer.</p>
             <div className="flex gap-3">
-              <button onClick={() => setDeleteConfirmId(null)} className="flex-1 py-2 border border-slate-300 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800">Cancelar</button>
+              <button onClick={() => setDeleteConfirmId(null)} className="flex-1 py-2 border border-slate-300 rounded-lg hover:bg-slate-50">Cancelar</button>
               <button onClick={() => handleDelete(deleteConfirmId)} className="flex-1 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Eliminar</button>
             </div>
           </div>

@@ -151,8 +151,8 @@ export default function EquipmentTable() {
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Equipamiento</h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">{filteredEquipment.length} equipos registrados</p>
+          <h2 className="text-xl font-semibold text-slate-900">Equipamiento</h2>
+          <p className="text-sm text-slate-500">{filteredEquipment.length} equipos registrados</p>
         </div>
         <button onClick={handleOpenCreate} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"><Plus className="w-4 h-4" /> Nuevo Equipo</button>
       </div>
@@ -165,14 +165,14 @@ export default function EquipmentTable() {
             placeholder="Buscar por nombre o marca..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg bg-white text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-gray-400 dark:border-slate-600"
+            className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg bg-white text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <div className="flex gap-3">
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="px-4 py-2 border border-slate-300 rounded-lg bg-white text-slate-900 focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-600"
+            className="px-4 py-2 border border-slate-300 rounded-lg bg-white text-slate-900 focus:ring-2 focus:ring-blue-500"
           >
             <option value="all">Todas las categorías</option>
             <option value="cardio">Cardio</option>
@@ -184,7 +184,7 @@ export default function EquipmentTable() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 border border-slate-300 rounded-lg bg-white text-slate-900 focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-600"
+            className="px-4 py-2 border border-slate-300 rounded-lg bg-white text-slate-900 focus:ring-2 focus:ring-blue-500"
           >
             <option value="all">Todos los estados</option>
             <option value="operativo">Operativo</option>
@@ -199,13 +199,13 @@ export default function EquipmentTable() {
         {filteredEquipment.map((eq) => {
           const maintStatus = getMaintenanceStatus(eq);
           return (
-            <div key={eq.id} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md transition dark:border-slate-700 dark:bg-slate-900">
+            <div key={eq.id} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md transition">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">{getCategoryIcon(eq.category)}</span>
                   <div>
-                    <h3 className="font-semibold text-slate-900 dark:text-slate-100">{eq.name}</h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">{eq.brand} {eq.model}</p>
+                    <h3 className="font-semibold text-slate-900">{eq.name}</h3>
+                    <p className="text-xs text-slate-500">{eq.brand} {eq.model}</p>
                   </div>
                 </div>
                 <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusColor(eq.status)}`}>{eq.status.replace('_', ' ').toUpperCase()}</span>
@@ -213,15 +213,15 @@ export default function EquipmentTable() {
 
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-slate-500 dark:text-slate-400">Ubicación:</span>
-                  <span className="font-medium text-slate-900 dark:text-slate-100">{eq.location || 'N/A'}</span>
+                  <span className="text-slate-500">Ubicación:</span>
+                  <span className="font-medium text-slate-900">{eq.location || 'N/A'}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500 dark:text-slate-400">Horas de uso:</span>
-                  <span className="font-medium text-slate-900 dark:text-slate-100">{eq.totalUsageHours || 0}h</span>
+                  <span className="text-slate-500">Horas de uso:</span>
+                  <span className="font-medium text-slate-900">{eq.totalUsageHours || 0}h</span>
                 </div>
-                {eq.serialNumber && <div className="flex justify-between"><span className="text-slate-500 dark:text-slate-400">Serial:</span><span className="font-mono text-xs text-slate-700 dark:text-slate-300">{eq.serialNumber}</span></div>}
-                {maintStatus && <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-700"><span className="text-slate-500 dark:text-slate-400 flex items-center gap-1"><maintStatus.icon className="w-4 h-4" />Próximo mant.:</span><span className={`text-xs font-medium ${maintStatus.color}`}>{maintStatus.text}</span></div>}
+                {eq.serialNumber && <div className="flex justify-between"><span className="text-slate-500">Serial:</span><span className="font-mono text-xs text-slate-700">{eq.serialNumber}</span></div>}
+                {maintStatus && <div className="flex items-center justify-between pt-2 border-t border-slate-100"><span className="text-slate-500 flex items-center gap-1"><maintStatus.icon className="w-4 h-4" />Próximo mant.:</span><span className={`text-xs font-medium ${maintStatus.color}`}>{maintStatus.text}</span></div>}
               </div>
 
               {eq.notes && <div className="mt-3 p-2 bg-slate-50 rounded-lg"><p className="text-xs text-slate-600">{eq.notes}</p></div>}
@@ -245,8 +245,8 @@ export default function EquipmentTable() {
 
       {isCreateModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white dark:bg-slate-900 dark:text-slate-100 rounded-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-semibold mb-4 text-slate-900 dark:text-slate-100">{editingEquipment ? 'Editar Equipo' : 'Crear Nuevo Equipo'}</h2>
+          <div className="bg-white rounded-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-semibold mb-4 text-slate-900">{editingEquipment ? 'Editar Equipo' : 'Crear Nuevo Equipo'}</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <input required placeholder="Nombre" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="col-span-2 rounded-lg border border-slate-300 px-4 py-2" />

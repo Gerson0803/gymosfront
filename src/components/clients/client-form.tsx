@@ -31,12 +31,12 @@ export function ClientForm({ mode, initialMember }: ClientFormProps) {
 
   const field = (label: string, children: React.ReactNode) => (
     <label className="flex flex-col gap-1.5">
-      <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{label}</span>
+      <span className="text-sm font-semibold text-slate-700">{label}</span>
       {children}
     </label>
   );
 
-  const inputClass = "w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200";
+  const inputClass = "w-full rounded-xl border border-slate-300 bg-white text-slate-900 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200";
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -72,7 +72,7 @@ export function ClientForm({ mode, initialMember }: ClientFormProps) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm">
+    <form onSubmit={onSubmit} className="space-y-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
       <div className="grid gap-4 md:grid-cols-2">
         {field('Nombre completo',
           <input required value={form.name} onChange={e => setForm({...form, name: e.target.value})} className={inputClass} placeholder="Ej: Juan García" />

@@ -81,8 +81,8 @@ export default function EnhancedDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Dashboard</h2>
-        <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">Métricas y análisis del gimnasio</p>
+        <h2 className="text-2xl font-bold text-slate-900">Dashboard</h2>
+        <p className="text-sm text-slate-600 mt-1">Métricas y análisis del gimnasio</p>
       </div>
 
       {highRiskMembers.length > 0 && (
