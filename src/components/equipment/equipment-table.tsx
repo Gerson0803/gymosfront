@@ -276,32 +276,81 @@ export default function EquipmentTable() {
           <div className="bg-white rounded-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-semibold mb-4 text-slate-900">{editingEquipment ? 'Editar Equipo' : 'Crear Nuevo Equipo'}</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <input required placeholder="Nombre" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="col-span-2 rounded-lg border border-slate-300 px-4 py-2" />
-                <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value as any})} className="rounded-lg border border-slate-300 px-4 py-2">
-                  <option value="cardio">Cardio</option>
-                  <option value="pesas">Pesas</option>
-                  <option value="maquinas">Máquinas</option>
-                  <option value="funcional">Funcional</option>
-                  <option value="accesorios">Accesorios</option>
-                </select>
-                <select value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value as any})} className="rounded-lg border border-slate-300 px-4 py-2">
-                  <option value="nuevo">Nuevo</option>
-                  <option value="operativo">Operativo</option>
-                  <option value="en_mantenimiento">En Mantenimiento</option>
-                  <option value="fuera_servicio">Fuera de Servicio</option>
-                </select>
-                <input placeholder="Marca" value={formData.brand} onChange={(e) => setFormData({...formData, brand: e.target.value})} className="rounded-lg border border-slate-300 px-4 py-2" />
-                <input placeholder="Modelo" value={formData.model} onChange={(e) => setFormData({...formData, model: e.target.value})} className="rounded-lg border border-slate-300 px-4 py-2" />
-                <input placeholder="Serial" value={formData.serialNumber} onChange={(e) => setFormData({...formData, serialNumber: e.target.value})} className="rounded-lg border border-slate-300 px-4 py-2" />
-                <input placeholder="Ubicación" value={formData.location} onChange={(e) => setFormData({...formData, location: e.target.value})} className="rounded-lg border border-slate-300 px-4 py-2" />
-                <input type="number" placeholder="Precio (COP)" value={formData.price} onChange={(e) => setFormData({...formData, price: e.target.value === '' ? '' : Number(e.target.value)})} className="rounded-lg border border-slate-300 px-4 py-2" />
-                <input type="number" placeholder="Horas de uso" value={formData.totalUsageHours} onChange={(e) => setFormData({...formData, totalUsageHours: e.target.value === '' ? '' : Number(e.target.value)})} className="rounded-lg border border-slate-300 px-4 py-2" />
-                <input type="date" value={formData.purchaseDate} onChange={(e) => setFormData({...formData, purchaseDate: e.target.value})} className="rounded-lg border border-slate-300 px-4 py-2" />
-                <input type="number" placeholder="Días entre mantenimientos (ej: 90)" value={formData.maintenanceIntervalDays} onChange={(e) => setFormData({...formData, maintenanceIntervalDays: e.target.value === '' ? '' : Number(e.target.value)})} className="rounded-lg border border-slate-300 px-4 py-2" />
-                <input type="date" value={formData.nextMaintenance} onChange={(e) => setFormData({...formData, nextMaintenance: e.target.value})} className="rounded-lg border border-slate-300 px-4 py-2" />
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-slate-900 mb-1">Nombre *</label>
+                  <input required placeholder="Ej: Caminadora Pro 3000" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full rounded-lg border border-slate-300 px-4 py-2" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-900 mb-1">Categoría</label>
+                    <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value as any})} className="w-full rounded-lg border border-slate-300 px-4 py-2">
+                      <option value="cardio">Cardio</option>
+                      <option value="pesas">Pesas</option>
+                      <option value="maquinas">Máquinas</option>
+                      <option value="funcional">Funcional</option>
+                      <option value="accesorios">Accesorios</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-900 mb-1">Estado</label>
+                    <select value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value as any})} className="w-full rounded-lg border border-slate-300 px-4 py-2">
+                      <option value="nuevo">Nuevo</option>
+                      <option value="operativo">Operativo</option>
+                      <option value="en_mantenimiento">En Mantenimiento</option>
+                      <option value="fuera_servicio">Fuera de Servicio</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-900 mb-1">Marca</label>
+                    <input placeholder="Ej: Life Fitness" value={formData.brand} onChange={(e) => setFormData({...formData, brand: e.target.value})} className="w-full rounded-lg border border-slate-300 px-4 py-2" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-900 mb-1">Modelo</label>
+                    <input placeholder="Ej: F1 Classic" value={formData.model} onChange={(e) => setFormData({...formData, model: e.target.value})} className="w-full rounded-lg border border-slate-300 px-4 py-2" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-900 mb-1">Número Serial</label>
+                    <input placeholder="Ej: LF-2024-0001" value={formData.serialNumber} onChange={(e) => setFormData({...formData, serialNumber: e.target.value})} className="w-full rounded-lg border border-slate-300 px-4 py-2" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-900 mb-1">Ubicación</label>
+                    <input placeholder="Ej: Sala Cardio - Zona A" value={formData.location} onChange={(e) => setFormData({...formData, location: e.target.value})} className="w-full rounded-lg border border-slate-300 px-4 py-2" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-900 mb-1">Precio (COP)</label>
+                    <input type="number" placeholder="Ej: 5000000" value={formData.price} onChange={(e) => setFormData({...formData, price: e.target.value === '' ? '' : Number(e.target.value)})} className="w-full rounded-lg border border-slate-300 px-4 py-2" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-900 mb-1">Horas de uso</label>
+                    <input type="number" placeholder="Ej: 250" value={formData.totalUsageHours} onChange={(e) => setFormData({...formData, totalUsageHours: e.target.value === '' ? '' : Number(e.target.value)})} className="w-full rounded-lg border border-slate-300 px-4 py-2" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-900 mb-1">Fecha de Compra</label>
+                    <input type="date" value={formData.purchaseDate} onChange={(e) => setFormData({...formData, purchaseDate: e.target.value})} className="w-full rounded-lg border border-slate-300 px-4 py-2" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-900 mb-1">Intervalo de Mantenimiento (días)</label>
+                    <input type="number" placeholder="Ej: 90" value={formData.maintenanceIntervalDays} onChange={(e) => setFormData({...formData, maintenanceIntervalDays: e.target.value === '' ? '' : Number(e.target.value)})} className="w-full rounded-lg border border-slate-300 px-4 py-2" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-900 mb-1">Próximo Mantenimiento</label>
+                  <input type="date" value={formData.nextMaintenance} onChange={(e) => setFormData({...formData, nextMaintenance: e.target.value})} className="w-full rounded-lg border border-slate-300 px-4 py-2" />
+                </div>
               </div>
-              <textarea placeholder="Notas" rows={3} value={formData.notes} onChange={(e) => setFormData({...formData, notes: e.target.value})} className="w-full rounded-lg border border-slate-300 px-4 py-2" />
+              <div>
+                <label className="block text-sm font-medium text-slate-900 mb-1">Notas</label>
+                <textarea placeholder="Ej: Equipo en perfecto estado, con manual de usuario incluido..." rows={3} value={formData.notes} onChange={(e) => setFormData({...formData, notes: e.target.value})} className="w-full rounded-lg border border-slate-300 px-4 py-2" />
+              </div>
               <div className="flex gap-3">
                 <button type="submit" disabled={isSubmitting} className="flex-1 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">{isSubmitting ? 'Guardando...' : 'Guardar'}</button>
                 <button type="button" onClick={() => setIsCreateModalOpen(false)} disabled={isSubmitting} className="flex-1 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50">Cancelar</button>
