@@ -6,7 +6,10 @@ import toast from 'react-hot-toast';
 import { Equipment, EquipmentStatus } from '@/types/client';
 import { getEquipment, createEquipment, updateEquipmentApi, deleteEquipment } from '@/lib/api';
 
-type EquipmentFormData = Omit<Equipment, 'id' | 'createdAt' | 'updatedAt'>;
+type EquipmentFormData = Omit<Equipment, 'id' | 'createdAt' | 'updatedAt' | 'price' | 'totalUsageHours'> & {
+  price: number | '';
+  totalUsageHours: number | '';
+};
 
 export default function EquipmentTable() {
   const [equipment, setEquipment] = useState<Equipment[]>([]);
@@ -20,10 +23,10 @@ export default function EquipmentTable() {
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<EquipmentFormData>({
-    name: '', category: 'cardio', brand: '', model: '', serialNumber: '', location: '', 
-    price: 0, status: 'nuevo', purchaseDate: new Date().toISOString().split('T')[0], 
+    name: '', category: 'cardio', brand: '', model: '', serialNumber: '', location: '',
+    price: '', status: 'nuevo', purchaseDate: new Date().toISOString().split('T')[0],
     maintenanceIntervalDays: 90, nextMaintenance: new Date().toISOString().split('T')[0],
-    totalUsageHours: 0, notes: '', maintenanceHistory: []
+    totalUsageHours: '', notes: '', maintenanceHistory: []
   });
 
   const filteredEquipment = useMemo(() => {
@@ -94,14 +97,32 @@ export default function EquipmentTable() {
 
   const handleOpenCreate = () => {
     setEditingEquipment(null);
-    setFormData({ name: '', category: 'cardio', brand: '', model: '', serialNumber: '', location: '', price: 0, status: 'nuevo', purchaseDate: new Date().toISOString().split('T')[0], maintenanceIntervalDays: 90, nextMaintenance: new Date().toISOString().split('T')[0], totalUsageHours: 0, notes: '', maintenanceHistory: [] });
+    setFormData({
+      name: '', category: 'cardio', brand: '', model: '', serialNumber: '', location: '',
+      price: '', status: 'nuevo', purchaseDate: new Date().toISOString().split('T')[0],
+      maintenanceIntervalDays: 90, nextMaintenance: new Date().toISOString().split('T')[0],
+      totalUsageHours: '', notes: '', maintenanceHistory: []
+    });
     setIsCreateModalOpen(true);
   };
 
   const handleEdit = (eq: Equipment) => {
     setEditingEquipment(eq);
     setFormData({
-      name: eq.name, category: eq.category, brand: eq.brand || '', model: eq.model || '', serialNumber: eq.serialNumber || '', location: eq.location || '', price: eq.price || 0, status: eq.status, purchaseDate: eq.purchaseDate || new Date().toISOString().split('T')[0], maintenanceIntervalDays: eq.maintenanceIntervalDays || 90, nextMaintenance: eq.nextMaintenance || new Date().toISOString().split('T')[0], totalUsageHours: eq.totalUsageHours || 0, notes: eq.notes || '', maintenanceHistory: eq.maintenanceHistory || []
+      name: eq.name,
+      category: eq.category,
+      brand: eq.brand || '',
+      model: eq.model || '',
+      serialNumber: eq.serialNumber || '',
+      location: eq.location || '',
+      price: eq.price ?? '',
+      status: eq.status,
+      purchaseDate: eq.purchaseDate || new Date().toISOString().split('T')[0],
+      maintenanceIntervalDays: eq.maintenanceIntervalDays || 90,
+      nextMaintenance: eq.nextMaintenance || new Date().toISOString().split('T')[0],
+      totalUsageHours: eq.totalUsageHours ?? '',
+      notes: eq.notes || '',
+      maintenanceHistory: eq.maintenanceHistory || [],
     });
     setIsCreateModalOpen(true);
   };
@@ -109,13 +130,19 @@ export default function EquipmentTable() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    const payload = {
+      ...formData,
+      price: formData.price === '' ? undefined : Number(formData.price),
+      totalUsageHours: formData.totalUsageHours === '' ? undefined : Number(formData.totalUsageHours),
+      maintenanceIntervalDays: Number(formData.maintenanceIntervalDays),
+    };
     try {
       if (editingEquipment) {
-        await updateEquipmentApi(editingEquipment.id, formData);
-        setEquipment(equipment.map(eq => eq.id === editingEquipment.id ? {...eq, ...formData} : eq));
+        await updateEquipmentApi(editingEquipment.id, payload);
+        setEquipment(equipment.map(eq => eq.id === editingEquipment.id ? {...eq, ...payload} : eq));
         toast.success('Equipo actualizado');
       } else {
-        const response = await createEquipment(formData);
+        const response = await createEquipment(payload);
         const raw = response as any;
         const newEquipment = raw.data || raw;
         setEquipment([...equipment, newEquipment]);
@@ -267,8 +294,8 @@ export default function EquipmentTable() {
                 <input placeholder="Modelo" value={formData.model} onChange={(e) => setFormData({...formData, model: e.target.value})} className="rounded-lg border border-slate-300 px-4 py-2" />
                 <input placeholder="Serial" value={formData.serialNumber} onChange={(e) => setFormData({...formData, serialNumber: e.target.value})} className="rounded-lg border border-slate-300 px-4 py-2" />
                 <input placeholder="Ubicación" value={formData.location} onChange={(e) => setFormData({...formData, location: e.target.value})} className="rounded-lg border border-slate-300 px-4 py-2" />
-                <input type="number" placeholder="Precio (COP)" value={formData.price} onChange={(e) => setFormData({...formData, price: Number(e.target.value)})} className="rounded-lg border border-slate-300 px-4 py-2" />
-                <input type="number" placeholder="Horas de uso" value={formData.totalUsageHours} onChange={(e) => setFormData({...formData, totalUsageHours: Number(e.target.value)})} className="rounded-lg border border-slate-300 px-4 py-2" />
+                <input type="number" placeholder="Precio (COP)" value={formData.price} onChange={(e) => setFormData({...formData, price: e.target.value === '' ? '' : Number(e.target.value)})} className="rounded-lg border border-slate-300 px-4 py-2" />
+                <input type="number" placeholder="Horas de uso" value={formData.totalUsageHours} onChange={(e) => setFormData({...formData, totalUsageHours: e.target.value === '' ? '' : Number(e.target.value)})} className="rounded-lg border border-slate-300 px-4 py-2" />
                 <input type="date" value={formData.purchaseDate} onChange={(e) => setFormData({...formData, purchaseDate: e.target.value})} className="rounded-lg border border-slate-300 px-4 py-2" />
                 <input type="number" placeholder="Intervalo mantenimiento (días)" value={formData.maintenanceIntervalDays} onChange={(e) => setFormData({...formData, maintenanceIntervalDays: Number(e.target.value)})} className="rounded-lg border border-slate-300 px-4 py-2" />
                 <input type="date" value={formData.nextMaintenance} onChange={(e) => setFormData({...formData, nextMaintenance: e.target.value})} className="rounded-lg border border-slate-300 px-4 py-2" />

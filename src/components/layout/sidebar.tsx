@@ -38,25 +38,29 @@ export default function Sidebar() {
   return (
     <aside className="fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 transition-colors">
       <div className="flex h-full flex-col">
-        <div className="flex h-16 items-center justify-between border-b border-slate-200 px-6">
-          {isEditingGymName ? (
-            <input
-              value={tempGymName}
-              onChange={(e) => setTempGymName(e.target.value)}
-              onBlur={handleSaveGymName}
-              onKeyDown={(e) => e.key === 'Enter' && handleSaveGymName()}
-              autoFocus
-              className="text-xl font-bold text-slate-900 bg-white border border-slate-300 rounded px-2 py-1 truncate flex-1"
-            />
-          ) : (
-            <h1 
-              onClick={() => setIsEditingGymName(true)}
-              className="text-xl font-bold text-slate-900 truncate cursor-pointer hover:opacity-70 transition flex-1"
-              title="Click para editar"
-            >
-              {gymName}
-            </h1>
-          )}
+        <div className="border-b border-slate-200 px-6 pb-4 pt-4">
+          <h1 className="text-xl font-bold text-slate-900">GymOS</h1>
+          <div className="mt-2">
+            {isEditingGymName ? (
+              <input
+                value={tempGymName}
+                onChange={(e) => setTempGymName(e.target.value)}
+                onBlur={handleSaveGymName}
+                onKeyDown={(e) => e.key === 'Enter' && handleSaveGymName()}
+                autoFocus
+                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
+                placeholder="Nombre del gimnasio"
+              />
+            ) : (
+              <button
+                type="button"
+                onClick={() => setIsEditingGymName(true)}
+                className="w-full text-left text-sm font-semibold text-slate-700 hover:text-slate-900"
+              >
+                {gymName || 'Agregar nombre del gimnasio'}
+              </button>
+            )}
+          </div>
         </div>
         
         <nav className="flex-1 space-y-1 px-3 py-4">

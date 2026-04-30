@@ -168,7 +168,7 @@ export default function SalesPipeline() {
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<LeadFormData>({
     resolver: zodResolver(leadSchema),
-    defaultValues: { budget: 0 },
+    defaultValues: {} as Partial<LeadFormData>,
   });
 
   const onSubmit = async (data: LeadFormData) => {
@@ -186,7 +186,7 @@ export default function SalesPipeline() {
       }
       setIsPanelOpen(false);
       setEditingLead(null);
-      reset({ budget: 0 });
+      reset();
     } catch (err) {
       toast.error('Error al guardar lead');
     }
@@ -225,7 +225,7 @@ export default function SalesPipeline() {
           <h2 className="text-2xl font-bold text-slate-900">Pipeline de Ventas</h2>
           <p className="text-sm text-slate-600 mt-1">Arrastra leads entre etapas para gestionar ventas</p>
         </div>
-        <button onClick={() => setIsPanelOpen(true)} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+        <button onClick={() => { setEditingLead(null); reset(); setIsPanelOpen(true); }} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
           <Plus className="w-4 h-4" /> Nuevo Lead
         </button>
       </div>
