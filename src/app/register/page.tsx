@@ -3,29 +3,58 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { login } from '@/lib/api';
+import { signup } from '@/lib/api';
 import toast from 'react-hot-toast';
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    // Validations
+    if (!name.trim()) {
+      setError('El nombre es requerido');
+      return;
+    }
+
+    if (name.trim().length < 3) {
+      setError('El nombre debe tener al menos 3 caracteres');
+      return;
+    }
+
+    if (!email.includes('@')) {
+      setError('Por favor ingresa un email válido');
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('La contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError('Las contraseñas no coinciden');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      await login(email, password);
-      toast.success('¡Bienvenido a GymOS!');
+      await signup(email, password, name);
+      toast.success('¡Cuenta creada exitosamente!');
       setTimeout(() => {
-      window.location.href = '/';
+        window.location.href = '/';
       }, 500);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al iniciar sesión';
+      const errorMessage = err instanceof Error ? err.message : 'Error al crear la cuenta';
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {
@@ -38,7 +67,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-slate-900">GymOS</h1>
-          <p className="mt-2 text-slate-600">Gestión Inteligente de Gimnasios</p>
+          <p className="mt-2 text-slate-600">Crea tu cuenta</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -47,6 +76,22 @@ export default function LoginPage() {
               <p className="text-sm text-red-700">{error}</p>
             </div>
           )}
+
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-1">
+              Nombre Completo
+            </label>
+            <input
+              id="name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Juan Pérez"
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              required
+              disabled={loading}
+            />
+          </div>
 
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1">
@@ -78,6 +123,23 @@ export default function LoginPage() {
               required
               disabled={loading}
             />
+            <p className="text-xs text-slate-500 mt-1">Mínimo 6 caracteres</p>
+          </div>
+
+          <div>
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-700 mb-1">
+              Confirmar Contraseña
+            </label>
+            <input
+              id="confirmPassword"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="••••••••"
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              required
+              disabled={loading}
+            />
           </div>
 
           <button
@@ -85,15 +147,15 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full px-4 py-2 mt-6 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Entrando...' : 'Entrar'}
+            {loading ? 'Creando cuenta...' : 'Crear Cuenta'}
           </button>
         </form>
 
-        <div className="mt-6 pt-6 border-t border-slate-200">
-          <p className="text-sm text-slate-600 text-center">
-            ¿No tienes cuenta?{' '}
-            <Link href="/register" className="text-blue-600 hover:text-blue-700 font-medium transition">
-              Regístrate aquí
+        <div className="mt-6 pt-6 border-t border-slate-200 text-center">
+          <p className="text-sm text-slate-600">
+            ¿Ya tienes cuenta?{' '}
+            <Link href="/login" className="text-blue-600 hover:text-blue-700 font-medium transition">
+              Inicia sesión
             </Link>
           </p>
         </div>

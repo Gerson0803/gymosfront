@@ -187,6 +187,28 @@ export async function login(email: string, password: string) {
   }
 }
 
+export async function signup(email: string, password: string, name: string) {
+  try {
+    const response = await apiRequest<{
+      success: boolean;
+      data: { token: string; user: { id: string; email: string; name: string; role: string } };
+    }>("/auth/signup", {
+      method: "POST",
+      body: JSON.stringify({ email, password, name }),
+    });
+
+    if (response.success && response.data.token) {
+      setAuthToken(response.data.token);
+      return response.data;
+    }
+
+    throw new Error(response.data?.token ? "No token received" : "Signup failed");
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Signup failed";
+    throw new Error(errorMessage);
+  }
+}
+
 export function logout() {
   clearAuthToken();
   if (typeof window !== "undefined") {
