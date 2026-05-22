@@ -2,104 +2,111 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-
-import { LayoutDashboard, Users, TrendingUp, Wrench, LogOut, Moon, Sun, QrCode } from 'lucide-react';
+import {
+  LayoutDashboard,
+  Users,
+  TrendingUp,
+  Wrench,
+  LogOut,
+  QrCode,
+  Dumbbell,
+} from 'lucide-react';
 import { logout } from '@/lib/api';
 import { useAppSettings } from '@/context/app-settings-context';
-import { useState } from 'react';
-import toast from 'react-hot-toast';
 
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { name: 'Miembros', href: '/clients', icon: Users },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Members', href: '/clients', icon: Users },
   { name: 'Check-in', href: '/checkin', icon: QrCode },
-  { name: 'Pipeline Ventas', href: '/pipeline', icon: TrendingUp },
-  { name: 'Equipamiento', href: '/equipment', icon: Wrench },
+  { name: 'Sales Pipeline', href: '/pipeline', icon: TrendingUp },
+  { name: 'Equipment', href: '/equipment', icon: Wrench },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { gymName, setGymName } = useAppSettings();
-  const [isEditingGymName, setIsEditingGymName] = useState(false);
-  const [tempGymName, setTempGymName] = useState(gymName);
+  const { gymName } = useAppSettings();
 
   const handleLogout = () => {
     logout();
   };
 
-  const handleSaveGymName = () => {
-    if (tempGymName.trim()) {
-      setGymName(tempGymName);
-      setIsEditingGymName(false);
-      toast.success('Nombre del gimnasio actualizado');
-    } else {
-      toast.error('El nombre no puede estar vacío');
-    }
-  };
-
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 transition-colors">
-      <div className="flex h-full flex-col">
-        <div className="border-b border-slate-200 px-6 pb-4 pt-4">
-          <h1 className="text-xl font-bold text-slate-900">GymOS</h1>
-          <div className="mt-2">
-            {isEditingGymName ? (
-              <input
-                value={tempGymName}
-                onChange={(e) => setTempGymName(e.target.value)}
-                onBlur={handleSaveGymName}
-                onKeyDown={(e) => e.key === 'Enter' && handleSaveGymName()}
-                autoFocus
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
-                placeholder="Nombre del gimnasio"
-              />
-            ) : (
-              <button
-                type="button"
-                onClick={() => setIsEditingGymName(true)}
-                className="w-full text-left text-sm font-semibold text-slate-700 hover:text-slate-900"
-              >
-                {gymName || 'Agregar nombre del gimnasio'}
-              </button>
-            )}
+    <>
+      <aside className="fixed inset-y-0 left-0 z-40 hidden h-screen w-64 flex-col border-r border-[#E5EAF3] bg-white md:flex">
+        <div className="border-b border-[#E5EAF3] px-6 py-6">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0B57F0] text-white shadow-sm">
+              <Dumbbell className="h-5 w-5" strokeWidth={2} />
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-[#0B57F0]">GymOS</h1>
+              <p className="text-xs text-[#5B6475]">{gymName || 'Elite Management'}</p>
+            </div>
           </div>
         </div>
-        
-        <nav className="flex-1 space-y-1 px-3 py-4">
+
+        <nav className="flex-1 space-y-1 px-3 py-5">
           {navigation.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive =
+              pathname === item.href || pathname.startsWith(`${item.href}/`);
             return (
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${
+                className={`relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition ${
                   isActive
-                    ? 'bg-blue-50 text-blue-700'
-                    : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+                    ? 'bg-[#0B57F0]/8 text-[#0B57F0]'
+                    : 'text-[#5B6475] hover:bg-[#F5F7FB] hover:text-[#0A1733]'
                 }`}
               >
-                <item.icon className={`h-5 w-5 ${isActive ? 'text-blue-600' : 'text-slate-400'}`} />
+                {isActive && (
+                  <span
+                    className="absolute right-0 top-1/2 h-8 w-1 -translate-y-1/2 rounded-l-full bg-[#0B57F0]"
+                    aria-hidden
+                  />
+                )}
+                <item.icon
+                  className={`h-5 w-5 shrink-0 ${isActive ? 'text-[#0B57F0]' : 'text-[#5B6475]'}`}
+                  strokeWidth={1.75}
+                />
                 {item.name}
               </Link>
             );
           })}
         </nav>
 
-        <div className="border-t border-slate-200 p-4 space-y-3">
+        <div className="mt-auto border-t border-[#E5EAF3] p-4">
           <button
+            type="button"
             onClick={handleLogout}
-            className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 rounded-lg transition"
+            className="flex w-full items-center justify-start gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-[#5B6475] transition hover:bg-[#F5F7FB] hover:text-[#0A1733]"
           >
-            <LogOut className="h-5 w-5 text-slate-400" />
-            Cerrar sesión
+            <LogOut className="h-5 w-5 shrink-0 text-[#5B6475]" strokeWidth={1.75} />
+            Logout
           </button>
-          
-          <div className="rounded-lg bg-slate-50 p-3">
-            <p className="text-xs font-medium text-slate-600">v2.0 - Fusion Edition</p>
-            <p className="mt-1 text-xs text-slate-500">Next.js 16 + React 19</p>
-          </div>
         </div>
-      </div>
-    </aside>
+      </aside>
+
+      {/* Mobile bottom nav */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 flex border-t border-[#E5EAF3] bg-white px-2 py-2 md:hidden">
+        {navigation.slice(0, 5).map((item) => {
+          const isActive =
+            pathname === item.href || pathname.startsWith(`${item.href}/`);
+          return (
+            <Link
+              key={item.name}
+              href={item.href}
+              className={`flex flex-1 flex-col items-center gap-0.5 rounded-lg py-2 text-[10px] font-medium ${
+                isActive ? 'text-[#0B57F0]' : 'text-[#5B6475]'
+              }`}
+            >
+              <item.icon className="h-5 w-5" strokeWidth={1.75} />
+              <span className="truncate px-0.5">{item.name.split(' ')[0]}</span>
+            </Link>
+          );
+        })}
+      </nav>
+      <div className="h-16 md:hidden" aria-hidden />
+    </>
   );
 }

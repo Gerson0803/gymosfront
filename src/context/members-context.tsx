@@ -17,6 +17,7 @@ import {
   getAuthToken,
   logout,
 } from "@/lib/api";
+import { setAuthCookie } from "@/lib/auth-cookie";
 import type { Member } from "@/types/member";
 
 type MemberInput = Partial<Omit<Member, "id" | "createdAt" | "updatedAt">> &
@@ -63,16 +64,28 @@ export function MembersProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  useEffect(() => {
+  const syncAuthState = useCallback(() => {
     const token = getAuthToken();
     if (token) {
+      setAuthCookie(token);
       setIsAuthenticated(true);
-      refreshMembers();
+      void refreshMembers();
     } else {
       setIsAuthenticated(false);
+      setMembers([]);
       setLoading(false);
     }
-  }, []);
+  }, [refreshMembers]);
+
+  useEffect(() => {
+    syncAuthState();
+  }, [syncAuthState]);
+
+  useEffect(() => {
+    const onAuthChanged = () => syncAuthState();
+    window.addEventListener("auth:changed", onAuthChanged);
+    return () => window.removeEventListener("auth:changed", onAuthChanged);
+  }, [syncAuthState]);
 
   useEffect(() => {
     const handleMembersRefresh = () => {

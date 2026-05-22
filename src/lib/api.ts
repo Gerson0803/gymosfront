@@ -1,3 +1,5 @@
+import { setAuthCookie, clearAuthCookie } from "./auth-cookie";
+
 // Centralized API layer for members management
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -11,6 +13,8 @@ export function setAuthToken(token: string) {
   authToken = token;
   if (typeof window !== "undefined") {
     localStorage.setItem("authToken", token);
+    setAuthCookie(token);
+    window.dispatchEvent(new Event("auth:changed"));
   }
 }
 
@@ -33,6 +37,8 @@ export function clearAuthToken() {
   authToken = null;
   if (typeof window !== "undefined") {
     localStorage.removeItem("authToken");
+    clearAuthCookie();
+    window.dispatchEvent(new Event("auth:changed"));
   }
 }
 
@@ -190,7 +196,7 @@ export async function login(email: string, password: string) {
 export function logout() {
   clearAuthToken();
   if (typeof window !== "undefined") {
-    window.location.href = "/login";
+    window.location.href = "/";
   }
 }
 

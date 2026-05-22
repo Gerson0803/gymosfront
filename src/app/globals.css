@@ -2,10 +2,10 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #0f172a;
+  --foreground: #0A1733;
   --surface: #ffffff;
-  --surface-muted: #f8fafc;
-  --border: #d7dbe8;
+  --surface-muted: #F5F7FB;
+  --border: #E5EAF3;
   --active: #16a34a;
   --risk: #ca8a04;
   --inactive: #dc2626;
@@ -14,21 +14,35 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-manrope);
-  --font-mono: var(--font-space-grotesk);
+  --font-sans: var(--font-inter);
+  
+  --color-gymos-blue: #0B57F0;
+  --color-gymos-dark: #0A1733;
+  --color-gymos-gray: #5B6475;
+  --color-gymos-bg: #F5F7FB;
+  --color-gymos-border: #E5EAF3;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   min-height: 100vh;
+  font-family: var(--font-inter), sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+.font-serif {
+  font-family: var(--font-playfair), Georgia, serif;
 }
 
 h1,
 h2,
 h3,
 h4 {
-  font-family: var(--font-space-grotesk), sans-serif;
+  font-family: var(--font-inter), sans-serif;
 }
 
 * {

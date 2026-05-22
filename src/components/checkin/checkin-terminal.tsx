@@ -2,8 +2,16 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Html5Qrcode } from "html5-qrcode";
-import { Fingerprint, QrCode, ScanLine } from "lucide-react";
+import {
+  Fingerprint,
+  QrCode,
+  ScanLine,
+  ChevronDown,
+  User,
+} from "lucide-react";
 import toast from "react-hot-toast";
+import { PageHeader } from "@/components/layout/page-header";
+import { premium } from "@/lib/premium-ui";
 
 type MemberLite = {
   id: string;
@@ -23,7 +31,6 @@ function bytesToBase64Url(bytes: Uint8Array): string {
   bytes.forEach((byte) => {
     binary += String.fromCharCode(byte);
   });
-
   return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
 }
 
@@ -48,7 +55,7 @@ export default function CheckInTerminal() {
   const [qrPayload, setQrPayload] = useState("");
   const [isCheckingQr, setIsCheckingQr] = useState(false);
   const [isCameraScanning, setIsCameraScanning] = useState(false);
-  const [cameraMessage, setCameraMessage] = useState("Apunta la cámara al QR del miembro.");
+  const [cameraMessage, setCameraMessage] = useState("Point the camera at the member QR code.");
 
   const [selectedMemberId, setSelectedMemberId] = useState("");
   const [isRegisteringFingerprint, setIsRegisteringFingerprint] = useState(false);
@@ -61,18 +68,16 @@ export default function CheckInTerminal() {
 
   const loadMembers = useCallback(async () => {
     if (!apiUrl) {
-      setCameraMessage("Configura NEXT_PUBLIC_API_URL para cargar miembros");
+      setCameraMessage("Set NEXT_PUBLIC_API_URL to load members");
       setLoadingMembers(false);
       return;
     }
 
     try {
       setLoadingMembers(true);
-      setCameraMessage("Cargando miembros...");
       const res = await fetch(`${apiUrl}/members?page=1&limit=100`);
       if (!res.ok) {
-        console.error("Failed to load members:", res.status, res.statusText);
-        throw new Error(`HTTP ${res.status}: No fue posible cargar miembros`);
+        throw new Error(`HTTP ${res.status}: Could not load members`);
       }
 
       const payload = (await res.json()) as MembersResponse;
@@ -81,14 +86,9 @@ export default function CheckInTerminal() {
       if (!selectedMemberId && list.length > 0) {
         setSelectedMemberId(list[0].id);
       }
-      if (list.length === 0) {
-        setCameraMessage("No hay miembros disponibles");
-      }
     } catch (error) {
-      const msg = error instanceof Error ? error.message : "Error desconocido";
-      console.error("Error loading members:", msg);
-      setCameraMessage(`Error: ${msg}`);
-      toast.error(`Error cargando miembros: ${msg}`);
+      const msg = error instanceof Error ? error.message : "Unknown error";
+      toast.error(`Error loading members: ${msg}`);
     } finally {
       setLoadingMembers(false);
     }
@@ -105,78 +105,14 @@ export default function CheckInTerminal() {
     };
   }, []);
 
-  useEffect(() => {
-    if (!isCameraScanning) {
-      return;
-    }
-
-    const startCamera = async () => {
-      try {
-        setCameraMessage("Iniciando cámara...");
-
-        if (scannerRef.current) {
-          try {
-            await scannerRef.current.stop();
-          } catch {
-            // Ignorar si todavía no estaba activa.
-          }
-          scannerRef.current = null;
-        }
-
-        const scanner = new Html5Qrcode(scannerContainerId);
-        scannerRef.current = scanner;
-
-        await scanner.start(
-          { facingMode: "environment" },
-          {
-            fps: 10,
-            qrbox: { width: 240, height: 240 },
-            aspectRatio: 1,
-          },
-          async (decodedText) => {
-            const value = decodedText.trim();
-            if (!value) {
-              return;
-            }
-
-            setQrPayload(value);
-            setCameraMessage("QR detectado. Registrando check-in...");
-            await scanner.stop();
-            scannerRef.current = null;
-            setIsCameraScanning(false);
-            await handleQrCheckIn(value);
-          },
-          () => {
-            // Sin ruido visual mientras se encuentra el QR.
-          },
-        );
-
-        setCameraMessage("Cámara activa. Acerca el QR al centro del cuadro.");
-      } catch (error) {
-        const message = error instanceof Error ? error.message : "No fue posible abrir la cámara";
-        setCameraMessage(message);
-        toast.error(message);
-        setIsCameraScanning(false);
-      }
-    };
-
-    void startCamera();
-
-    return () => {
-      void scannerRef.current?.stop().catch(() => undefined);
-      scannerRef.current = null;
-    };
-  }, [isCameraScanning]);
-
   const handleQrCheckIn = async (overridePayload?: string) => {
     const value = (overridePayload ?? qrPayload).trim();
     if (!value) {
-      toast.error("Escanea o pega un QR válido");
+      toast.error("Scan or paste a valid QR");
       return;
     }
-
     if (!apiUrl) {
-      toast.error("Configura NEXT_PUBLIC_API_URL");
+      toast.error("Configure NEXT_PUBLIC_API_URL");
       return;
     }
 
@@ -190,20 +126,67 @@ export default function CheckInTerminal() {
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || "No fue posible registrar check-in por QR");
+        throw new Error(err.message || "QR check-in failed");
       }
 
-      toast.success("Check-in por QR registrado");
+      toast.success("QR check-in registered");
       setQrPayload("");
       notifyMembersRefresh();
       await loadMembers();
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Error inesperado en check-in QR";
-      toast.error(message);
+      toast.error(error instanceof Error ? error.message : "QR check-in error");
     } finally {
       setIsCheckingQr(false);
     }
   };
+
+  useEffect(() => {
+    if (!isCameraScanning) return;
+
+    const startCamera = async () => {
+      try {
+        setCameraMessage("Starting camera...");
+        if (scannerRef.current) {
+          try {
+            await scannerRef.current.stop();
+          } catch {
+            /* noop */
+          }
+          scannerRef.current = null;
+        }
+
+        const scanner = new Html5Qrcode(scannerContainerId);
+        scannerRef.current = scanner;
+
+        await scanner.start(
+          { facingMode: "environment" },
+          { fps: 10, qrbox: { width: 240, height: 240 }, aspectRatio: 1 },
+          async (decodedText) => {
+            const value = decodedText.trim();
+            if (!value) return;
+            setQrPayload(value);
+            await scanner.stop();
+            scannerRef.current = null;
+            setIsCameraScanning(false);
+            await handleQrCheckIn(value);
+          },
+          () => undefined,
+        );
+        setCameraMessage("Camera active. Center the QR in the frame.");
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Could not open camera";
+        setCameraMessage(message);
+        toast.error(message);
+        setIsCameraScanning(false);
+      }
+    };
+
+    void startCamera();
+    return () => {
+      void scannerRef.current?.stop().catch(() => undefined);
+      scannerRef.current = null;
+    };
+  }, [isCameraScanning]);
 
   const stopCameraScanning = useCallback(() => {
     setIsCameraScanning(false);
@@ -213,45 +196,38 @@ export default function CheckInTerminal() {
 
   const handleRegisterFingerprint = async () => {
     if (!selectedMemberId) {
-      toast.error("Selecciona un miembro");
+      toast.error("Select a member");
       return;
     }
-
     if (!window.PublicKeyCredential) {
-      toast.error("Este navegador no soporta autenticación biométrica (WebAuthn)");
+      toast.error("WebAuthn not supported in this browser");
       return;
     }
 
     try {
       setIsRegisteringFingerprint(true);
-
-      const publicKey: PublicKeyCredentialCreationOptions = {
-        challenge: randomChallenge(),
-        rp: { name: "GymOS" },
-        user: {
-          id: new TextEncoder().encode(selectedMemberId),
-          name: `member-${selectedMemberId}`,
-          displayName: selectedMember?.name ?? "Miembro Gym",
-        },
-        pubKeyCredParams: [{ type: "public-key", alg: -7 }],
-        authenticatorSelection: {
-          authenticatorAttachment: "platform",
-          userVerification: "required",
-        },
-        timeout: 60000,
-        attestation: "none",
-      };
-
       const credential = (await navigator.credentials.create({
-        publicKey,
+        publicKey: {
+          challenge: randomChallenge() as BufferSource,
+          rp: { name: "GymOS" },
+          user: {
+            id: new TextEncoder().encode(selectedMemberId),
+            name: `member-${selectedMemberId}`,
+            displayName: selectedMember?.name ?? "GymOS Member",
+          },
+          pubKeyCredParams: [{ type: "public-key", alg: -7 }],
+          authenticatorSelection: {
+            authenticatorAttachment: "platform",
+            userVerification: "required",
+          },
+          timeout: 60000,
+          attestation: "none",
+        },
       })) as PublicKeyCredential | null;
 
-      if (!credential) {
-        throw new Error("No se pudo crear credencial biométrica");
-      }
+      if (!credential) throw new Error("Could not create biometric credential");
 
       const credentialId = bytesToBase64Url(new Uint8Array(credential.rawId));
-
       const res = await fetch(`${apiUrl}/attendance/biometric/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -260,15 +236,14 @@ export default function CheckInTerminal() {
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || "No fue posible registrar huella");
+        throw new Error(err.message || "Fingerprint registration failed");
       }
 
-      toast.success("Huella registrada correctamente");
+      toast.success("Biometric registered");
       notifyMembersRefresh();
       await loadMembers();
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Error registrando huella";
-      toast.error(message);
+      toast.error(error instanceof Error ? error.message : "Registration error");
     } finally {
       setIsRegisteringFingerprint(false);
     }
@@ -276,39 +251,33 @@ export default function CheckInTerminal() {
 
   const handleFingerprintCheckIn = async () => {
     if (!selectedMemberId) {
-      toast.error("Selecciona un miembro");
+      toast.error("Select a member");
       return;
     }
-
     if (!window.PublicKeyCredential) {
-      toast.error("Este navegador no soporta autenticación biométrica (WebAuthn)");
+      toast.error("WebAuthn not supported");
       return;
     }
 
     try {
       setIsCheckingFingerprint(true);
-
       const statusRes = await fetch(`${apiUrl}/attendance/biometric/member/${selectedMemberId}`);
-      if (!statusRes.ok) {
-        throw new Error("No fue posible validar el estado biométrico del miembro");
-      }
+      if (!statusRes.ok) throw new Error("Could not verify biometric status");
 
       const statusPayload = (await statusRes.json()) as { hasCredential?: boolean };
       if (!statusPayload.hasCredential) {
-        throw new Error("Este miembro no tiene huella registrada. Regístrala primero.");
+        throw new Error("No fingerprint registered. Register first.");
       }
 
       const assertion = (await navigator.credentials.get({
         publicKey: {
-          challenge: randomChallenge(),
+          challenge: randomChallenge() as BufferSource,
           userVerification: "required",
           timeout: 60000,
         },
       })) as PublicKeyCredential | null;
 
-      if (!assertion) {
-        throw new Error("No se obtuvo credencial biométrica");
-      }
+      if (!assertion) throw new Error("Biometric verification failed");
 
       const credentialId = bytesToBase64Url(new Uint8Array(assertion.rawId));
       const res = await fetch(`${apiUrl}/attendance/biometric-checkin`, {
@@ -324,133 +293,145 @@ export default function CheckInTerminal() {
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || "No fue posible registrar check-in por huella");
+        throw new Error(err.message || "Biometric check-in failed");
       }
 
-      toast.success("Check-in por huella registrado");
+      toast.success("Biometric check-in registered");
       notifyMembersRefresh();
       await loadMembers();
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Error en check-in biométrico";
-      toast.error(message);
+      toast.error(error instanceof Error ? error.message : "Biometric check-in error");
     } finally {
       setIsCheckingFingerprint(false);
     }
   };
 
   return (
-    <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold text-slate-900">Terminal de Check-in</h1>
-        <p className="mt-1 text-sm text-slate-600">
-          Registra entrada por QR o por huella usando el lector biométrico del dispositivo.
-        </p>
-      </header>
+    <div className="space-y-8 pb-8">
+      <PageHeader
+        centered
+        title="Welcome to GymOS"
+        subtitle="Please select your preferred check-in method."
+      />
 
-      <section className="grid gap-4 lg:grid-cols-2">
-        <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="mb-4 flex items-center gap-2 text-slate-900">
-            <QrCode className="h-5 w-5 text-blue-600" />
-            <h2 className="text-lg font-semibold">Check-in por QR</h2>
+      <section className="grid gap-6 lg:grid-cols-2">
+        <article className={`${premium.card} flex flex-col p-8 sm:p-10`}>
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#0B57F0]/10">
+            <QrCode className="h-6 w-6 text-[#0B57F0]" strokeWidth={1.75} />
           </div>
-
-          <p className="mb-3 text-sm text-slate-600">
-            Puedes escanear desde un lector QR o pegar el contenido del QR. Se acepta memberId directo o JSON con memberId.
+          <h2 className="font-serif text-2xl font-semibold text-[#0A1733]">Check-in via App</h2>
+          <p className="mt-2 text-sm text-[#5B6475]">
+            Present your GymOS mobile app QR code to the scanner below.
           </p>
 
-          <div className="mb-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-3">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-sm font-medium text-slate-900">Escaneo con cámara</p>
-                <p className="text-xs text-slate-500">Usa la cámara del PC para leer el QR sin teclearlo.</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsCameraScanning((current) => !current)}
-                className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-800"
-              >
-                {isCameraScanning ? "Cerrar cámara" : "Abrir cámara"}
-              </button>
-            </div>
-
+          <div className="relative my-8 flex min-h-[200px] flex-1 flex-col items-center justify-center rounded-2xl border border-dashed border-[#E5EAF3] bg-[#F5F7FB]/80 p-6">
             {isCameraScanning ? (
-              <div className="mt-3 space-y-3">
-                <div className="overflow-hidden rounded-2xl border border-slate-200 bg-black">
-                  <div id={scannerContainerId} className="h-72 w-full" />
-                </div>
-                <p className="text-xs text-slate-600">{cameraMessage}</p>
-                <button
-                  type="button"
-                  onClick={stopCameraScanning}
-                  className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
-                >
-                  Detener cámara
-                </button>
+              <div className="w-full overflow-hidden rounded-xl border border-[#E5EAF3] bg-black">
+                <div id={scannerContainerId} className="h-56 w-full" />
+                <p className="mt-3 text-center text-xs text-[#5B6475]">{cameraMessage}</p>
               </div>
             ) : (
-              <p className="mt-3 text-xs text-slate-500">
-                Puedes activar la cámara cuando quieras.
-              </p>
+              <div className="relative flex h-40 w-56 items-center justify-center">
+                <span className="absolute left-0 top-0 h-8 w-8 border-l-2 border-t-2 border-[#0B57F0]" />
+                <span className="absolute right-0 top-0 h-8 w-8 border-r-2 border-t-2 border-[#0B57F0]" />
+                <span className="absolute bottom-0 left-0 h-8 w-8 border-b-2 border-l-2 border-[#0B57F0]" />
+                <span className="absolute bottom-0 right-0 h-8 w-8 border-b-2 border-r-2 border-[#0B57F0]" />
+                <QrCode className="h-16 w-16 text-[#0B57F0]/20" />
+                <div className="absolute left-4 right-4 top-1/2 h-0.5 -translate-y-1/2 bg-[#0B57F0]/60 shadow-[0_0_12px_#0B57F0]" />
+              </div>
             )}
           </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (isCameraScanning) stopCameraScanning();
+              else setIsCameraScanning(true);
+            }}
+            className={`${premium.pillBtn} w-full`}
+          >
+            <ScanLine className="h-4 w-4" />
+            {isCameraScanning ? "Stop Scan" : "Start Scan"}
+          </button>
 
           <textarea
             value={qrPayload}
             onChange={(e) => setQrPayload(e.target.value)}
-            placeholder='Ejemplos: "cm123..." o {"memberId":"cm123..."}'
-            className="min-h-28 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+            placeholder='Paste QR payload or member ID'
+            className="mt-4 min-h-[72px] w-full rounded-2xl border border-[#E5EAF3] bg-[#F5F7FB] px-4 py-3 text-sm text-[#0A1733] outline-none focus:border-[#0B57F0]/40 focus:ring-2 focus:ring-[#0B57F0]/10"
           />
 
           <button
+            type="button"
             onClick={() => handleQrCheckIn()}
             disabled={isCheckingQr}
-            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-3 text-center text-sm font-semibold text-[#0B57F0] hover:underline disabled:opacity-50"
           >
-            <ScanLine className="h-4 w-4" />
-            {isCheckingQr ? "Registrando..." : "Registrar Check-in QR"}
+            {isCheckingQr ? "Registering..." : "Enter Member ID Manually"}
           </button>
         </article>
 
-        <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="mb-4 flex items-center gap-2 text-slate-900">
-            <Fingerprint className="h-5 w-5 text-emerald-600" />
-            <h2 className="text-lg font-semibold">Check-in por Huella</h2>
+        <article className={`${premium.card} flex flex-col p-8 sm:p-10`}>
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50">
+            <Fingerprint className="h-6 w-6 text-emerald-600" strokeWidth={1.75} />
           </div>
-
-          <label className="mb-2 block text-sm font-medium text-slate-700">Miembro</label>
-          <select
-            value={selectedMemberId}
-            onChange={(e) => setSelectedMemberId(e.target.value)}
-            disabled={loadingMembers || members.length === 0}
-            className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
-          >
-            {members.map((member) => (
-              <option key={member.id} value={member.id}>
-                {member.name} ({member.id})
-              </option>
-            ))}
-          </select>
-
-          <p className="mt-2 text-xs text-slate-500">
-            Estado biométrico:{" "}
-            {selectedMember?.hasBiometricCredential ? "registrado" : "sin registrar"}
+          <h2 className="font-serif text-2xl font-semibold text-[#0A1733]">Biometric Access</h2>
+          <p className="mt-2 text-sm text-[#5B6475]">
+            Use your registered fingerprint for immediate access.
           </p>
 
-          <div className="mt-4 grid gap-2 sm:grid-cols-2">
+          <div className="my-6 flex justify-center">
+            <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-700">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              Scanner Ready
+            </span>
+          </div>
+
+          <div className="relative my-4 flex min-h-[200px] flex-1 items-center justify-center">
+            <div className="absolute h-44 w-44 rounded-full border border-[#0B57F0]/10" />
+            <div className="absolute h-36 w-36 rounded-full border border-[#0B57F0]/15" />
+            <div className="absolute h-28 w-28 rounded-full border border-[#0B57F0]/20" />
+            <Fingerprint className="relative h-20 w-20 text-[#5B6475]/40" strokeWidth={1} />
+          </div>
+
+          <label className="sr-only" htmlFor="biometric-member">
+            Select profile
+          </label>
+          <div className="relative">
+            <User className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#5B6475]" />
+            <select
+              id="biometric-member"
+              value={selectedMemberId}
+              onChange={(e) => setSelectedMemberId(e.target.value)}
+              disabled={loadingMembers || members.length === 0}
+              className="w-full appearance-none rounded-full border border-[#E5EAF3] bg-white py-3.5 pl-11 pr-10 text-sm font-medium text-[#0A1733] outline-none focus:border-[#0B57F0]/40 focus:ring-2 focus:ring-[#0B57F0]/10"
+            >
+              <option value="">Select Profile...</option>
+              {members.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.name}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#5B6475]" />
+          </div>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <button
+              type="button"
               onClick={handleRegisterFingerprint}
               disabled={isRegisteringFingerprint || !selectedMemberId}
-              className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-60"
+              className={premium.pillBtnOutline}
             >
-              {isRegisteringFingerprint ? "Registrando..." : "Registrar Huella"}
+              {isRegisteringFingerprint ? "..." : "Register"}
             </button>
-
             <button
+              type="button"
               onClick={handleFingerprintCheckIn}
               disabled={isCheckingFingerprint || !selectedMemberId}
-              className="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+              className={premium.pillBtn}
             >
-              {isCheckingFingerprint ? "Validando..." : "Check-in con Huella"}
+              {isCheckingFingerprint ? "Validating..." : "Check-in"}
             </button>
           </div>
         </article>

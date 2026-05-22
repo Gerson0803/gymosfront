@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { Search, Filter, Wrench, AlertTriangle, CheckCircle, XCircle, Clock, Loader, Plus, Edit, Trash2 } from 'lucide-react';
+import { Search, Wrench, AlertTriangle, CheckCircle, Clock, Loader, Plus, Edit, Trash2, MapPin, MoreVertical } from 'lucide-react';
+import { PageHeader } from '@/components/layout/page-header';
+import { premium } from '@/lib/premium-ui';
 import toast from 'react-hot-toast';
 import { Equipment, EquipmentStatus } from '@/types/client';
 import { getEquipment, createEquipment, updateEquipmentApi, deleteEquipment } from '@/lib/api';
@@ -18,7 +20,6 @@ export default function EquipmentTable() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingEquipment, setEditingEquipment] = useState<Equipment | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
@@ -34,10 +35,9 @@ export default function EquipmentTable() {
     return equipment.filter((eq) => {
       const matchesSearch = eq.name.toLowerCase().includes(search.toLowerCase()) || eq.brand?.toLowerCase().includes(search.toLowerCase());
       const matchesCategory = categoryFilter === 'all' || eq.category === categoryFilter;
-      const matchesStatus = statusFilter === 'all' || eq.status === statusFilter;
-      return matchesSearch && matchesCategory && matchesStatus;
+      return matchesSearch && matchesCategory;
     });
-  }, [equipment, search, categoryFilter, statusFilter]);
+  }, [equipment, search, categoryFilter]);
 
   useEffect(() => {
     const loadEquipment = async () => {
@@ -175,96 +175,147 @@ export default function EquipmentTable() {
   if (loading) return <div className="flex justify-center items-center p-12"><Loader className="animate-spin h-8 w-8 text-blue-600" /></div>;
   if (error) return <div className="text-red-600 p-4 rounded-lg bg-red-50 border border-red-200">{error}</div>;
 
+  const categoryTabs = [
+    { id: 'all', label: 'All Equipment' },
+    { id: 'cardio', label: 'Cardio' },
+    { id: 'pesas', label: 'Strength' },
+    { id: 'maquinas', label: 'Machines' },
+    { id: 'funcional', label: 'Functional' },
+  ];
+
+  const getMaintenanceDays = (eq: Equipment) => {
+    if (!eq.nextMaintenance) return 45;
+    return Math.max(
+      0,
+      Math.floor(
+        (new Date(eq.nextMaintenance).getTime() - Date.now()) / (1000 * 60 * 60 * 24),
+      ),
+    );
+  };
+
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-xl font-semibold text-slate-900">Equipamiento</h2>
-          <p className="text-sm text-slate-500">{filteredEquipment.length} equipos registrados</p>
-        </div>
-        <button onClick={handleOpenCreate} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"><Plus className="w-4 h-4" /> Nuevo Equipo</button>
+    <div className="space-y-6 pb-4">
+      <PageHeader
+        title="Equipment"
+        search={
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#5B6475]" />
+            <input
+              type="text"
+              placeholder="Search equipment..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className={premium.searchInput}
+            />
+          </div>
+        }
+        actions={
+          <button type="button" onClick={handleOpenCreate} className={premium.pillBtn}>
+            <Plus className="h-4 w-4" /> Add Equipment
+          </button>
+        }
+      />
+
+      <div className="flex flex-wrap gap-2">
+        {categoryTabs.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setCategoryFilter(tab.id)}
+            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+              categoryFilter === tab.id
+                ? 'bg-[#0B57F0] text-white shadow-sm'
+                : 'border border-[#E5EAF3] bg-white text-[#5B6475] hover:border-[#0B57F0]/30'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Buscar por nombre o marca..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg bg-white text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        <div className="flex gap-3">
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="px-4 py-2 border border-slate-300 rounded-lg bg-white text-slate-900 focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="all">Todas las categorías</option>
-            <option value="cardio">Cardio</option>
-            <option value="pesas">Pesas</option>
-            <option value="maquinas">Máquinas</option>
-            <option value="funcional">Funcional</option>
-            <option value="accesorios">Accesorios</option>
-          </select>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 border border-slate-300 rounded-lg bg-white text-slate-900 focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="all">Todos los estados</option>
-            <option value="operativo">Operativo</option>
-            <option value="en_mantenimiento">En Mantenimiento</option>
-            <option value="fuera_servicio">Fuera de Servicio</option>
-            <option value="nuevo">Nuevo</option>
-          </select>
-        </div>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
         {filteredEquipment.map((eq) => {
-          const maintStatus = getMaintenanceStatus(eq);
+          const maintDays = getMaintenanceDays(eq);
+          const maintProgress = Math.min(100, Math.max(10, 100 - maintDays));
+          const isOperational = eq.status === 'operativo';
           return (
-            <div key={eq.id} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md transition">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl">{getCategoryIcon(eq.category)}</span>
+            <article key={eq.id} className={`overflow-hidden ${premium.card}`}>
+              <div className="relative h-40 bg-gradient-to-br from-[#E5EAF3] to-[#F5F7FB]">
+                <div className="flex h-full items-center justify-center text-5xl opacity-80">
+                  {getCategoryIcon(eq.category)}
+                </div>
+                {isOperational && (
+                  <span className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    Operational
+                  </span>
+                )}
+              </div>
+
+              <div className="p-5 sm:p-6">
+                <div className="flex items-start justify-between gap-2">
                   <div>
-                    <h3 className="font-semibold text-slate-900">{eq.name}</h3>
-                    <p className="text-xs text-slate-500">{eq.brand} {eq.model}</p>
+                    <h3 className="font-semibold text-[#0A1733]">{eq.name}</h3>
+                    <p className="mt-0.5 font-mono text-xs text-[#5B6475]">
+                      SN: {eq.serialNumber || '—'}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className="rounded-full p-2 text-[#5B6475] hover:bg-[#F5F7FB]"
+                    aria-label="Options"
+                  >
+                    <MoreVertical className="h-4 w-4" />
+                  </button>
+                </div>
+
+                <div className="mt-5 grid grid-cols-2 gap-4">
+                  <div>
+                    <p className={premium.labelCaps}>Location</p>
+                    <p className="mt-1 flex items-center gap-1 text-sm font-semibold text-[#0A1733]">
+                      <MapPin className="h-3.5 w-3.5 text-[#0B57F0]" />
+                      {eq.location || '—'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className={premium.labelCaps}>Usage</p>
+                    <p className="mt-1 text-sm font-semibold text-[#0A1733]">
+                      {(eq.totalUsageHours || 0).toLocaleString()} hrs
+                    </p>
                   </div>
                 </div>
-                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusColor(eq.status)}`}>{eq.status.replace('_', ' ').toUpperCase()}</span>
-              </div>
 
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Ubicación:</span>
-                  <span className="font-medium text-slate-900">{eq.location || 'N/A'}</span>
+                <div className="mt-5">
+                  <div className="mb-2 flex items-center justify-between text-xs">
+                    <span className="font-medium text-[#5B6475]">Next Maintenance</span>
+                    <span className="font-semibold text-[#0A1733]">{maintDays} Days</span>
+                  </div>
+                  <div className="h-1.5 overflow-hidden rounded-full bg-[#E5EAF3]">
+                    <div
+                      className="h-full rounded-full bg-[#0B57F0] transition-all"
+                      style={{ width: `${maintProgress}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Horas de uso:</span>
-                  <span className="font-medium text-slate-900">{eq.totalUsageHours || 0}h</span>
+
+                <div className="mt-4 flex gap-2 border-t border-[#E5EAF3] pt-4">
+                  <button
+                    type="button"
+                    onClick={() => handleEdit(eq)}
+                    className="flex-1 rounded-full border border-[#E5EAF3] py-2 text-xs font-semibold text-[#0B57F0] hover:bg-[#0B57F0]/5"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDeleteConfirmId(eq.id)}
+                    className="rounded-full px-4 py-2 text-xs font-semibold text-red-600 hover:bg-red-50"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 </div>
-                {eq.serialNumber && <div className="flex justify-between"><span className="text-slate-500">Serial:</span><span className="font-mono text-xs text-slate-700">{eq.serialNumber}</span></div>}
-                {maintStatus && <div className="flex items-center justify-between pt-2 border-t border-slate-100"><span className="text-slate-500 flex items-center gap-1"><maintStatus.icon className="w-4 h-4" />Próximo mant.:</span><span className={`text-xs font-medium ${maintStatus.color}`}>{maintStatus.text}</span></div>}
               </div>
-
-              {eq.notes && <div className="mt-3 p-2 bg-slate-50 rounded-lg"><p className="text-xs text-slate-600">{eq.notes}</p></div>}
-
-              <div className="mt-4 pt-3 border-t border-slate-100 flex gap-2">
-                <select value={eq.status} onChange={(e) => handleStatusChange(eq.id, e.target.value)} className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
-                  <option value="operativo">Operativo</option>
-                  <option value="en_mantenimiento">En Mantenimiento</option>
-                  <option value="fuera_servicio">Fuera de Servicio</option>
-                  <option value="nuevo">Nuevo</option>
-                </select>
-                <button onClick={() => handleEdit(eq)} className="px-3 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"><Edit className="w-4 h-4" /></button>
-                <button onClick={() => setDeleteConfirmId(eq.id)} className="px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition"><Trash2 className="w-4 h-4" /></button>
-              </div>
-            </div>
+            </article>
           );
         })}
       </div>

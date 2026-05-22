@@ -6,9 +6,5 @@ export const metadata = {
 };
 
 export default function CheckInPage() {
-  return (
-    <div className="space-y-6">
-      <CheckInTerminal />
-    </div>
-  );
+  return <CheckInTerminal />;
 }

@@ -666,7 +666,7 @@ export const useGymStore = create<GymState>()(
     {
       name: 'gymos-storage',
       version: 1,
-      partialize: (state) => ({
+      partialize: (state: GymState) => ({
         clients: state.clients,
         leads: state.leads,
         alerts: state.alerts,
@@ -699,6 +699,6 @@ export const useGymStore = create<GymState>()(
           return {};
         }
       },
-    }
+    } as any
   )
 );
