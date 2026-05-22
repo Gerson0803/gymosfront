@@ -1,10 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { getAuthToken } from '@/lib/api';
+import { useState } from 'react';
 import Link from 'next/link';
-import { Check, Users, Kanban, Wrench, Menu, X, Loader } from 'lucide-react';
+import { Check, Users, Kanban, Wrench, Menu, X } from 'lucide-react';
 
 const avatars = [
   "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces",
@@ -13,26 +11,7 @@ const avatars = [
 ];
 
 export default function HomePage() {
-  const router = useRouter();
-  const [checkingAuth, setCheckingAuth] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const token = getAuthToken();
-    if (token) {
-      router.replace('/dashboard');
-    } else {
-      setCheckingAuth(false);
-    }
-  }, [router]);
-
-  if (checkingAuth) {
-    return (
-      <div className="min-h-screen bg-[#F5F7FB] flex items-center justify-center">
-        <Loader className="h-8 w-8 text-[#0B57F0] animate-spin" />
-      </div>
-    );
-  }
 
   return (
     <main className="min-h-screen bg-white text-[#0A1733] font-sans antialiased selection:bg-[#0B57F0]/10 selection:text-[#0B57F0]">

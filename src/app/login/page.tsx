@@ -1,26 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { login, getAuthToken } from '@/lib/api';
+import { login } from '@/lib/api';
 import toast from 'react-hot-toast';
-import { Loader } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [checkingSession, setCheckingSession] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (getAuthToken()) {
-      router.replace('/dashboard');
-    } else {
-      setCheckingSession(false);
-    }
-  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,14 +29,6 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
-
-  if (checkingSession) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#F5F7FB]">
-        <Loader className="h-8 w-8 animate-spin text-[#0B57F0]" />
-      </div>
-    );
-  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#F5F7FB] px-4 py-10">

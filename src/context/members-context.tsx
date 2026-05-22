@@ -16,8 +16,8 @@ import {
   deleteMember as deleteMemberAPI,
   getAuthToken,
   logout,
+  purgeLegacyAuthStorage,
 } from "@/lib/api";
-import { setAuthCookie } from "@/lib/auth-cookie";
 import type { Member } from "@/types/member";
 
 type MemberInput = Partial<Omit<Member, "id" | "createdAt" | "updatedAt">> &
@@ -67,7 +67,6 @@ export function MembersProvider({ children }: { children: ReactNode }) {
   const syncAuthState = useCallback(() => {
     const token = getAuthToken();
     if (token) {
-      setAuthCookie(token);
       setIsAuthenticated(true);
       void refreshMembers();
     } else {
@@ -78,6 +77,7 @@ export function MembersProvider({ children }: { children: ReactNode }) {
   }, [refreshMembers]);
 
   useEffect(() => {
+    purgeLegacyAuthStorage();
     syncAuthState();
   }, [syncAuthState]);
 

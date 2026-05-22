@@ -80,18 +80,18 @@ function DroppableColumn({ stageId, stageName, leads, onEdit, onDelete }: { stag
     <div
       ref={setNodeRef}
       id={stageId}
-      className={`flex min-h-[calc(100dvh-11rem)] flex-col rounded-[1.25rem] border border-[#E5EAF3] bg-[#EEF2F8]/60 p-4 transition ${
+      className={`flex h-full min-h-0 flex-col rounded-[1.25rem] border border-[#E5EAF3] bg-[#EEF2F8]/60 p-4 transition ${
         isOver ? 'ring-2 ring-[#0B57F0]/20' : ''
       }`}
     >
-      <div className="mb-4 flex items-center justify-between gap-2">
+      <div className="mb-4 flex shrink-0 items-center justify-between gap-2">
         <h3 className="text-sm font-semibold text-[#0A1733]">{stageName}</h3>
         <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#0B57F0] text-xs font-bold text-white">
           {leads?.length || 0}
         </span>
       </div>
 
-      <div className="flex flex-1 flex-col space-y-3">
+      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-x-hidden overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {(leads || []).map((lead) => (
           <DraggableCard key={lead.id} lead={lead} onEdit={onEdit} onDelete={onDelete} />
         ))}
@@ -215,24 +215,27 @@ export default function SalesPipeline() {
   );
 
   return (
-    <div className="space-y-6 pb-4">
-      <PageHeader
-        title="Sales Pipeline"
-        actions={
-          <button
-            type="button"
-            onClick={() => { setEditingLead(null); reset(); setIsPanelOpen(true); }}
-            className={premium.pillBtn}
-          >
-            <Plus className="h-4 w-4" /> New Lead
-          </button>
-        }
-      />
+    <div className="flex h-full min-h-0 flex-col overflow-hidden">
+      <div className="shrink-0 [&_header]:!mb-4">
+        <PageHeader
+          title="Sales Pipeline"
+          actions={
+            <button
+              type="button"
+              onClick={() => { setEditingLead(null); reset(); setIsPanelOpen(true); }}
+              className={premium.pillBtn}
+            >
+              <Plus className="h-4 w-4" /> New Lead
+            </button>
+          }
+        />
+      </div>
 
       <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
-        <div className="flex gap-4 overflow-x-auto pb-4">
+        <div className="min-h-0 flex-1 overflow-x-auto overflow-y-hidden overscroll-x-contain">
+          <div className="flex h-full min-w-max items-stretch gap-4">
           {stages.map((stage) => (
-            <div key={stage.id} className="w-[min(100%,280px)] shrink-0 sm:w-[260px]">
+            <div key={stage.id} className="h-full w-[260px] shrink-0">
               <DroppableColumn
                 stageId={stage.id}
                 stageName={stage.label}
@@ -242,6 +245,7 @@ export default function SalesPipeline() {
               />
             </div>
           ))}
+          </div>
         </div>
       </DndContext>
 

@@ -5,7 +5,6 @@ import { Loader } from "lucide-react";
 import Sidebar from "./sidebar";
 import { useMembers } from "@/context/members-context";
 import { useRouter } from "next/navigation";
-import { getAuthToken } from "@/lib/api";
 import { premium } from "@/lib/premium-ui";
 
 type AppShellProps = {
@@ -17,12 +16,12 @@ export function AppShell({ children }: AppShellProps) {
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !isAuthenticated && !getAuthToken()) {
+    if (!loading && !isAuthenticated) {
       router.replace("/login");
     }
   }, [isAuthenticated, loading, router]);
 
-  if (loading || (!isAuthenticated && !getAuthToken())) {
+  if (loading || !isAuthenticated) {
     return (
       <div className={`flex min-h-screen items-center justify-center ${premium.pageBg}`}>
         <div className="space-y-4 text-center">
