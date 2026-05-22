@@ -5,6 +5,7 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useMembers } from '@/context/members-context';
 import type { Member } from '@/types/member';
+import { PhotoUpload } from '@/components/ui/photo-upload';
 
 type ClientFormProps = {
   mode: 'create' | 'edit';
@@ -27,6 +28,7 @@ export function ClientForm({ mode, initialMember }: ClientFormProps) {
     monthlyPrice: initialMember?.monthlyPrice ?? 0,
     assignedTrainer: initialMember?.assignedTrainer ?? '',
     notes: initialMember?.notes ?? '',
+    photoUrl: initialMember?.photoUrl ?? '',
   });
 
   const field = (label: string, children: React.ReactNode) => (
@@ -52,6 +54,7 @@ export function ClientForm({ mode, initialMember }: ClientFormProps) {
         monthlyPrice: Number(form.monthlyPrice),
         assignedTrainer: form.assignedTrainer,
         notes: form.notes,
+        photoUrl: form.photoUrl,
       };
       if (mode === 'create') {
         const member = await addMember(payload);
@@ -73,6 +76,11 @@ export function ClientForm({ mode, initialMember }: ClientFormProps) {
 
   return (
     <form onSubmit={onSubmit} className="space-y-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <PhotoUpload
+        value={form.photoUrl}
+        onChange={(photoUrl) => setForm({ ...form, photoUrl })}
+        name={form.name || 'Miembro'}
+      />
       <div className="grid gap-4 md:grid-cols-2">
         {field('Nombre completo',
           <input required value={form.name} onChange={e => setForm({...form, name: e.target.value})} className={inputClass} placeholder="Ej: Juan García" />

@@ -58,6 +58,7 @@ export type Member = {
     | "facebook";
   assignedTrainer?: string;
   notes?: string;
+  photoUrl?: string;
 
   attendance: AttendanceRecord[];
   createdAt: string;

@@ -21,7 +21,9 @@ import {
 import type { Member } from "@/types/member";
 
 type MemberInput = Partial<Omit<Member, "id" | "createdAt" | "updatedAt">> &
-  Pick<Member, "name" | "email" | "phone" | "goal" | "experienceLevel" | "membershipType" | "monthlyPrice">;
+  Pick<Member, "name" | "email" | "phone" | "goal" | "experienceLevel" | "membershipType" | "monthlyPrice"> & {
+    photoUrl?: string;
+  };
 
 type MembersContextValue = {
   members: Member[];
@@ -109,8 +111,12 @@ export function MembersProvider({ children }: { children: ReactNode }) {
         try {
           const response = await createMemberAPI(payload);
           const newMember = (response as any).data || response;
-          setMembers((current) => [newMember as Member, ...current]);
-          return newMember as Member;
+          const withPhoto: Member = {
+            ...(newMember as Member),
+            photoUrl: payload.photoUrl ?? (newMember as Member).photoUrl ?? "",
+          };
+          setMembers((current) => [withPhoto, ...current]);
+          return withPhoto;
         } catch (err) {
           const errorMessage = err instanceof Error ? err.message : "Failed to create member";
           setError(errorMessage);
@@ -121,10 +127,17 @@ export function MembersProvider({ children }: { children: ReactNode }) {
         try {
           const response = await updateMemberAPI(id, payload);
           const updatedMember = (response as any).data || response;
+          const withPhoto: Member = {
+            ...(updatedMember as Member),
+            photoUrl:
+              payload.photoUrl !== undefined
+                ? payload.photoUrl
+                : (updatedMember as Member).photoUrl ?? "",
+          };
           setMembers((current) =>
-            current.map((member) => (member.id === id ? (updatedMember as Member) : member))
+            current.map((member) => (member.id === id ? withPhoto : member)),
           );
-          return updatedMember as Member;
+          return withPhoto;
         } catch (err) {
           const errorMessage = err instanceof Error ? err.message : "Failed to update member";
           setError(errorMessage);

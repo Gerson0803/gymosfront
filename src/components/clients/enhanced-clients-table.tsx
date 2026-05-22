@@ -8,8 +8,7 @@ import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { PageHeader } from '@/components/layout/page-header';
 import { premium } from '@/lib/premium-ui';
-
-const AVATAR_COLORS = ['#0B57F0', '#10b981', '#8b5cf6', '#f59e0b'];
+import { ProfileAvatar } from '@/components/ui/profile-avatar';
 
 function formatLastCheckIn(date?: string) {
   if (!date) return 'Never';
@@ -129,7 +128,7 @@ export default function EnhancedClientsTable() {
       />
 
       <div className="space-y-4">
-        {filteredMembers.map((member, index) => {
+        {filteredMembers.map((member) => {
           const churn = churnLabel(member.churnRiskLevel);
           const isActive =
             member.status === 'active' || member.membershipStatus === 'activo';
@@ -145,12 +144,12 @@ export default function EnhancedClientsTable() {
               <div className="grid grid-cols-1 items-center gap-6 p-5 sm:p-6 md:grid-cols-[minmax(0,1.4fr)_repeat(5,minmax(0,1fr))]">
                 <div className="flex items-center gap-4 min-w-0">
                   <div className="relative shrink-0">
-                    <div
-                      className="flex h-12 w-12 items-center justify-center rounded-full text-sm font-bold text-white"
-                      style={{ backgroundColor: AVATAR_COLORS[index % AVATAR_COLORS.length] }}
-                    >
-                      {member.name.charAt(0)}
-                    </div>
+                    <ProfileAvatar
+                      photoUrl={member.photoUrl}
+                      name={member.name}
+                      size="sm"
+                      className="!rounded-full"
+                    />
                     {isActive && (
                       <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-emerald-500" />
                     )}
