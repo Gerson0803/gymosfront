@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-import { LayoutDashboard, Users, TrendingUp, Wrench, LogOut, Moon, Sun, QrCode } from 'lucide-react';
+import { LayoutDashboard, Users, TrendingUp, Wrench, LogOut, Moon, Sun, QrCode, Settings } from 'lucide-react';
 import { logout } from '@/lib/api';
 import { useAppSettings } from '@/context/app-settings-context';
 import { useState } from 'react';
@@ -19,7 +19,7 @@ const navigation = [
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { gymName, setGymName } = useAppSettings();
+  const { gymName, setGymName, userDisplayName } = useAppSettings();
   const [isEditingGymName, setIsEditingGymName] = useState(false);
   const [tempGymName, setTempGymName] = useState(gymName);
 
@@ -41,7 +41,16 @@ export default function Sidebar() {
     <aside className="fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 transition-colors">
       <div className="flex h-full flex-col">
         <div className="border-b border-slate-200 px-6 pb-4 pt-4">
-          <h1 className="text-xl font-bold text-slate-900">GymOS</h1>
+          <div className="flex items-center justify-between gap-2">
+            <h1 className="text-xl font-bold text-slate-900">GymOS</h1>
+            <Link
+              href="/settings"
+              className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition"
+              title="Ajustes"
+            >
+              <Settings className="h-5 w-5" />
+            </Link>
+          </div>
           <div className="mt-2">
             {isEditingGymName ? (
               <input
@@ -86,6 +95,13 @@ export default function Sidebar() {
         </nav>
 
         <div className="border-t border-slate-200 p-4 space-y-3">
+          {userDisplayName && (
+            <div className="rounded-lg bg-blue-50 border border-blue-200 p-3">
+              <p className="text-xs text-slate-600 font-medium">Tu Nombre</p>
+              <p className="text-sm font-semibold text-slate-900 mt-1">{userDisplayName}</p>
+            </div>
+          )}
+          
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 rounded-lg transition"

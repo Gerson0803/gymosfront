@@ -246,3 +246,7 @@ export async function updateEquipmentApi(id: string, data: Record<string, unknow
 export async function deleteEquipment(id: string) {
   return apiRequest(`/equipment/${id}`, { method: 'DELETE' });
 }
+
+// USER SETTINGS
+// Los ajustes de usuario (nombre personalizado, preferencias) se guardan localmente en el navegador (localStorage)
+// No se requieren endpoints en el backend para esta funcionalidad
