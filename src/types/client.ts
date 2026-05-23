@@ -6,6 +6,62 @@ export type FitnessGoal = "perder_peso" | "ganar_musculo" | "resistencia" | "sal
 export type ExperienceLevel = "principiante" | "intermedio" | "avanzado";
 export type PreferredSchedule = "manana" | "tarde" | "noche";
 
+export type ProductType = "fitness_product" | "membership" | "personal_training" | "combo";
+export type ServiceType = "basica" | "premium" | "vip" | "estudiante" | "individual" | "grupal" | "funcional";
+
+// Product-specific details types
+export type MembershipDetails = {
+  membershipType: string;
+  durationMonths: number;
+  pricePerPeriod: number;
+  periodicity: 'monthly' | 'quarterly' | 'annual';
+  startDate: string;
+  endDate?: string;
+  autoRenewal: boolean;
+  includedAccess: string[];
+  enrollmentFee: number;
+};
+
+export type PersonalTrainingDetails = {
+  serviceType: 'individual' | 'group' | 'functional';
+  assignedTrainer?: string;
+  numberOfSessions: number;
+  sessionDurationMinutes: number;
+  modality: 'in-person' | 'virtual' | 'hybrid';
+  pricePerSession: number;
+  packagePrice?: number;
+  firstSessionDate: string;
+  clientObjective: string;
+  initialEvaluationRequired: boolean;
+};
+
+export type FitnessProductDetails = {
+  productName: string;
+  sku: string;
+  category: 'equipment' | 'supplements' | 'clothing';
+  quantity: number;
+  unitPrice: number;
+  size?: string;
+  color?: string;
+  availableStock: number;
+  brand: string;
+};
+
+export type ComboDetails = {
+  comboType: string;
+  components: Array<{
+    type: 'membership' | 'product' | 'training';
+    description: string;
+    value?: number;
+  }>;
+  normalPrice: number;
+  discountedPrice: number;
+  discountPercentage: number;
+  isRecurring: boolean;
+};
+
+export type ProductDetails = MembershipDetails | PersonalTrainingDetails | FitnessProductDetails | ComboDetails;
+
 export type AttendanceRecord = {
   date: string;
   duration?: number; // minutos
@@ -69,14 +125,14 @@ export type Lead = {
   name: string;
   email: string;
   phone: string;
-  fitnessGoal: string;
-  budget: number;
   source: "instagram" | "google" | "referido" | "walk_in" | "facebook";
   status: LeadStatus;
   assignedAdvisor: string;
-  conversionProbability: number; // 0-100
+  productType: ProductType;
+  productDetails?: ProductDetails;
   notes?: string;
   createdAt: string;
+  updatedAt: string;
 };
 
 // Alertas de retención
