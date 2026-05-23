@@ -6,9 +6,6 @@ import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Users, TrendingUp, Wrench, LogOut, Moon, Sun, QrCode, Settings } from 'lucide-react';
 import { logout } from '@/lib/api';
 import { useAppSettings } from '@/context/app-settings-context';
-import { useState } from 'react';
-import toast from 'react-hot-toast';
-
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Miembros', href: '/clients', icon: Users },
@@ -19,22 +16,10 @@ const navigation = [
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { gymName, setGymName, userDisplayName } = useAppSettings();
-  const [isEditingGymName, setIsEditingGymName] = useState(false);
-  const [tempGymName, setTempGymName] = useState(gymName);
+  const { gymName, userDisplayName } = useAppSettings();
 
   const handleLogout = () => {
     logout();
-  };
-
-  const handleSaveGymName = () => {
-    if (tempGymName.trim()) {
-      setGymName(tempGymName);
-      setIsEditingGymName(false);
-      toast.success('Nombre del gimnasio actualizado');
-    } else {
-      toast.error('El nombre no puede estar vacío');
-    }
   };
 
   return (
@@ -52,25 +37,9 @@ export default function Sidebar() {
             </Link>
           </div>
           <div className="mt-2">
-            {isEditingGymName ? (
-              <input
-                value={tempGymName}
-                onChange={(e) => setTempGymName(e.target.value)}
-                onBlur={handleSaveGymName}
-                onKeyDown={(e) => e.key === 'Enter' && handleSaveGymName()}
-                autoFocus
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
-                placeholder="Nombre del gimnasio"
-              />
-            ) : (
-              <button
-                type="button"
-                onClick={() => setIsEditingGymName(true)}
-                className="w-full text-left text-sm font-semibold text-slate-700 hover:text-slate-900"
-              >
-                {gymName || 'Agregar nombre del gimnasio'}
-              </button>
-            )}
+            <p className="text-sm font-semibold text-slate-700">
+              {gymName || 'Agregar nombre del gimnasio'}
+            </p>
           </div>
         </div>
         

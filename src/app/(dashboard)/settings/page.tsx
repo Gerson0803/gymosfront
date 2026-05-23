@@ -14,6 +14,8 @@ interface UserData {
 
 export default function SettingsPage() {
   const {
+    gymName,
+    setGymName,
     userDisplayName,
     setUserDisplayName,
     notifications,
@@ -222,6 +224,28 @@ export default function SettingsPage() {
                 value={userDisplayName}
                 onChange={(e) => setUserDisplayName(e.target.value)}
                 placeholder="Tu nombre personalizado"
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              />
+              <p className="text-xs text-slate-500 mt-1">Se guarda automáticamente en tu navegador</p>
+            </div>
+          </div>
+
+          {/* Nombre del Gimnasio */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-semibold text-slate-900 mb-4">Información del Gimnasio</h2>
+            <p className="text-sm text-slate-600 mb-4">
+              Personaliza el nombre de tu gimnasio
+            </p>
+            <div>
+              <label htmlFor="gymName" className="block text-sm font-medium text-slate-700 mb-2">
+                Nombre del Gimnasio
+              </label>
+              <input
+                id="gymName"
+                type="text"
+                value={gymName}
+                onChange={(e) => setGymName(e.target.value)}
+                placeholder="Nombre de tu gimnasio"
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
               />
               <p className="text-xs text-slate-500 mt-1">Se guarda automáticamente en tu navegador</p>
