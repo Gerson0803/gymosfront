@@ -8,10 +8,11 @@ type PageHeaderProps = {
   subtitle?: string;
   search?: ReactNode;
   actions?: ReactNode;
+  headerActions?: ReactNode;
   centered?: boolean;
 };
 
-export function PageHeader({ title, subtitle, search, actions, centered }: PageHeaderProps) {
+export function PageHeader({ title, subtitle, search, actions, headerActions, centered }: PageHeaderProps) {
   if (centered) {
     return (
       <header className="relative mb-8">
@@ -37,7 +38,10 @@ export function PageHeader({ title, subtitle, search, actions, centered }: PageH
           <h1 className="text-2xl font-bold tracking-tight text-[#0A1733] sm:text-3xl">{title}</h1>
           {subtitle ? <p className="mt-1 text-sm text-[#5B6475]">{subtitle}</p> : null}
         </div>
-        <SettingsButton />
+        <div className="flex shrink-0 items-center gap-3">
+          {headerActions ? <div className="flex shrink-0 items-center gap-3">{headerActions}</div> : null}
+          <SettingsButton />
+        </div>
       </div>
 
       {(search || actions) && (

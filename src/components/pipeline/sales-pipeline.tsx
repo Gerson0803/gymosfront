@@ -219,7 +219,7 @@ export default function SalesPipeline() {
       <div className="shrink-0 [&_header]:!mb-4">
         <PageHeader
           title="Sales Pipeline"
-          actions={
+          headerActions={
             <button
               type="button"
               onClick={() => { setEditingLead(null); reset(); setIsPanelOpen(true); }}
