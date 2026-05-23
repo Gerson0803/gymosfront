@@ -343,6 +343,7 @@ interface GymState {
   leads: Lead[];
   alerts: RetentionAlert[];
   equipment: Equipment[];
+  gymName: string;
   
   // Client actions
   addClient: (client: Omit<Client, 'id' | 'createdAt' | 'updatedAt' | 'churnRiskScore' | 'churnRiskLevel' | 'attendance'>) => void;
@@ -368,6 +369,9 @@ interface GymState {
   scheduleMaintenance: (equipmentId: string, maintenance: Omit<MaintenanceRecord, 'id' | 'equipmentId' | 'createdAt'>) => void;
   completeMaintenance: (equipmentId: string, maintenanceId: string) => void;
   
+  // Settings actions
+  setGymName: (name: string) => void;
+  
   // Utilities
   calculateChurnRisk: (client: Client) => { score: number; level: ChurnRiskLevel };
   calculateStatus: (lastCheckIn?: string) => ClientStatus;
@@ -380,6 +384,7 @@ export const useGymStore = create<GymState>()(
       leads: initialLeads,
       alerts: initialAlerts,
       equipment: initialEquipment,
+      gymName: 'GymOS',
 
       // Client actions
       addClient: (clientData) => {
@@ -653,15 +658,47 @@ export const useGymStore = create<GymState>()(
           }),
         }));
       },
+
+      setGymName: (name: string) => {
+        set({ gymName: name.trim() || 'GymOS' });
+      },
     }),
     {
       name: 'gymos-storage',
-      partialize: (state) => ({
+      version: 1,
+      partialize: (state: GymState) => ({
         clients: state.clients,
         leads: state.leads,
         alerts: state.alerts,
         equipment: state.equipment,
+        gymName: state.gymName,
       }),
-    }
+      migrate: (persistedState: any, version: number) => {
+        // Si está vacío o no es objeto, retornar undefined para usar valores por defecto
+        if (!persistedState || typeof persistedState !== 'object') {
+          return undefined;
+        }
+        // Asegurar que todas las propiedades requeridas existan
+        return {
+          ...persistedState,
+          clients: persistedState.clients || initialClients,
+          leads: persistedState.leads || initialLeads,
+          alerts: persistedState.alerts || initialAlerts,
+          equipment: persistedState.equipment || initialEquipment,
+          gymName: persistedState.gymName || 'GymOS',
+        };
+      },
+      // Evita crash si el localStorage contiene JSON inválido.
+      deserialize: (str: string) => {
+        try {
+          return JSON.parse(str);
+        } catch (err) {
+          try {
+            localStorage.removeItem('gymos-storage');
+          } catch {}
+          return {};
+        }
+      },
+    } as any
   )
 );

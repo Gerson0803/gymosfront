@@ -32,7 +32,7 @@ function buildId(name: string): string {
 }
 
 export function ClientsProvider({ children }: { children: ReactNode }) {
-  const [clients, setClients] = useState<Client[]>(mockClients);
+  const [clients, setClients] = useState<Client[]>(mockClients as Client[]);
 
   const value = useMemo<ClientsContextValue>(
     () => ({

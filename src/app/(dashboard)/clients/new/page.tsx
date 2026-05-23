@@ -1,15 +1,16 @@
-import { ClientForm } from "@/components/clients/client-form";
+import { ClientForm } from '@/components/clients/client-form';
+
+export const metadata = {
+  title: 'Crear nuevo miembro | GymOS',
+};
 
 export default function NewClientPage() {
   return (
-    <div className="space-y-4">
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="text-xl font-semibold text-slate-900">Add New Client</h2>
-        <p className="mt-1 text-sm text-slate-500">
-          Create a new member profile and seed attendance history.
-        </p>
-      </section>
-
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold text-slate-900">Crear Nuevo Miembro</h1>
+        <p className="mt-2 text-slate-600">Agrega un nuevo miembro a tu gimnasio</p>
+      </div>
       <ClientForm mode="create" />
     </div>
   );
