@@ -41,16 +41,19 @@ export function purgeLegacyAuthStorage() {
 
 interface RequestOptions extends RequestInit {
   headers?: Record<string, string>;
+  /** Evita redirigir a /login en 401 (p. ej. contraseña actual incorrecta). */
+  skipAuthRedirect?: boolean;
 }
 
 async function apiRequest<T>(
   endpoint: string,
   options: RequestOptions = {}
 ): Promise<T> {
+  const { skipAuthRedirect, headers: customHeaders, ...fetchOptions } = options;
   const url = `${API_URL}${endpoint}`;
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...options.headers,
+    ...customHeaders,
   };
 
   const token = getAuthToken();
@@ -58,26 +61,44 @@ async function apiRequest<T>(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  console.log(`[API] ${options.method || "GET"} ${url}`);
+  console.log(`[API] ${fetchOptions.method || "GET"} ${url}`);
 
   try {
     const response = await fetch(url, {
-      ...options,
+      ...fetchOptions,
       headers,
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      const errorData = (await response.json().catch(() => ({}))) as {
+        message?: string;
+        error?: { message?: string };
+      };
       console.error(`[API Error] ${response.status}:`, errorData);
-      if (response.status === 401 && typeof window !== "undefined") {
+      let errorMessage =
+        errorData.message ||
+        errorData.error?.message ||
+        `API error: ${response.status} ${response.statusText}`;
+
+      if (
+        response.status === 404 &&
+        endpoint.includes("change-password")
+      ) {
+        errorMessage =
+          "El servidor no tiene activo el endpoint de cambio de contraseña. Reinicia el backend (backend-gymos) con npm run start:dev.";
+      }
+
+      if (
+        response.status === 401 &&
+        !skipAuthRedirect &&
+        typeof window !== "undefined"
+      ) {
         clearAuthToken();
         if (!window.location.pathname.startsWith("/login")) {
           window.location.href = "/login";
         }
       }
-      throw new Error(
-        errorData.message || `API error: ${response.status} ${response.statusText}`
-      );
+      throw new Error(errorMessage);
     }
 
     const data = await response.json();
@@ -230,6 +251,23 @@ export function logout() {
     localStorage.removeItem("userData");
     window.location.href = "/login";
   }
+}
+
+export async function changePassword(currentPassword: string, newPassword: string) {
+  const response = await apiRequest<{
+    success: boolean;
+    message?: string;
+  }>("/auth/change-password", {
+    method: "PATCH",
+    body: JSON.stringify({ currentPassword, newPassword }),
+    skipAuthRedirect: true,
+  });
+
+  if (!response.success) {
+    throw new Error(response.message || "No se pudo cambiar la contraseña");
+  }
+
+  return response;
 }
 
 // LEADS

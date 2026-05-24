@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAppSettings } from '@/context/app-settings-context';
+import { changePassword } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { Save, Eye, EyeOff, User, Lock, Bell } from 'lucide-react';
 import { premium } from '@/lib/premium-ui';
@@ -138,74 +139,106 @@ function SecurityTab() {
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleChangePassword = () => {
-    if (!oldPassword) {
-      toast.error('Ingresa tu contrasena actual');
-      return;
-    }
-    if (!newPassword || newPassword.length < 6) {
-      toast.error('La nueva contrasena debe tener al menos 6 caracteres');
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      toast.error('Las contrasenas no coinciden');
-      return;
-    }
-    toast.success('Contrasena cambiada exitosamente');
+  const resetPasswordForm = () => {
     setOldPassword('');
     setNewPassword('');
     setConfirmPassword('');
     setShowPasswordForm(false);
   };
 
+  const handleChangePassword = async () => {
+    if (!oldPassword) {
+      toast.error('Ingresa tu contraseña actual');
+      return;
+    }
+    if (!newPassword || newPassword.length < 6) {
+      toast.error('La nueva contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error('Las contraseñas no coinciden');
+      return;
+    }
+    if (oldPassword === newPassword) {
+      toast.error('La nueva contraseña debe ser diferente a la actual');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await changePassword(oldPassword, newPassword);
+      toast.success('Contraseña actualizada correctamente');
+      resetPasswordForm();
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Error al cambiar la contraseña';
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <section className={`${premium.card} p-6 sm:p-8`}>
-      <h2 className="text-lg font-semibold text-[#0A1733]">Cambiar contrasena</h2>
+      <h2 className="text-lg font-semibold text-[#0A1733]">Cambiar contraseña</h2>
+      <p className="mt-1 text-sm text-[#5B6475]">
+        La actualización se guarda en tu cuenta del servidor.
+      </p>
       {!showPasswordForm ? (
-        <button type="button" onClick={() => setShowPasswordForm(true)} className={`${premium.pillBtnOutline} mt-6`}>
-          Cambiar contrasena
+        <button
+          type="button"
+          onClick={() => setShowPasswordForm(true)}
+          className={`${premium.pillBtnOutline} mt-6`}
+          disabled={loading}
+        >
+          Cambiar contraseña
         </button>
       ) : (
         <div className="mt-6 space-y-4">
           <PasswordField
             id="old-password"
-            label="Contrasena actual"
+            label="Contraseña actual"
             value={oldPassword}
             onChange={setOldPassword}
             visible={showPassword}
             onToggle={() => setShowPassword(!showPassword)}
+            disabled={loading}
           />
           <PasswordField
             id="new-password"
-            label="Nueva contrasena"
+            label="Nueva contraseña"
             value={newPassword}
             onChange={setNewPassword}
             visible={showNewPassword}
             onToggle={() => setShowNewPassword(!showNewPassword)}
-            hint="Minimo 6 caracteres"
+            hint="Mínimo 6 caracteres"
+            disabled={loading}
           />
           <PasswordField
             id="confirm-password"
-            label="Confirmar nueva contrasena"
+            label="Confirmar nueva contraseña"
             value={confirmPassword}
             onChange={setConfirmPassword}
             visible={showConfirmPassword}
             onToggle={() => setShowConfirmPassword(!showConfirmPassword)}
+            disabled={loading}
           />
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={handleChangePassword} className={`${premium.pillBtn} flex-1`}>
-              Cambiar contrasena
+            <button
+              type="button"
+              onClick={handleChangePassword}
+              disabled={loading}
+              className={`${premium.pillBtn} flex-1 disabled:cursor-not-allowed disabled:opacity-50`}
+            >
+              {loading ? 'Guardando...' : 'Cambiar contraseña'}
             </button>
             <button
               type="button"
-              onClick={() => {
-                setShowPasswordForm(false);
-                setOldPassword('');
-                setNewPassword('');
-                setConfirmPassword('');
-              }}
-              className={`${premium.pillBtnOutline} flex-1`}
+              onClick={resetPasswordForm}
+              disabled={loading}
+              className={`${premium.pillBtnOutline} flex-1 disabled:cursor-not-allowed disabled:opacity-50`}
             >
               Cancelar
             </button>
@@ -258,6 +291,7 @@ function PasswordField({
   visible,
   onToggle,
   hint,
+  disabled,
 }: {
   id: string;
   label: string;
@@ -266,6 +300,7 @@ function PasswordField({
   visible: boolean;
   onToggle: () => void;
   hint?: string;
+  disabled?: boolean;
 }) {
   return (
     <div>
@@ -280,6 +315,7 @@ function PasswordField({
           onChange={(e) => onChange(e.target.value)}
           placeholder="********"
           className={`${inputClass} pr-11`}
+          disabled={disabled}
         />
         <button
           type="button"
