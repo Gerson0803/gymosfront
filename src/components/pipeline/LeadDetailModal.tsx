@@ -27,21 +27,21 @@ function formatDate(dateString: string): string {
 function MembershipDetails({ details }: { details: MembershipDetails }) {
   return (
     <div className="space-y-3">
-      <DetailRow label="Tipo de Membresía" value={details.membershipType} />
-      <DetailRow label="Duración" value={`${details.durationMonths} meses`} />
-      <DetailRow label="Precio por Período" value={`$${details.pricePerPeriod.toLocaleString()}`} />
+      <DetailRow label="Tipo de Membresía" value={details.membershipType || 'N/A'} />
+      <DetailRow label="Duración" value={details.durationMonths ? `${details.durationMonths} meses` : 'N/A'} />
+      <DetailRow label="Precio por Período" value={details.pricePerPeriod ? `$${details.pricePerPeriod.toLocaleString()}` : 'N/A'} />
       <DetailRow label="Periodicidad" value={
-        {
+        details.periodicity ? {
           monthly: 'Mensual',
           quarterly: 'Trimestral',
           annual: 'Anual',
-        }[details.periodicity]
+        }[details.periodicity] : 'N/A'
       } />
-      <DetailRow label="Fecha de Inicio" value={formatDate(details.startDate)} />
+      <DetailRow label="Fecha de Inicio" value={details.startDate ? formatDate(details.startDate) : 'N/A'} />
       {details.endDate && <DetailRow label="Fecha de Fin" value={formatDate(details.endDate)} />}
       <DetailRow label="Renovación Automática" value={details.autoRenewal ? 'Sí' : 'No'} />
-      <DetailRow label="Acceso Incluido" value={details.includedAccess.join(', ')} />
-      <DetailRow label="Cuota de Inscripción" value={`$${details.enrollmentFee.toLocaleString()}`} />
+      <DetailRow label="Acceso Incluido" value={details.includedAccess?.length ? details.includedAccess.join(', ') : 'N/A'} />
+      <DetailRow label="Cuota de Inscripción" value={details.enrollmentFee ? `$${details.enrollmentFee.toLocaleString()}` : 'N/A'} />
     </div>
   );
 }
@@ -50,26 +50,26 @@ function PersonalTrainingDetailsComponent({ details }: { details: PersonalTraini
   return (
     <div className="space-y-3">
       <DetailRow label="Tipo de Servicio" value={
-        {
+        details.serviceType ? {
           individual: 'Individual',
           group: 'Grupal',
           functional: 'Funcional',
-        }[details.serviceType]
+        }[details.serviceType] : 'N/A'
       } />
       {details.assignedTrainer && <DetailRow label="Entrenador Asignado" value={details.assignedTrainer} />}
-      <DetailRow label="Número de Sesiones" value={details.numberOfSessions.toString()} />
-      <DetailRow label="Duración por Sesión" value={`${details.sessionDurationMinutes} minutos`} />
+      <DetailRow label="Número de Sesiones" value={details.numberOfSessions?.toString() || 'N/A'} />
+      <DetailRow label="Duración por Sesión" value={details.sessionDurationMinutes ? `${details.sessionDurationMinutes} minutos` : 'N/A'} />
       <DetailRow label="Modalidad" value={
-        {
+        details.modality ? {
           'in-person': 'Presencial',
           virtual: 'Virtual',
           hybrid: 'Híbrida',
-        }[details.modality]
+        }[details.modality] : 'N/A'
       } />
-      <DetailRow label="Precio por Sesión" value={`$${details.pricePerSession.toLocaleString()}`} />
+      <DetailRow label="Precio por Sesión" value={details.pricePerSession ? `$${details.pricePerSession.toLocaleString()}` : 'N/A'} />
       {details.packagePrice && <DetailRow label="Precio del Pack" value={`$${details.packagePrice.toLocaleString()}`} />}
-      <DetailRow label="Fecha Primera Sesión" value={formatDate(details.firstSessionDate)} />
-      <DetailRow label="Objetivo del Cliente" value={details.clientObjective} />
+      <DetailRow label="Fecha Primera Sesión" value={details.firstSessionDate ? formatDate(details.firstSessionDate) : 'N/A'} />
+      <DetailRow label="Objetivo del Cliente" value={details.clientObjective || 'N/A'} />
       <DetailRow label="Evaluación Inicial" value={details.initialEvaluationRequired ? 'Requerida' : 'No requerida'} />
     </div>
   );
@@ -78,21 +78,21 @@ function PersonalTrainingDetailsComponent({ details }: { details: PersonalTraini
 function FitnessProductDetailsComponent({ details }: { details: FitnessProductDetails }) {
   return (
     <div className="space-y-3">
-      <DetailRow label="Nombre del Producto" value={details.productName} />
-      <DetailRow label="SKU" value={details.sku} />
-      <DetailRow label="Marca" value={details.brand} />
+      <DetailRow label="Nombre del Producto" value={details.productName || 'N/A'} />
+      <DetailRow label="SKU" value={details.sku || 'N/A'} />
+      <DetailRow label="Marca" value={details.brand || 'N/A'} />
       <DetailRow label="Categoría" value={
-        {
+        details.category ? {
           equipment: 'Equipamiento',
           supplements: 'Suplementos',
           clothing: 'Ropa',
-        }[details.category]
+        }[details.category] : 'N/A'
       } />
-      <DetailRow label="Cantidad" value={details.quantity.toString()} />
-      <DetailRow label="Precio Unitario" value={`$${details.unitPrice.toLocaleString()}`} />
+      <DetailRow label="Cantidad" value={details.quantity?.toString() || 'N/A'} />
+      <DetailRow label="Precio Unitario" value={details.unitPrice ? `$${details.unitPrice.toLocaleString()}` : 'N/A'} />
       {details.size && <DetailRow label="Talla" value={details.size} />}
       {details.color && <DetailRow label="Color" value={details.color} />}
-      <DetailRow label="Stock Disponible" value={details.availableStock.toString()} />
+      <DetailRow label="Stock Disponible" value={details.availableStock?.toString() || 'N/A'} />
     </div>
   );
 }
@@ -100,19 +100,19 @@ function FitnessProductDetailsComponent({ details }: { details: FitnessProductDe
 function ComboDetailsComponent({ details }: { details: ComboDetails }) {
   return (
     <div className="space-y-3">
-      <DetailRow label="Tipo de Combo" value={details.comboType} />
-      <DetailRow label="Precio Normal" value={`$${details.normalPrice.toLocaleString()}`} />
-      <DetailRow label="Precio con Descuento" value={`$${details.discountedPrice.toLocaleString()}`} />
-      <DetailRow label="Descuento" value={`${details.discountPercentage}%`} />
+      <DetailRow label="Tipo de Combo" value={details.comboType || 'N/A'} />
+      <DetailRow label="Precio Normal" value={details.normalPrice ? `$${details.normalPrice.toLocaleString()}` : 'N/A'} />
+      <DetailRow label="Precio con Descuento" value={details.discountedPrice ? `$${details.discountedPrice.toLocaleString()}` : 'N/A'} />
+      <DetailRow label="Descuento" value={details.discountPercentage ? `${details.discountPercentage}%` : '0%'} />
       <DetailRow label="Es Recurrente" value={details.isRecurring ? 'Sí' : 'No'} />
       <div>
         <h4 className="text-sm font-medium text-[#5B6475] mb-2">Componentes</h4>
         <ul className="space-y-1">
-          {details.components.map((component, idx) => (
+          {details.components?.length ? details.components.map((component, idx) => (
             <li key={idx} className="text-sm text-[#0A1733] pl-3 border-l-2 border-[#0B57F0]">
               {component.description} {component.value && `($${component.value.toLocaleString()})`}
             </li>
-          ))}
+          )) : <li className="text-sm text-[#5B6475]">Sin componentes</li>}
         </ul>
       </div>
     </div>

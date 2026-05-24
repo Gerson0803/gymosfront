@@ -19,6 +19,7 @@ import { Plus, Edit, Trash2, Loader } from 'lucide-react';
 import { getLeads, createLead, updateLeadApi, deleteLeadApi, moveLeadStage } from '@/lib/api';
 import { LeadFormModal } from './LeadFormModal';
 import { LeadDetailModal } from './LeadDetailModal';
+import { ExcelButtons } from './ExcelButtons';
 
 import { PageHeader } from '@/components/layout/page-header';
 import { premium } from '@/lib/premium-ui';
@@ -213,7 +214,8 @@ export default function SalesPipeline() {
       setIsFormOpen(false);
       setEditingLead(null);
     } catch (err) {
-      toast.error('Error al guardar lead');
+      const errorMessage = err instanceof Error ? err.message : 'Error al guardar lead';
+      toast.error(errorMessage);
     }
   };
 
@@ -253,13 +255,29 @@ export default function SalesPipeline() {
         <PageHeader
           title="Sales Pipeline"
           headerActions={
-            <button
-              type="button"
-              onClick={() => { setEditingLead(null); setIsFormOpen(true); }}
-              className={premium.pillBtn}
-            >
-              <Plus className="h-4 w-4" /> Nuevo Lead
-            </button>
+            <div className="flex items-center gap-3">
+              <ExcelButtons onImportComplete={() => {
+                const loadLeads = async () => {
+                  try {
+                    const data = await getLeads();
+                    const raw = data as any;
+                    const list = Array.isArray(raw) ? raw
+                      : raw.data?.leads || raw.data?.items || raw.data || raw.leads || [];
+                    setLeads(list);
+                  } catch (err) {
+                    setError('Error al cargar leads');
+                  }
+                };
+                loadLeads();
+              }} />
+              <button
+                type="button"
+                onClick={() => { setEditingLead(null); setIsFormOpen(true); }}
+                className={premium.pillBtn}
+              >
+                <Plus className="h-4 w-4" /> Nuevo Lead
+              </button>
+            </div>
           }
         />
       </div>

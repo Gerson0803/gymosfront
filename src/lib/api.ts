@@ -7,18 +7,37 @@ if (!API_URL) {
   throw new Error("NEXT_PUBLIC_API_URL environment variable is not set");
 }
 
-/** Auth token lives only in memory for the current browser session (lost on refresh/restart). */
+/** Auth token stored in localStorage so it persists across page reloads. */
 let authToken: string | null = null;
+
+// Initialize authToken from localStorage on module load
+if (typeof window !== "undefined") {
+  const stored = localStorage.getItem("authToken");
+  if (stored) {
+    authToken = stored;
+  }
+}
 
 export function setAuthToken(token: string) {
   authToken = token;
   if (typeof window !== "undefined") {
+    localStorage.setItem("authToken", token);
     window.dispatchEvent(new Event("auth:changed"));
   }
 }
 
 export function getAuthToken(): string | null {
-  return authToken;
+  if (authToken) return authToken;
+  
+  if (typeof window !== "undefined") {
+    const stored = localStorage.getItem("authToken");
+    if (stored) {
+      authToken = stored;
+      return authToken;
+    }
+  }
+  
+  return null;
 }
 
 export function clearAuthToken() {
@@ -32,9 +51,7 @@ export function clearAuthToken() {
 
 /** Removes any legacy persisted auth from older builds (not used for login). */
 export function purgeLegacyAuthStorage() {
-  authToken = null;
   if (typeof window !== "undefined") {
-    localStorage.removeItem("authToken");
     clearAuthCookie();
   }
 }
