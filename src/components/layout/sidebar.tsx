@@ -26,7 +26,7 @@ const navigation = [
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { gymName } = useAppSettings();
+  const { gymName, userDisplayName } = useAppSettings();
 
   const handleLogout = () => {
     logout();
@@ -77,7 +77,13 @@ export default function Sidebar() {
           })}
         </nav>
 
-        <div className="mt-auto border-t border-[#E5EAF3] p-4">
+        <div className="mt-auto border-t border-[#E5EAF3] p-4 space-y-3">
+          {userDisplayName ? (
+            <div className="rounded-xl border border-[#0B57F0]/15 bg-[#0B57F0]/5 px-4 py-3">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#5B6475]">Tu nombre</p>
+              <p className="mt-1 text-sm font-semibold text-[#0A1733]">{userDisplayName}</p>
+            </div>
+          ) : null}
           <button
             type="button"
             onClick={handleLogout}

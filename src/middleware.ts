@@ -17,6 +17,8 @@ export const config = {
     "/pipeline/:path*",
     "/equipment/:path*",
     "/employees/:path*",
+    "/settings",
+    "/settings/:path*",
     "/login",
   ],
 };

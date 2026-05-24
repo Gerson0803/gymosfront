@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { login } from '@/lib/api';
 import toast from 'react-hot-toast';
+import { RegisterForm } from '@/components/auth/register-form';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -11,6 +12,12 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (window.location.hash === '#register') {
+      document.getElementById('register')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,7 +69,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="p-10 sm:p-12">
+        <div className="max-h-[90vh] overflow-y-auto p-8 sm:p-10">
           <div className="mb-8">
             <p className="text-sm font-semibold uppercase tracking-[0.32em] text-slate-500">Iniciar sesión</p>
             <h2 className="mt-4 text-3xl font-bold text-slate-900">Accede a GymOS</h2>
@@ -117,9 +124,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="mt-8 rounded-3xl border border-slate-200 bg-slate-50 p-5 text-center text-sm text-slate-600">
-            ¿No tienes una cuenta? Solicita acceso desde tu administrador.
-          </div>
+          <RegisterForm />
         </div>
       </div>
     </div>

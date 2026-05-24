@@ -69,6 +69,12 @@ async function apiRequest<T>(
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       console.error(`[API Error] ${response.status}:`, errorData);
+      if (response.status === 401 && typeof window !== "undefined") {
+        clearAuthToken();
+        if (!window.location.pathname.startsWith("/login")) {
+          window.location.href = "/login";
+        }
+      }
       throw new Error(
         errorData.message || `API error: ${response.status} ${response.statusText}`
       );
@@ -180,6 +186,9 @@ export async function login(email: string, password: string) {
 
     if (response.success && response.data.token) {
       setAuthToken(response.data.token);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("userData", JSON.stringify(response.data.user));
+      }
       return response.data;
     }
 
@@ -190,10 +199,36 @@ export async function login(email: string, password: string) {
   }
 }
 
+export async function signup(email: string, password: string, name: string) {
+  try {
+    const response = await apiRequest<{
+      success: boolean;
+      data: { token: string; user: { id: string; email: string; name: string; role: string } };
+    }>("/auth/signup", {
+      method: "POST",
+      body: JSON.stringify({ email, password, name }),
+    });
+
+    if (response.success && response.data.token) {
+      setAuthToken(response.data.token);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("userData", JSON.stringify(response.data.user));
+      }
+      return response.data;
+    }
+
+    throw new Error(response.data?.token ? "No token received" : "Signup failed");
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Signup failed";
+    throw new Error(errorMessage);
+  }
+}
+
 export function logout() {
   clearAuthToken();
   if (typeof window !== "undefined") {
-    window.location.href = "/";
+    localStorage.removeItem("userData");
+    window.location.href = "/login";
   }
 }
 
