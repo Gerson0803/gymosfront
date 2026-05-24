@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
 import { login } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { RegisterForm } from '@/components/auth/register-form';
@@ -26,7 +28,6 @@ export default function LoginPage() {
 
     try {
       await login(email, password);
-      toast.success('¡Bienvenido a GymOS!');
       router.push('/dashboard');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al iniciar sesión';
@@ -69,7 +70,16 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="max-h-[90vh] overflow-y-auto p-8 sm:p-10">
+        <div className="max-h-[90vh] overflow-y-auto p-6 sm:p-10">
+          <Link
+            href="/"
+            aria-label="Volver al inicio"
+            className="group mb-8 inline-flex cursor-pointer items-center gap-2 rounded-full border border-[#E5EAF3] bg-white px-4 py-2 text-sm font-semibold text-[#5B6475] shadow-[0_2px_12px_-8px_rgba(10,23,51,0.22)] outline-none transition duration-200 hover:border-[#0B57F0]/30 hover:bg-[#0B57F0]/5 hover:text-[#0A1733] focus-visible:ring-4 focus-visible:ring-[#0B57F0]/10"
+          >
+            <ArrowLeft className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-0.5" aria-hidden="true" />
+            Volver al inicio
+          </Link>
+
           <div className="mb-8">
             <p className="text-sm font-semibold uppercase tracking-[0.32em] text-slate-500">Iniciar sesión</p>
             <h2 className="mt-4 text-3xl font-bold text-slate-900">Accede a GymOS</h2>

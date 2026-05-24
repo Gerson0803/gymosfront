@@ -5,7 +5,7 @@ import { Search, Wrench, AlertTriangle, CheckCircle, Clock, Loader, Plus, Edit, 
 import { PageHeader } from '@/components/layout/page-header';
 import { premium } from '@/lib/premium-ui';
 import toast from 'react-hot-toast';
-import { Equipment, EquipmentStatus } from '@/types/client';
+import { Equipment, EquipmentCategory, EquipmentStatus } from '@/types/client';
 import { getEquipment, createEquipment, updateEquipmentApi, deleteEquipment } from '@/lib/api';
 
 type EquipmentFormData = Omit<Equipment, 'id' | 'createdAt' | 'updatedAt' | 'price' | 'totalUsageHours' | 'maintenanceIntervalDays'> & {
@@ -323,88 +323,102 @@ export default function EquipmentTable() {
       {filteredEquipment.length === 0 && <div className="text-center py-12"><Wrench className="w-12 h-12 text-slate-300 mx-auto mb-3" /><p className="text-slate-500">No se encontraron equipos</p></div>}
 
       {isCreateModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-semibold mb-4 text-slate-900">{editingEquipment ? 'Editar Equipo' : 'Crear Nuevo Equipo'}</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-sm font-medium text-slate-900 mb-1">Nombre *</label>
-                  <input required placeholder="Ej: Caminadora Pro 3000" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full rounded-lg border border-slate-300 px-4 py-2" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0A1733]/45 px-4 py-6 backdrop-blur-sm">
+          <div className={`${premium.formPanel} max-h-[90vh] w-full max-w-3xl overflow-y-auto p-5 sm:p-6`}>
+            <div className="mb-6 flex items-start justify-between gap-4 border-b border-[#E5EAF3] pb-5">
+              <div>
+                <p className={premium.labelCaps}>Equipment</p>
+                <h2 className="mt-1 text-2xl font-bold text-[#0A1733]">{editingEquipment ? 'Editar Equipo' : 'Crear Nuevo Equipo'}</h2>
+                <p className="mt-1 text-sm text-[#5B6475]">Organize asset details, location and maintenance planning.</p>
+              </div>
+              <button type="button" onClick={() => setIsCreateModalOpen(false)} disabled={isSubmitting} className={premium.formSecondaryBtn}>Cerrar</button>
+            </div>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className={premium.formSection}>
+                <div className="mb-5">
+                  <h3 className="text-lg font-bold text-[#0A1733]">Asset details</h3>
+                  <p className="mt-1 text-sm text-[#5B6475]">Basic information to identify this equipment.</p>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-900 mb-1">Categoría</label>
-                    <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value as any})} className="w-full rounded-lg border border-slate-300 px-4 py-2">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <label className="block sm:col-span-2">
+                    <span className={premium.formLabel}>Nombre *</span>
+                    <input required placeholder="Ej: Caminadora Pro 3000" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className={premium.formInput} />
+                  </label>
+                  <label className="block">
+                    <span className={premium.formLabel}>Categoría</span>
+                    <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value as EquipmentCategory})} className={premium.formInput}>
                       <option value="cardio">Cardio</option>
                       <option value="pesas">Pesas</option>
                       <option value="maquinas">Máquinas</option>
                       <option value="funcional">Funcional</option>
                       <option value="accesorios">Accesorios</option>
                     </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-900 mb-1">Estado</label>
-                    <select value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value as any})} className="w-full rounded-lg border border-slate-300 px-4 py-2">
+                  </label>
+                  <label className="block">
+                    <span className={premium.formLabel}>Estado</span>
+                    <select value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value as EquipmentStatus})} className={premium.formInput}>
                       <option value="nuevo">Nuevo</option>
                       <option value="operativo">Operativo</option>
                       <option value="en_mantenimiento">En Mantenimiento</option>
                       <option value="fuera_servicio">Fuera de Servicio</option>
                     </select>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-900 mb-1">Marca</label>
-                    <input placeholder="Ej: Life Fitness" value={formData.brand} onChange={(e) => setFormData({...formData, brand: e.target.value})} className="w-full rounded-lg border border-slate-300 px-4 py-2" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-900 mb-1">Modelo</label>
-                    <input placeholder="Ej: F1 Classic" value={formData.model} onChange={(e) => setFormData({...formData, model: e.target.value})} className="w-full rounded-lg border border-slate-300 px-4 py-2" />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-900 mb-1">Número Serial</label>
-                    <input placeholder="Ej: LF-2024-0001" value={formData.serialNumber} onChange={(e) => setFormData({...formData, serialNumber: e.target.value})} className="w-full rounded-lg border border-slate-300 px-4 py-2" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-900 mb-1">Ubicación</label>
-                    <input placeholder="Ej: Sala Cardio - Zona A" value={formData.location} onChange={(e) => setFormData({...formData, location: e.target.value})} className="w-full rounded-lg border border-slate-300 px-4 py-2" />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-900 mb-1">Precio (COP)</label>
-                    <input type="number" placeholder="Ej: 5000000" value={formData.price} onChange={(e) => setFormData({...formData, price: e.target.value === '' ? '' : Number(e.target.value)})} className="w-full rounded-lg border border-slate-300 px-4 py-2" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-900 mb-1">Horas de uso</label>
-                    <input type="number" placeholder="Ej: 250" value={formData.totalUsageHours} onChange={(e) => setFormData({...formData, totalUsageHours: e.target.value === '' ? '' : Number(e.target.value)})} className="w-full rounded-lg border border-slate-300 px-4 py-2" />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-900 mb-1">Fecha de Compra</label>
-                    <input type="date" value={formData.purchaseDate} onChange={(e) => setFormData({...formData, purchaseDate: e.target.value})} className="w-full rounded-lg border border-slate-300 px-4 py-2" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-900 mb-1">Intervalo de Mantenimiento (días)</label>
-                    <input type="number" placeholder="Ej: 90" value={formData.maintenanceIntervalDays} onChange={(e) => setFormData({...formData, maintenanceIntervalDays: e.target.value === '' ? '' : Number(e.target.value)})} className="w-full rounded-lg border border-slate-300 px-4 py-2" />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-900 mb-1">Próximo Mantenimiento</label>
-                  <input type="date" value={formData.nextMaintenance} onChange={(e) => setFormData({...formData, nextMaintenance: e.target.value})} className="w-full rounded-lg border border-slate-300 px-4 py-2" />
+                  </label>
+                  <label className="block">
+                    <span className={premium.formLabel}>Marca</span>
+                    <input placeholder="Ej: Life Fitness" value={formData.brand} onChange={(e) => setFormData({...formData, brand: e.target.value})} className={premium.formInput} />
+                  </label>
+                  <label className="block">
+                    <span className={premium.formLabel}>Modelo</span>
+                    <input placeholder="Ej: F1 Classic" value={formData.model} onChange={(e) => setFormData({...formData, model: e.target.value})} className={premium.formInput} />
+                  </label>
+                  <label className="block">
+                    <span className={premium.formLabel}>Número Serial</span>
+                    <input placeholder="Ej: LF-2024-0001" value={formData.serialNumber} onChange={(e) => setFormData({...formData, serialNumber: e.target.value})} className={premium.formInput} />
+                  </label>
+                  <label className="block">
+                    <span className={premium.formLabel}>Ubicación</span>
+                    <input placeholder="Ej: Sala Cardio - Zona A" value={formData.location} onChange={(e) => setFormData({...formData, location: e.target.value})} className={premium.formInput} />
+                  </label>
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-900 mb-1">Notas</label>
-                <textarea placeholder="Ej: Equipo en perfecto estado, con manual de usuario incluido..." rows={3} value={formData.notes} onChange={(e) => setFormData({...formData, notes: e.target.value})} className="w-full rounded-lg border border-slate-300 px-4 py-2" />
+
+              <div className={premium.formSection}>
+                <div className="mb-5">
+                  <h3 className="text-lg font-bold text-[#0A1733]">Maintenance and usage</h3>
+                  <p className="mt-1 text-sm text-[#5B6475]">Track cost, usage and maintenance schedule.</p>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <label className="block">
+                    <span className={premium.formLabel}>Precio (COP)</span>
+                    <input type="number" placeholder="Ej: 5000000" value={formData.price} onChange={(e) => setFormData({...formData, price: e.target.value === '' ? '' : Number(e.target.value)})} className={premium.formInput} />
+                  </label>
+                  <label className="block">
+                    <span className={premium.formLabel}>Horas de uso</span>
+                    <input type="number" placeholder="Ej: 250" value={formData.totalUsageHours} onChange={(e) => setFormData({...formData, totalUsageHours: e.target.value === '' ? '' : Number(e.target.value)})} className={premium.formInput} />
+                  </label>
+                  <label className="block">
+                    <span className={premium.formLabel}>Fecha de Compra</span>
+                    <input type="date" value={formData.purchaseDate} onChange={(e) => setFormData({...formData, purchaseDate: e.target.value})} className={premium.formInput} />
+                  </label>
+                  <label className="block">
+                    <span className={premium.formLabel}>Intervalo de Mantenimiento (días)</span>
+                    <input type="number" placeholder="Ej: 90" value={formData.maintenanceIntervalDays} onChange={(e) => setFormData({...formData, maintenanceIntervalDays: e.target.value === '' ? '' : Number(e.target.value)})} className={premium.formInput} />
+                  </label>
+                  <label className="block sm:col-span-2">
+                    <span className={premium.formLabel}>Próximo Mantenimiento</span>
+                    <input type="date" value={formData.nextMaintenance} onChange={(e) => setFormData({...formData, nextMaintenance: e.target.value})} className={premium.formInput} />
+                  </label>
+                </div>
               </div>
-              <div className="flex gap-3">
-                <button type="submit" disabled={isSubmitting} className="flex-1 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">{isSubmitting ? 'Guardando...' : 'Guardar'}</button>
-                <button type="button" onClick={() => setIsCreateModalOpen(false)} disabled={isSubmitting} className="flex-1 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50">Cancelar</button>
+
+              <label className="block">
+                <span className={premium.formLabel}>Notas</span>
+                <textarea placeholder="Ej: Equipo en perfecto estado, con manual de usuario incluido..." rows={4} value={formData.notes} onChange={(e) => setFormData({...formData, notes: e.target.value})} className={premium.formTextarea} />
+              </label>
+
+              <div className="flex flex-col-reverse gap-3 border-t border-[#E5EAF3] pt-6 sm:flex-row sm:justify-end">
+                <button type="button" onClick={() => setIsCreateModalOpen(false)} disabled={isSubmitting} className={premium.formSecondaryBtn}>Cancelar</button>
+                <button type="submit" disabled={isSubmitting} className={`${premium.pillBtn} disabled:cursor-not-allowed disabled:opacity-60`}>{isSubmitting ? 'Guardando...' : 'Guardar'}</button>
               </div>
             </form>
           </div>
