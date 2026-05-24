@@ -26,7 +26,7 @@ const navigation = [
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { gymName, userDisplayName } = useAppSettings();
+  const { gymName } = useAppSettings();
 
   const handleLogout = () => {
     logout();
@@ -40,9 +40,9 @@ export default function Sidebar() {
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0B57F0] text-white shadow-sm">
               <Dumbbell className="h-5 w-5" strokeWidth={2} />
             </div>
-            <div>
+            <div className="min-w-0 flex-1">
               <h1 className="text-lg font-bold text-[#0B57F0]">GymOS</h1>
-              <p className="text-xs text-[#5B6475]">{gymName || 'Elite Management'}</p>
+              <p className="mt-1 truncate text-xs text-[#5B6475]">{gymName || 'Elite Management'}</p>
             </div>
           </div>
         </div>
@@ -77,13 +77,7 @@ export default function Sidebar() {
           })}
         </nav>
 
-        <div className="mt-auto border-t border-[#E5EAF3] p-4 space-y-3">
-          {userDisplayName ? (
-            <div className="rounded-xl border border-[#0B57F0]/15 bg-[#0B57F0]/5 px-4 py-3">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#5B6475]">Tu nombre</p>
-              <p className="mt-1 text-sm font-semibold text-[#0A1733]">{userDisplayName}</p>
-            </div>
-          ) : null}
+        <div className="mt-auto border-t border-[#E5EAF3] p-4">
           <button
             type="button"
             onClick={handleLogout}

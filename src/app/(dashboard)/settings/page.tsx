@@ -5,6 +5,7 @@ import { useAppSettings } from '@/context/app-settings-context';
 import toast from 'react-hot-toast';
 import { Save, Eye, EyeOff, User, Lock, Bell } from 'lucide-react';
 import { premium } from '@/lib/premium-ui';
+import { GymNameEditor } from '@/components/layout/gym-name-editor';
 
 interface UserData {
   id?: string;
@@ -73,94 +74,57 @@ function SettingsTabs({
 }
 
 function ProfileTab() {
-  const { gymName, setGymName, userDisplayName, setUserDisplayName } = useAppSettings();
-  const [userData, setUserData] = useState<UserData | null>(null);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [role, setRole] = useState('user');
 
   useEffect(() => {
     const storedUserData = localStorage.getItem('userData');
     if (storedUserData) {
       try {
         const data = JSON.parse(storedUserData) as UserData;
-        setUserData(data);
         setName(data.name || '');
         setEmail(data.email || '');
-        setRole(data.role || 'user');
       } catch {
         /* ignore */
       }
     }
   }, []);
 
-  const handleSaveProfile = () => {
-    if (!name.trim()) {
-      toast.error('El nombre no puede estar vacio');
-      return;
-    }
-    const updatedData = { ...userData, name: name.trim(), email, role };
-    localStorage.setItem('userData', JSON.stringify(updatedData));
-    setUserData(updatedData);
-    toast.success('Perfil actualizado');
-  };
-
   return (
     <div className="space-y-6">
       <section className={`${premium.card} p-6 sm:p-8`}>
-        <h2 className="text-lg font-semibold text-[#0A1733]">Informacion de cuenta</h2>
-        <p className="mt-1 text-sm text-[#5B6475]">Datos asociados a tu sesion.</p>
+        <h2 className="text-lg font-semibold text-[#0A1733]">Información de cuenta</h2>
+        <p className="mt-1 text-sm text-[#5B6475]">Datos asociados a tu sesión.</p>
         <div className="mt-6 space-y-4">
           <div>
-            <label className="mb-2 block text-sm font-medium text-[#0A1733]">Email</label>
-            <input type="email" value={email} disabled className={`${inputClass} cursor-not-allowed opacity-70`} />
+            <label className="mb-2 block text-sm font-medium text-[#0A1733]">Nombre</label>
+            <input
+              type="text"
+              value={name}
+              disabled
+              className={`${inputClass} cursor-not-allowed opacity-70`}
+            />
+            <p className="mt-1 text-xs text-[#5B6475]">El nombre no se puede modificar desde aquí.</p>
           </div>
           <div>
-            <label className="mb-2 block text-sm font-medium text-[#0A1733]">Nombre completo</label>
-            <input type="text" value={name} onChange={(e) => setName(e.target.value)} className={inputClass} />
+            <label className="mb-2 block text-sm font-medium text-[#0A1733]">Correo electrónico</label>
+            <input
+              type="email"
+              value={email}
+              disabled
+              className={`${inputClass} cursor-not-allowed opacity-70`}
+            />
+            <p className="mt-1 text-xs text-[#5B6475]">El correo no se puede modificar desde aquí.</p>
           </div>
-          <div>
-            <label className="mb-2 block text-sm font-medium text-[#0A1733]">Rol</label>
-            <select value={role} disabled className={`${inputClass} cursor-not-allowed opacity-70`}>
-              <option value="admin">Administrador</option>
-              <option value="trainer">Entrenador</option>
-              <option value="staff">Personal</option>
-              <option value="user">Usuario</option>
-            </select>
-          </div>
-          <button type="button" onClick={handleSaveProfile} className={premium.pillBtn}>
-            <Save className="h-4 w-4" />
-            Guardar cambios
-          </button>
         </div>
       </section>
 
       <section className={`${premium.card} p-6 sm:p-8`}>
-        <h2 className="text-lg font-semibold text-[#0A1733]">Nombre personalizado</h2>
-        <p className="mt-1 text-sm text-[#5B6475]">Se muestra en la barra lateral de la aplicacion.</p>
-        <div className="mt-4">
-          <input
-            type="text"
-            value={userDisplayName}
-            onChange={(e) => setUserDisplayName(e.target.value)}
-            placeholder="Tu nombre personalizado"
-            className={inputClass}
-          />
-        </div>
-      </section>
-
-      <section className={`${premium.card} p-6 sm:p-8`}>
-        <h2 className="text-lg font-semibold text-[#0A1733]">Informacion del gimnasio</h2>
-        <p className="mt-1 text-sm text-[#5B6475]">Personaliza el nombre de tu centro fitness.</p>
-        <div className="mt-4">
-          <input
-            type="text"
-            value={gymName}
-            onChange={(e) => setGymName(e.target.value)}
-            placeholder="Nombre de tu gimnasio"
-            className={inputClass}
-          />
-        </div>
+        <h2 className="text-lg font-semibold text-[#0A1733]">Información del gimnasio</h2>
+        <p className="mt-1 text-sm text-[#5B6475]">
+          Personaliza el nombre de tu centro. Los cambios se aplican al guardar.
+        </p>
+        <GymNameEditor variant="settings" />
       </section>
     </div>
   );
