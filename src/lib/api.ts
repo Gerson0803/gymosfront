@@ -66,6 +66,12 @@ async function apiRequest<T>(
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       console.error(`[API Error] ${response.status}:`, errorData);
+      if (response.status === 401 && typeof window !== "undefined") {
+        clearAuthToken();
+        if (!window.location.pathname.startsWith("/login")) {
+          window.location.href = "/login";
+        }
+      }
       throw new Error(
         errorData.message || `API error: ${response.status} ${response.statusText}`
       );
