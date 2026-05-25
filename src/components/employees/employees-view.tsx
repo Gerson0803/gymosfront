@@ -12,7 +12,7 @@ import { EmployeeCard } from "./employee-card";
 import { EmployeeFormPanel } from "./employee-form-panel";
 
 export default function EmployeesView() {
-  const { employees, addEmployee, updateEmployee, deleteEmployee } = useEmployees();
+  const { employees, loading, error, addEmployee, updateEmployee, deleteEmployee } = useEmployees();
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<EmployeeRole | "all">("all");
   const [statusFilter, setStatusFilter] = useState<EmployeeStatus | "all">("all");
@@ -50,21 +50,29 @@ export default function EmployeesView() {
     setEditingEmployee(null);
   };
 
-  const handleSave = (data: EmployeeFormData) => {
-    if (editingEmployee) {
-      updateEmployee(editingEmployee.id, data);
-      toast.success("Empleado actualizado");
-    } else {
-      addEmployee(data);
-      toast.success("Empleado creado");
+  const handleSave = async (data: EmployeeFormData) => {
+    try {
+      if (editingEmployee) {
+        await updateEmployee(editingEmployee.id, data);
+        toast.success("Empleado actualizado");
+      } else {
+        await addEmployee(data);
+        toast.success("Empleado creado");
+      }
+      closePanel();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Error al guardar empleado");
     }
-    closePanel();
   };
 
-  const handleDelete = (id: string) => {
-    deleteEmployee(id);
-    toast.success("Empleado eliminado");
-    setDeleteConfirmId(null);
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteEmployee(id);
+      toast.success("Empleado eliminado");
+      setDeleteConfirmId(null);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Error al eliminar empleado");
+    }
   };
 
   const selectClass =
@@ -128,7 +136,19 @@ export default function EmployeesView() {
       </div>
 
       <div className="space-y-4">
-        {filteredEmployees.map((employee) => (
+        {error && (
+          <div className={`${premium.card} border-red-200 bg-red-50 p-5 text-sm font-medium text-red-700`}>
+            {error}
+          </div>
+        )}
+
+        {loading && (
+          <div className={`${premium.card} py-16 text-center`}>
+            <p className="text-sm text-[#5B6475]">Cargando empleados...</p>
+          </div>
+        )}
+
+        {!loading && !error && filteredEmployees.map((employee) => (
           <EmployeeCard
             key={employee.id}
             employee={employee}
@@ -137,7 +157,7 @@ export default function EmployeesView() {
           />
         ))}
 
-        {filteredEmployees.length === 0 && (
+        {!loading && !error && filteredEmployees.length === 0 && (
           <div className={`${premium.card} py-16 text-center`}>
             <p className="text-sm text-[#5B6475]">No hay empleados que coincidan con los filtros.</p>
           </div>
