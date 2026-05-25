@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { login } from '@/lib/api';
 import toast from 'react-hot-toast';
-import { RegisterForm } from '@/components/auth/register-form';
+import { AuthMarketingPanel } from '@/components/auth/auth-marketing-panel';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -14,12 +14,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (window.location.hash === '#register') {
-      document.getElementById('register')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,34 +35,10 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#F5F7FB] px-4 py-10">
       <div className="grid w-full max-w-6xl grid-cols-1 overflow-hidden rounded-[2rem] border border-[#E5EAF3] bg-white shadow-[0_8px_40px_-8px_rgba(10,23,51,0.12)] sm:grid-cols-[1.4fr_1fr]">
-        <div className="relative overflow-hidden bg-[#0A1733] p-10 text-white">
-          <div className="absolute inset-0 opacity-30">
-            <img
-              src="/Imagen Login.png"
-              alt="GymOS Login Background"
-              className="h-full w-full object-cover"
-            />
-          </div>
-          <div className="relative z-10 space-y-6">
-            <div>
-              <p className="text-sm uppercase tracking-[0.32em] text-sky-300/80">GymOS</p>
-              <h1 className="mt-4 text-4xl font-semibold tracking-tight">Bienvenido de nuevo</h1>
-            </div>
-            <p className="max-w-md text-sm text-slate-200">
-              Accede a tu panel de control de alto rendimiento y gestiona miembros, check-ins y ventas de forma elegante.
-            </p>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="rounded-3xl border border-white/15 bg-white/10 px-4 py-4 shadow-sm">
-                <p className="text-sm font-semibold text-slate-100">Administra tu gimnasio</p>
-                <p className="mt-2 text-xs text-slate-200/90">Miembros, equipos y operaciones centralizados.</p>
-              </div>
-              <div className="rounded-3xl border border-white/15 bg-white/10 px-4 py-4 shadow-sm">
-                <p className="text-sm font-semibold text-slate-100">Experiencia premium</p>
-                <p className="mt-2 text-xs text-slate-200/90">Interfaz moderna y herramientas para equipos de alto rendimiento.</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <AuthMarketingPanel
+          title="Bienvenido de nuevo"
+          description="Accede a tu panel de control de alto rendimiento y gestiona miembros, check-ins y ventas de forma elegante."
+        />
 
         <div className="max-h-[90vh] overflow-y-auto p-6 sm:p-10">
           <Link
@@ -81,14 +51,14 @@ export default function LoginPage() {
           </Link>
 
           <div className="mb-8">
-            <p className="text-sm font-semibold uppercase tracking-[0.32em] text-slate-500">Iniciar sesión</p>
-            <h2 className="mt-4 text-3xl font-bold text-slate-900">Accede a GymOS</h2>
-            <p className="mt-2 text-sm text-slate-500">Ingresa con tu correo y contraseña para continuar.</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.32em] text-[#5B6475]">Iniciar sesión</p>
+            <h2 className="mt-4 text-3xl font-bold text-[#0A1733]">Accede a GymOS</h2>
+            <p className="mt-2 text-sm text-[#5B6475]">Ingresa con tu correo y contraseña para continuar.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <div className="rounded-3xl bg-red-50 border border-red-200 p-4 text-sm text-red-700">
+              <div className="rounded-3xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
                 {error}
               </div>
             )}
@@ -134,7 +104,12 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <RegisterForm />
+          <div className="mt-8 rounded-3xl border border-[#E5EAF3] bg-[#F5F7FB] p-5 text-center text-sm text-[#5B6475]">
+            ¿No tienes cuenta?{' '}
+            <Link href="/register" className="font-semibold text-[#0B57F0] transition hover:text-[#0948c9]">
+              Regístrate aquí
+            </Link>
+          </div>
         </div>
       </div>
     </div>

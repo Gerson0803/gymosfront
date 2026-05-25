@@ -7,20 +7,37 @@ if (!API_URL) {
   throw new Error("NEXT_PUBLIC_API_URL environment variable is not set");
 }
 
-const API_BASE_URL = API_URL;
-
-/** Auth token lives only in memory for the current browser session (lost on refresh/restart). */
+/** Auth token stored in localStorage so it persists across page reloads. */
 let authToken: string | null = null;
+
+// Initialize authToken from localStorage on module load
+if (typeof window !== "undefined") {
+  const stored = localStorage.getItem("authToken");
+  if (stored) {
+    authToken = stored;
+  }
+}
 
 export function setAuthToken(token: string) {
   authToken = token;
   if (typeof window !== "undefined") {
+    localStorage.setItem("authToken", token);
     window.dispatchEvent(new Event("auth:changed"));
   }
 }
 
 export function getAuthToken(): string | null {
-  return authToken;
+  if (authToken) return authToken;
+  
+  if (typeof window !== "undefined") {
+    const stored = localStorage.getItem("authToken");
+    if (stored) {
+      authToken = stored;
+      return authToken;
+    }
+  }
+  
+  return null;
 }
 
 export function clearAuthToken() {
@@ -34,33 +51,26 @@ export function clearAuthToken() {
 
 /** Removes any legacy persisted auth from older builds (not used for login). */
 export function purgeLegacyAuthStorage() {
-  authToken = null;
   if (typeof window !== "undefined") {
-    localStorage.removeItem("authToken");
     clearAuthCookie();
   }
 }
 
 interface RequestOptions extends RequestInit {
   headers?: Record<string, string>;
+  /** Evita redirigir a /login en 401 (p. ej. contraseña actual incorrecta). */
+  skipAuthRedirect?: boolean;
 }
 
 async function apiRequest<T>(
   endpoint: string,
   options: RequestOptions = {},
 ): Promise<T> {
-  return apiRequestWithBase<T>(API_BASE_URL, endpoint, options);
-}
-
-async function apiRequestWithBase<T>(
-  baseUrl: string,
-  endpoint: string,
-  options: RequestOptions = {},
-): Promise<T> {
-  const url = `${baseUrl}${endpoint}`;
+  const { skipAuthRedirect, headers: customHeaders, ...fetchOptions } = options;
+  const url = `${API_URL}${endpoint}`;
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...options.headers,
+    ...customHeaders,
   };
 
   const token = getAuthToken();
@@ -68,27 +78,44 @@ async function apiRequestWithBase<T>(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  console.log(`[API] ${options.method || "GET"} ${url}`);
+  console.log(`[API] ${fetchOptions.method || "GET"} ${url}`);
 
   try {
     const response = await fetch(url, {
-      ...options,
+      ...fetchOptions,
       headers,
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      const errorData = (await response.json().catch(() => ({}))) as {
+        message?: string;
+        error?: { message?: string };
+      };
       console.error(`[API Error] ${response.status}:`, errorData);
-      if (response.status === 401 && typeof window !== "undefined") {
+      let errorMessage =
+        errorData.message ||
+        errorData.error?.message ||
+        `API error: ${response.status} ${response.statusText}`;
+
+      if (
+        response.status === 404 &&
+        endpoint.includes("change-password")
+      ) {
+        errorMessage =
+          "El servidor no tiene activo el endpoint de cambio de contraseña. Reinicia el backend (backend-gymos) con npm run start:dev.";
+      }
+
+      if (
+        response.status === 401 &&
+        !skipAuthRedirect &&
+        typeof window !== "undefined"
+      ) {
         clearAuthToken();
         if (!window.location.pathname.startsWith("/login")) {
           window.location.href = "/login";
         }
       }
-      throw new Error(
-        errorData.message ||
-          `API error: ${response.status} ${response.statusText}`,
-      );
+      throw new Error(errorMessage);
     }
 
     const data = await response.json();
@@ -253,6 +280,23 @@ export function logout() {
     localStorage.removeItem("userData");
     window.location.href = "/login";
   }
+}
+
+export async function changePassword(currentPassword: string, newPassword: string) {
+  const response = await apiRequest<{
+    success: boolean;
+    message?: string;
+  }>("/auth/change-password", {
+    method: "PATCH",
+    body: JSON.stringify({ currentPassword, newPassword }),
+    skipAuthRedirect: true,
+  });
+
+  if (!response.success) {
+    throw new Error(response.message || "No se pudo cambiar la contraseña");
+  }
+
+  return response;
 }
 
 // LEADS

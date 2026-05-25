@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   LayoutDashboard,
   Users,
@@ -35,8 +35,20 @@ type SidebarProps = {
 
 export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps) {
   const pathname = usePathname();
-  const { gymName, userDisplayName } = useAppSettings();
+  const { gymName } = useAppSettings();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [userDisplayName, setUserDisplayName] = useState('');
+
+  useEffect(() => {
+    const stored = localStorage.getItem('userData');
+    if (!stored) return;
+    try {
+      const data = JSON.parse(stored) as { name?: string };
+      setUserDisplayName(data.name?.trim() || '');
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -69,7 +81,7 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
                 }`}
               >
                 <h1 className="text-lg font-bold text-[#0B57F0]">GymOS</h1>
-                <p className="text-xs text-[#5B6475]">{gymName || 'Elite Management'}</p>
+                <p className="truncate text-xs text-[#5B6475]">{gymName || 'Elite Management'}</p>
               </div>
             </button>
             {!isCollapsed && (

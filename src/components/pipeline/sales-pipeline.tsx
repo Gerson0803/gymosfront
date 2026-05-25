@@ -17,6 +17,9 @@ import { leadSchema, type LeadFormData } from '@/lib/validations';
 import { Lead, LeadStatus } from '@/types/client';
 import { Plus, Edit, Trash2, Loader } from 'lucide-react';
 import { getLeads, createLead, updateLeadApi, deleteLeadApi, moveLeadStage } from '@/lib/api';
+import { LeadFormModal } from './LeadFormModal';
+import { LeadDetailModal } from './LeadDetailModal';
+import { ExcelButtons } from './ExcelButtons';
 
 import { PageHeader } from '@/components/layout/page-header';
 import { premium } from '@/lib/premium-ui';
@@ -30,12 +33,37 @@ const stages: { id: LeadStatus; label: string }[] = [
   { id: 'cerrado_ganado', label: 'Closed Won' },
 ];
 
-function DraggableCard({ lead, onEdit, onDelete }: { lead: Lead; onEdit: (lead: Lead) => void; onDelete: (id: string) => void }) {
+function DraggableCard({ lead, onEdit, onDelete, onViewDetails }: { lead: Lead; onEdit: (lead: Lead) => void; onDelete: (id: string) => void; onViewDetails?: (lead: Lead) => void }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: lead.id,
   });
 
   const style = transform ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` } : undefined;
+
+  const productTypeInfo = {
+    fitness_product: { label: 'Producto', icon: '🏋️', color: 'bg-orange-100 text-orange-700' },
+    membership: { label: 'Membresía', icon: '🎟️', color: 'bg-blue-100 text-blue-700' },
+    personal_training: { label: 'Entrenamiento', icon: '👨‍🏫', color: 'bg-purple-100 text-purple-700' },
+    combo: { label: 'Combo', icon: '📦', color: 'bg-green-100 text-green-700' },
+  }[lead.productType] || { label: 'Producto', icon: '📦', color: 'bg-gray-100 text-gray-700' };
+
+  const getRelevantInfo = () => {
+    const details = lead.productDetails;
+    if (!details) return null;
+
+    switch (lead.productType) {
+      case 'membership':
+        return `${(details as any).membershipType} - $${(details as any).pricePerPeriod}`;
+      case 'personal_training':
+        return `${(details as any).numberOfSessions} sesiones - ${(details as any).serviceType}`;
+      case 'fitness_product':
+        return `${(details as any).productName} - $${(details as any).unitPrice}`;
+      case 'combo':
+        return `${(details as any).comboType}`;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div
@@ -43,22 +71,28 @@ function DraggableCard({ lead, onEdit, onDelete }: { lead: Lead; onEdit: (lead: 
       style={style}
       {...listeners}
       {...attributes}
-      className={`cursor-grab rounded-2xl border border-[#E5EAF3] bg-white p-4 shadow-[0_2px_12px_-4px_rgba(10,23,51,0.06)] transition ${
-        isDragging ? 'opacity-50 active:cursor-grabbing' : 'hover:shadow-[0_8px_24px_-8px_rgba(10,23,51,0.1)]'
+      onClick={() => onViewDetails?.(lead)}
+      className={`cursor-grab rounded-2xl border border-[#E5EAF3] bg-white p-4 shadow-[0_2px_12px_-4px_rgba(10,23,51,0.06)] transition hover:shadow-[0_8px_24px_-8px_rgba(10,23,51,0.1)] ${
+        isDragging ? 'opacity-50 active:cursor-grabbing' : ''
       }`}
     >
       <div className="flex items-start justify-between gap-2">
-        <h4 className="text-sm font-semibold text-[#0A1733]">{lead.name}</h4>
-        <span className="shrink-0 rounded-lg bg-[#0B57F0]/10 px-2 py-0.5 text-xs font-semibold text-[#0B57F0]">
-          {lead.conversionProbability}%
-        </span>
+        <h4 className="text-sm font-semibold text-[#0A1733] flex-1">{lead.name}</h4>
       </div>
-      <p className="mt-2 text-xs text-[#5B6475] line-clamp-2">{lead.fitnessGoal}</p>
+      
+      <div className={`mt-2 rounded-lg px-2 py-1.5 text-xs font-medium ${productTypeInfo.color}`}>
+        {productTypeInfo.icon} {productTypeInfo.label}
+      </div>
+
+      {getRelevantInfo() && (
+        <p className="mt-2 text-xs text-[#5B6475] line-clamp-2 font-medium">{getRelevantInfo()}</p>
+      )}
+
       <div className="mt-4 flex items-center justify-between">
         <span className="rounded-lg bg-[#F5F7FB] px-2 py-1 text-xs font-medium text-[#5B6475]">
-          ${(lead.budget / 1000).toFixed(0)}k/m
+          {lead.status}
         </span>
-        <div className="flex gap-1">
+        <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
           <button type="button" onClick={() => onEdit(lead)} className="rounded-lg p-1.5 text-[#5B6475] hover:bg-[#0B57F0]/5 hover:text-[#0B57F0]">
             <Edit className="h-3.5 w-3.5" />
           </button>
@@ -71,7 +105,7 @@ function DraggableCard({ lead, onEdit, onDelete }: { lead: Lead; onEdit: (lead: 
   );
 }
 
-function DroppableColumn({ stageId, stageName, leads, onEdit, onDelete }: { stageId: string; stageName: string; leads: Lead[]; onEdit: (lead: Lead) => void; onDelete: (id: string) => void }) {
+function DroppableColumn({ stageId, stageName, leads, onEdit, onDelete, onViewDetails }: { stageId: string; stageName: string; leads: Lead[]; onEdit: (lead: Lead) => void; onDelete: (id: string) => void; onViewDetails?: (lead: Lead) => void }) {
   const { setNodeRef, isOver } = useDroppable({
     id: stageId,
   });
@@ -93,7 +127,7 @@ function DroppableColumn({ stageId, stageName, leads, onEdit, onDelete }: { stag
 
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-x-hidden overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {(leads || []).map((lead) => (
-          <DraggableCard key={lead.id} lead={lead} onEdit={onEdit} onDelete={onDelete} />
+          <DraggableCard key={lead.id} lead={lead} onEdit={onEdit} onDelete={onDelete} onViewDetails={onViewDetails} />
         ))}
         {(!leads || leads.length === 0) && (
           <div className="flex flex-1 items-center justify-center rounded-2xl border-2 border-dashed border-[#E5EAF3] bg-white/50">
@@ -110,8 +144,10 @@ export default function SalesPipeline() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editingLead, setEditingLead] = useState<Lead | null>(null);
+  const [viewingLead, setViewingLead] = useState<Lead | null>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
-  const [isPanelOpen, setIsPanelOpen] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -155,23 +191,18 @@ export default function SalesPipeline() {
     setLeads(leads.map(l => l.id === leadId ? {...l, status: newStatus} : l));
     try {
       await moveLeadStage(leadId, newStatus);
-      toast.success(newStatus === 'cerrado_ganado' ? '🎉 ¡Nueva membresía vendida!' : 'Lead movido');
+      toast.success(newStatus === 'cerrado_ganado' ? '🎉 ¡Nueva venta completada!' : 'Lead movido');
     } catch (err) {
       setLeads(previousLeads);
       toast.error('Error al mover lead');
     }
   };
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<LeadFormData>({
-    resolver: zodResolver(leadSchema),
-    defaultValues: {} as Partial<LeadFormData>,
-  });
-
-  const onSubmit = async (data: LeadFormData) => {
+  const handleFormSubmit = async (data: LeadFormData) => {
     try {
       if (editingLead) {
         await updateLeadApi(editingLead.id, data as any);
-        setLeads(leads.map(l => l.id === editingLead.id ? {...l, ...data} : l));
+        setLeads(leads.map(l => l.id === editingLead.id ? {...l, ...data} as Lead : l));
         toast.success('Lead actualizado');
       } else {
         const response = await createLead(data as any);
@@ -180,21 +211,25 @@ export default function SalesPipeline() {
         setLeads([...leads, newLead]);
         toast.success('Lead creado');
       }
-      setIsPanelOpen(false);
+      setIsFormOpen(false);
       setEditingLead(null);
-      reset();
     } catch (err) {
-      toast.error('Error al guardar lead');
+      const errorMessage = err instanceof Error ? err.message : 'Error al guardar lead';
+      toast.error(errorMessage);
     }
   };
 
-  const handleEdit = (lead: Lead) => {
+  const handleEditLead = (lead: Lead) => {
     setEditingLead(lead);
-    reset({ name: lead.name, email: lead.email, phone: lead.phone, fitnessGoal: lead.fitnessGoal, budget: lead.budget, source: lead.source });
-    setIsPanelOpen(true);
+    setIsFormOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleViewDetails = (lead: Lead) => {
+    setViewingLead(lead);
+    setIsDetailOpen(true);
+  };
+
+  const handleDeleteLead = async (id: string) => {
     try {
       await deleteLeadApi(id);
       setLeads(leads.filter(l => l.id !== id));
@@ -220,13 +255,29 @@ export default function SalesPipeline() {
         <PageHeader
           title="Sales Pipeline"
           headerActions={
-            <button
-              type="button"
-              onClick={() => { setEditingLead(null); reset(); setIsPanelOpen(true); }}
-              className={premium.pillBtn}
-            >
-              <Plus className="h-4 w-4" /> New Lead
-            </button>
+            <div className="flex items-center gap-3">
+              <ExcelButtons onImportComplete={() => {
+                const loadLeads = async () => {
+                  try {
+                    const data = await getLeads();
+                    const raw = data as any;
+                    const list = Array.isArray(raw) ? raw
+                      : raw.data?.leads || raw.data?.items || raw.data || raw.leads || [];
+                    setLeads(list);
+                  } catch (err) {
+                    setError('Error al cargar leads');
+                  }
+                };
+                loadLeads();
+              }} />
+              <button
+                type="button"
+                onClick={() => { setEditingLead(null); setIsFormOpen(true); }}
+                className={premium.pillBtn}
+              >
+                <Plus className="h-4 w-4" /> Nuevo Lead
+              </button>
+            </div>
           }
         />
       </div>
@@ -240,8 +291,9 @@ export default function SalesPipeline() {
                 stageId={stage.id}
                 stageName={stage.label}
                 leads={leadsByStage[stage.id] || []}
-                onEdit={handleEdit}
+                onEdit={handleEditLead}
                 onDelete={(id) => setDeleteConfirmId(id)}
+                onViewDetails={handleViewDetails}
               />
             </div>
           ))}
@@ -320,6 +372,7 @@ export default function SalesPipeline() {
         </aside>
       )}
 
+      {/* Delete Confirmation */}
       {deleteConfirmId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
@@ -327,7 +380,7 @@ export default function SalesPipeline() {
             <p className="text-sm text-slate-600 mb-4">Esta acción no se puede deshacer.</p>
             <div className="flex gap-3">
               <button onClick={() => setDeleteConfirmId(null)} className="flex-1 py-2 border border-slate-300 rounded-lg hover:bg-slate-50">Cancelar</button>
-              <button onClick={() => handleDelete(deleteConfirmId)} className="flex-1 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Eliminar</button>
+              <button onClick={() => handleDeleteLead(deleteConfirmId)} className="flex-1 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Eliminar</button>
             </div>
           </div>
         </div>

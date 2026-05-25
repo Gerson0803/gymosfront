@@ -146,50 +146,7 @@ const initialClients: Client[] = [
   }
 ];
 
-const initialLeads: Lead[] = [
-  {
-    id: '1',
-    name: 'Roberto Gómez',
-    email: 'roberto@email.com',
-    phone: '+57 305 678 9012',
-    fitnessGoal: 'Perder 10kg en 3 meses',
-    budget: 100000,
-    source: 'instagram',
-    status: 'tour_agendado',
-    assignedAdvisor: 'Asesor María',
-    conversionProbability: 65,
-    notes: 'Interesado en plan premium. Tour agendado para mañana 5pm.',
-    createdAt: '2024-03-20T10:00:00Z'
-  },
-  {
-    id: '2',
-    name: 'Patricia Ruiz',
-    email: 'patricia@email.com',
-    phone: '+57 306 789 0123',
-    fitnessGoal: 'Tonificar después del embarazo',
-    budget: 80000,
-    source: 'referido',
-    status: 'propuesta',
-    assignedAdvisor: 'Asesor Carlos',
-    conversionProbability: 80,
-    notes: 'Referida por miembro actual. Muy interesada.',
-    createdAt: '2024-03-18T15:00:00Z'
-  },
-  {
-    id: '3',
-    name: 'Javier Torres',
-    email: 'javier@email.com',
-    phone: '+57 307 890 1234',
-    fitnessGoal: 'Ganar masa muscular',
-    budget: 150000,
-    source: 'google',
-    status: 'negociacion',
-    assignedAdvisor: 'Asesor María',
-    conversionProbability: 55,
-    notes: 'Comparando con otro gym. Negociando precio.',
-    createdAt: '2024-03-15T11:00:00Z'
-  }
-];
+const initialLeads: Lead[] = [];
 
 const initialAlerts: RetentionAlert[] = [
   {
@@ -471,16 +428,10 @@ export const useGymStore = create<GymState>()(
 
       // Lead actions
       addLead: (leadData) => {
-        let probability = 30; // base
-        if (leadData.source === 'referido') probability += 25;
-        if (leadData.source === 'instagram') probability += 15;
-        if (leadData.budget >= 100000) probability += 10;
-        
         const newLead: Lead = {
           ...leadData,
           id: uuidv4(),
           createdAt: new Date().toISOString(),
-          conversionProbability: Math.min(probability, 95),
           status: leadData.status || 'nuevo',
           assignedAdvisor: leadData.assignedAdvisor || 'Sin asignar',
         };

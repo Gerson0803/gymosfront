@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useGymStore } from '@/store/useGymStore';
+import { useAppSettings } from '@/context/app-settings-context';
 
 export default function TitleUpdater() {
-  const { gymName } = useGymStore();
+  const { gymName } = useAppSettings();
 
   useEffect(() => {
-    document.title = `${gymName} - Gym Management Dashboard`;
+    document.title = `${gymName} - GymOS`;
   }, [gymName]);
 
   return null;
