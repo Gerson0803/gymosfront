@@ -8,7 +8,7 @@ export function AuthMarketingPanel({ title, description }: AuthMarketingPanelPro
     <div className="relative overflow-hidden bg-[#0A1733] p-10 text-white">
       <div className="absolute inset-0 opacity-30">
         <img
-          src="/Imagen Login.png"
+          src="https://gymos-images.s3.us-east-1.amazonaws.com/fotos-del-sistema/Imagen%20Login.png"
           alt="GymOS"
           className="h-full w-full object-cover"
         />
