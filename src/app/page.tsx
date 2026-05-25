@@ -99,7 +99,7 @@ export default function HomePage() {
         {/* Imagen de gimnasio a la derecha con overlay translúcido */}
         <div className="absolute right-0 top-0 bottom-0 w-full md:w-1/2 h-full z-0 pointer-events-none opacity-20 md:opacity-100">
           <img 
-            src="/Imagen Home.png" 
+            src="https://gymos-images.s3.us-east-1.amazonaws.com/fotos-del-sistema/Imagen%20Home.png" 
             alt="GymOS Hero Background" 
             className="h-full w-full object-cover object-center"
           />

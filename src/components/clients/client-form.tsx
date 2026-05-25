@@ -7,6 +7,7 @@ import { useMembers } from '@/context/members-context';
 import type { ExperienceLevel, FitnessGoal, Member, MembershipType } from '@/types/member';
 import { PhotoUpload } from '@/components/ui/photo-upload';
 import { premium } from '@/lib/premium-ui';
+import { uploadToS3 } from '@/lib/s3';
 
 type ClientFormProps = {
   mode: 'create' | 'edit';
@@ -43,6 +44,15 @@ export function ClientForm({ mode, initialMember }: ClientFormProps) {
     e.preventDefault();
     setIsSubmitting(true);
     try {
+      let finalPhotoUrl = form.photoUrl;
+
+      if (form.photoUrl.startsWith('blob:')) {
+        const response = await fetch(form.photoUrl);
+        const blob = await response.blob();
+        const file = new File([blob], 'photo.jpg', { type: blob.type });
+        finalPhotoUrl = await uploadToS3(file);
+      }
+
       const payload = {
         name: form.name,
         email: form.email,
@@ -53,7 +63,7 @@ export function ClientForm({ mode, initialMember }: ClientFormProps) {
         monthlyPrice: Number(form.monthlyPrice),
         assignedTrainer: form.assignedTrainer,
         notes: form.notes,
-        photoUrl: form.photoUrl,
+        photoUrl: finalPhotoUrl,
       };
       if (mode === 'create') {
         const member = await addMember(payload);
