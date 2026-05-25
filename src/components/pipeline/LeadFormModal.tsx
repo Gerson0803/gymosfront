@@ -10,7 +10,7 @@ import { MembershipForm } from './forms/MembershipForm';
 import { PersonalTrainingForm } from './forms/PersonalTrainingForm';
 import { FitnessProductForm } from './forms/FitnessProductForm';
 import { ComboForm } from './forms/ComboForm';
-import toast from 'react-hot-toast';
+import { premium } from '@/lib/premium-ui';
 
 interface LeadFormModalProps {
   isOpen: boolean;
@@ -18,6 +18,13 @@ interface LeadFormModalProps {
   onClose: () => void;
   onSubmit: (data: any) => Promise<void>;
 }
+
+const productTypes: { value: ProductType; label: string; emoji: string }[] = [
+  { value: 'membership', label: 'Membresía', emoji: '🎟️' },
+  { value: 'personal_training', label: 'Entrenamiento', emoji: '👨‍🏫' },
+  { value: 'fitness_product', label: 'Producto', emoji: '🏋️' },
+  { value: 'combo', label: 'Combo', emoji: '📦' },
+];
 
 export function LeadFormModal({ isOpen, lead, onClose, onSubmit }: LeadFormModalProps) {
   const [selectedProductType, setSelectedProductType] = useState<ProductType>('fitness_product');
@@ -30,7 +37,7 @@ export function LeadFormModal({ isOpen, lead, onClose, onSubmit }: LeadFormModal
     },
   });
 
-  const { register, handleSubmit, formState: { errors }, watch, reset, control } = form;
+  const { register, handleSubmit, formState: { errors }, watch, reset } = form;
   const productType = watch('productType');
 
   useEffect(() => {
@@ -66,65 +73,67 @@ export function LeadFormModal({ isOpen, lead, onClose, onSubmit }: LeadFormModal
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/30 p-4">
-      <div className="bg-white rounded-t-2xl md:rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/20 backdrop-blur-sm p-4">
+      <div className={`${premium.formPanel} w-full max-w-2xl max-h-[90vh] overflow-y-auto`}>
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-[#E5EAF3] px-6 py-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-[#0A1733]">
-            {lead ? 'Editar Lead' : 'Nuevo Lead'}
-          </h2>
+        <div className="sticky top-0 bg-white border-b border-[#E5EAF3] px-6 py-4 flex items-center justify-between rounded-[1.75rem_1.75rem_0_0]">
+          <div>
+            <h2 className="text-xl font-bold text-[#0A1733]">
+              {lead ? 'Editar Lead' : 'Nuevo Lead'}
+            </h2>
+            <p className="text-sm text-[#5B6475] mt-0.5">
+              {lead ? 'Actualiza los datos del prospecto' : 'Registra un nuevo prospecto en el pipeline'}
+            </p>
+          </div>
           <button
             onClick={onClose}
-            className="p-2 text-[#5B6475] hover:bg-[#F5F7FB] rounded-lg transition"
+            className="p-2.5 text-[#5B6475] hover:bg-[#F5F7FB] rounded-xl transition"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="p-6 space-y-5">
           {/* Basic Information */}
-          <div>
-            <h3 className="text-sm font-semibold text-[#0A1733] mb-4 uppercase tracking-wide">Información Básica</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-[#5B6475] mb-1">Nombre Completo *</label>
+          <div className={premium.formSection}>
+            <h3 className="text-lg font-bold text-[#0A1733] mb-4">Información Básica</h3>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="block">
+                <span className={premium.formLabel}>Nombre Completo *</span>
                 <input
                   {...register('name')}
                   type="text"
                   placeholder="Juan García"
-                  className="w-full rounded-lg border border-[#E5EAF3] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B57F0]"
+                  className={premium.formInput}
                 />
-                {errors.name && <p className="text-xs text-red-600 mt-1">{String(errors.name.message)}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-[#5B6475] mb-1">Email *</label>
+                {errors.name && <p className={premium.formError}>{String(errors.name.message)}</p>}
+              </label>
+              <label className="block">
+                <span className={premium.formLabel}>Email *</span>
                 <input
                   {...register('email')}
                   type="email"
                   placeholder="juan@email.com"
-                  className="w-full rounded-lg border border-[#E5EAF3] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B57F0]"
+                  className={premium.formInput}
                 />
-                {errors.email && <p className="text-xs text-red-600 mt-1">{String(errors.email.message)}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-[#5B6475] mb-1">Teléfono *</label>
+                {errors.email && <p className={premium.formError}>{String(errors.email.message)}</p>}
+              </label>
+              <label className="block">
+                <span className={premium.formLabel}>Teléfono *</span>
                 <input
                   {...register('phone')}
                   type="tel"
                   placeholder="+57 300 123 4567"
-                  className="w-full rounded-lg border border-[#E5EAF3] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B57F0]"
+                  className={premium.formInput}
                 />
-                {errors.phone && <p className="text-xs text-red-600 mt-1">{String(errors.phone.message)}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-[#5B6475] mb-1">Fuente *</label>
+                {errors.phone && <p className={premium.formError}>{String(errors.phone.message)}</p>}
+              </label>
+              <label className="block">
+                <span className={premium.formLabel}>Fuente *</span>
                 <select
                   {...register('source')}
-                  className="w-full rounded-lg border border-[#E5EAF3] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B57F0]"
+                  className={premium.formInput}
                 >
                   <option value="instagram">Instagram</option>
                   <option value="facebook">Facebook</option>
@@ -132,23 +141,15 @@ export function LeadFormModal({ isOpen, lead, onClose, onSubmit }: LeadFormModal
                   <option value="referido">Referido</option>
                   <option value="walk_in">Walk-in</option>
                 </select>
-              </div>
+              </label>
             </div>
           </div>
 
-          {/* Divider */}
-          <div className="h-px bg-[#E5EAF3]" />
-
           {/* Product Type Selection */}
-          <div>
-            <h3 className="text-sm font-semibold text-[#0A1733] mb-4 uppercase tracking-wide">Tipo de Producto/Servicio</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-              {[
-                { value: 'membership' as const, label: '🎟️ Membresía', emoji: '🎟️' },
-                { value: 'personal_training' as const, label: '👨‍🏫 Entrenamiento', emoji: '👨‍🏫' },
-                { value: 'fitness_product' as const, label: '🏋️ Producto', emoji: '🏋️' },
-                { value: 'combo' as const, label: '📦 Combo', emoji: '📦' },
-              ].map((type) => (
+          <div className={premium.formSection}>
+            <h3 className="text-lg font-bold text-[#0A1733] mb-4">Tipo de Producto / Servicio</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {productTypes.map((type) => (
                 <button
                   key={type.value}
                   type="button"
@@ -156,21 +157,22 @@ export function LeadFormModal({ isOpen, lead, onClose, onSubmit }: LeadFormModal
                     form.setValue('productType', type.value);
                     setSelectedProductType(type.value);
                   }}
-                  className={`p-3 rounded-lg border-2 transition text-sm font-medium ${
+                  className={`rounded-xl border-2 p-4 transition text-sm font-medium ${
                     productType === type.value
-                      ? 'border-[#0B57F0] bg-[#0B57F0]/5 text-[#0B57F0]'
-                      : 'border-[#E5EAF3] bg-white text-[#5B6475] hover:border-[#0B57F0]/30'
+                      ? 'border-[#0B57F0] bg-[#0B57F0]/5 text-[#0B57F0] shadow-[0_2px_12px_-4px_rgba(11,87,240,0.15)]'
+                      : 'border-[#E5EAF3] bg-white text-[#5B6475] hover:border-[#0B57F0]/30 hover:bg-[#F8FAFD]'
                   }`}
                 >
-                  <div className="text-xl mb-1">{type.emoji}</div>
-                  <div className="text-xs">{type.label.split(' ')[1]}</div>
+                  <div className="text-2xl mb-2">{type.emoji}</div>
+                  <div className="text-xs font-semibold">{type.label}</div>
                 </button>
               ))}
             </div>
           </div>
 
           {/* Product-Specific Form */}
-          <div className="border border-[#E5EAF3] rounded-lg p-4 bg-[#F9FAFB]">
+          <div className={premium.formSection}>
+            <h3 className="text-lg font-bold text-[#0A1733] mb-4">Detalles del Producto</h3>
             {productType === 'membership' && <MembershipForm form={form} />}
             {productType === 'personal_training' && <PersonalTrainingForm form={form} />}
             {productType === 'fitness_product' && <FitnessProductForm form={form} />}
@@ -178,28 +180,28 @@ export function LeadFormModal({ isOpen, lead, onClose, onSubmit }: LeadFormModal
           </div>
 
           {/* Notes */}
-          <div>
-            <label className="block text-sm font-medium text-[#5B6475] mb-1">Notas Adicionales</label>
+          <div className={premium.formSection}>
+            <h3 className="text-lg font-bold text-[#0A1733] mb-4">Notas</h3>
             <textarea
               {...register('notes')}
               placeholder="Información adicional sobre el lead..."
               rows={3}
-              className="w-full rounded-lg border border-[#E5EAF3] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B57F0]"
+              className={premium.formTextarea}
             />
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 sticky bottom-0 bg-white pt-4 border-t border-[#E5EAF3]">
+          <div className="flex gap-3 sticky bottom-0 bg-white pt-4 border-t border-[#E5EAF3] -mx-2 px-2">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 rounded-lg border border-[#E5EAF3] text-[#5B6475] font-medium hover:bg-[#F5F7FB] transition"
+              className={`${premium.formSecondaryBtn} flex-1`}
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-2 rounded-lg bg-[#0B57F0] text-white font-medium hover:bg-[#0B57F0]/90 transition"
+              className={`${premium.pillBtn} flex-1`}
             >
               {lead ? 'Actualizar Lead' : 'Crear Lead'}
             </button>
@@ -209,4 +211,3 @@ export function LeadFormModal({ isOpen, lead, onClose, onSubmit }: LeadFormModal
     </div>
   );
 }
-

@@ -233,10 +233,10 @@ export default function HomePage() {
           {/* Header */}
           <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-[#0A1733]">
-              Planes Flexibles
+              Planes a tu Medida
             </h2>
             <p className="text-base md:text-lg text-[#5B6475]">
-              Elige la solución que mejor se adapte a la escala de tu centro.
+              Elige el plan que mejor se adapte a tu centro fitness.
             </p>
           </div>
 
@@ -247,10 +247,10 @@ export default function HomePage() {
               <div className="space-y-6">
                 <div>
                   <h3 className="text-xl font-bold text-[#0A1733]">Básico</h3>
-                  <p className="text-xs text-[#5B6475] mt-1">Para centros en crecimiento.</p>
+                  <p className="text-xs text-[#5B6475] mt-1">Solo lo esencial.</p>
                 </div>
                 <div className="flex items-baseline">
-                  <span className="text-5xl font-bold text-[#0A1733] tracking-tight">$49</span>
+                  <span className="text-5xl font-bold text-[#0A1733] tracking-tight">$29</span>
                   <span className="text-sm font-medium text-[#5B6475] ml-1">/mes</span>
                 </div>
                 <div className="border-t border-[#E5EAF3] pt-6">
@@ -265,22 +265,16 @@ export default function HomePage() {
                       <div className="rounded-full bg-[#0B57F0]/10 p-0.5 mt-0.5">
                         <Check className="h-3.5 w-3.5 text-[#0B57F0]" />
                       </div>
-                      <span>Gestión de Miembros (hasta 500)</span>
-                    </li>
-                    <li className="flex items-start space-x-3 text-sm text-[#5B6475]">
-                      <div className="rounded-full bg-[#0B57F0]/10 p-0.5 mt-0.5">
-                        <Check className="h-3.5 w-3.5 text-[#0B57F0]" />
-                      </div>
-                      <span>Check-in básico</span>
+                      <span>Gestión de Miembros</span>
                     </li>
                   </ul>
                 </div>
               </div>
               <Link 
-                href="/login" 
+                href="/register?plan=basic" 
                 className="w-full border border-[#0B57F0] text-[#0B57F0] rounded-full py-3.5 text-sm font-semibold hover:bg-[#0B57F0]/5 transition duration-200 mt-8 text-center block"
               >
-                Login
+                Comenzar Gratis
               </Link>
             </div>
 
@@ -290,14 +284,14 @@ export default function HomePage() {
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="text-xl font-bold">Pro</h3>
-                    <p className="text-xs text-white/80 mt-1">Para gimnasios consolidados.</p>
+                    <p className="text-xs text-white/80 mt-1">Todo incluido.</p>
                   </div>
                   <span className="inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white">
                     Más Popular
                   </span>
                 </div>
                 <div className="flex items-baseline">
-                  <span className="text-5xl font-bold tracking-tight">$99</span>
+                  <span className="text-5xl font-bold tracking-tight">$79</span>
                   <span className="text-sm font-medium text-white/80 ml-1">/mes</span>
                 </div>
                 <div className="border-t border-white/20 pt-6">
@@ -306,46 +300,52 @@ export default function HomePage() {
                       <div className="rounded-full bg-white/20 p-0.5 mt-0.5">
                         <Check className="h-3.5 w-3.5 text-white" />
                       </div>
-                      <span>Todo en Básico +</span>
+                      <span>Todo de Básico +</span>
                     </li>
                     <li className="flex items-start space-x-3 text-sm text-white">
                       <div className="rounded-full bg-white/20 p-0.5 mt-0.5">
                         <Check className="h-3.5 w-3.5 text-white" />
                       </div>
-                      <span>Miembros ilimitados</span>
+                      <span>Check-in QR / Huella</span>
                     </li>
                     <li className="flex items-start space-x-3 text-sm text-white">
                       <div className="rounded-full bg-white/20 p-0.5 mt-0.5">
                         <Check className="h-3.5 w-3.5 text-white" />
                       </div>
-                      <span>Sales Pipeline (Kanban)</span>
+                      <span>Pipeline de Ventas</span>
                     </li>
                     <li className="flex items-start space-x-3 text-sm text-white">
                       <div className="rounded-full bg-white/20 p-0.5 mt-0.5">
                         <Check className="h-3.5 w-3.5 text-white" />
                       </div>
-                      <span>Check-in por QR Scanner</span>
+                      <span>Gestión de Equipamiento</span>
+                    </li>
+                    <li className="flex items-start space-x-3 text-sm text-white">
+                      <div className="rounded-full bg-white/20 p-0.5 mt-0.5">
+                        <Check className="h-3.5 w-3.5 text-white" />
+                      </div>
+                      <span>Gestión de Empleados</span>
                     </li>
                   </ul>
                 </div>
               </div>
               <Link 
-                href="/login" 
-                className="w-full bg-white text-[#0B57F0] rounded-full py-3.5 text-sm font-semibold hover:bg-white/95 transition duration-200 mt-8 text-center block"
+                href="/register?plan=custom" 
+                className="w-full border border-[#0B57F0] text-white rounded-full py-3.5 text-sm font-semibold hover:bg-[#0B57F0]/5 transition duration-200 mt-8 text-center block"
               >
-                Login
+                Comenzar Gratis
               </Link>
             </div>
 
-            {/* Card 3: Premium */}
+            {/* Card 3: Personalizado */}
             <div className="flex flex-col justify-between bg-white border border-[#E5EAF3] rounded-[2rem] p-8 md:p-10 shadow-sm hover:shadow-md transition">
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-xl font-bold text-[#0A1733]">Premium</h3>
-                  <p className="text-xs text-[#5B6475] mt-1">Control elite y analíticas.</p>
+                  <h3 className="text-xl font-bold text-[#0A1733]">Personalizado</h3>
+                  <p className="text-xs text-[#5B6475] mt-1">Elige los módulos que necesitas.</p>
                 </div>
                 <div className="flex items-baseline">
-                  <span className="text-5xl font-bold text-[#0A1733] tracking-tight">$199</span>
+                  <span className="text-5xl font-bold text-[#0A1733] tracking-tight">Desde $19</span>
                   <span className="text-sm font-medium text-[#5B6475] ml-1">/mes</span>
                 </div>
                 <div className="border-t border-[#E5EAF3] pt-6">
@@ -354,34 +354,34 @@ export default function HomePage() {
                       <div className="rounded-full bg-[#0B57F0]/10 p-0.5 mt-0.5">
                         <Check className="h-3.5 w-3.5 text-[#0B57F0]" />
                       </div>
-                      <span>Todo en Pro +</span>
+                      <span>Dashboard Principal</span>
                     </li>
                     <li className="flex items-start space-x-3 text-sm text-[#5B6475]">
                       <div className="rounded-full bg-[#0B57F0]/10 p-0.5 mt-0.5">
                         <Check className="h-3.5 w-3.5 text-[#0B57F0]" />
                       </div>
-                      <span>Módulo de Equipamiento</span>
+                      <span>Módulos a tu medida</span>
                     </li>
                     <li className="flex items-start space-x-3 text-sm text-[#5B6475]">
                       <div className="rounded-full bg-[#0B57F0]/10 p-0.5 mt-0.5">
                         <Check className="h-3.5 w-3.5 text-[#0B57F0]" />
                       </div>
-                      <span>Analíticas Avanzadas</span>
+                      <span>Pagas solo lo que usas</span>
                     </li>
                     <li className="flex items-start space-x-3 text-sm text-[#5B6475]">
                       <div className="rounded-full bg-[#0B57F0]/10 p-0.5 mt-0.5">
                         <Check className="h-3.5 w-3.5 text-[#0B57F0]" />
                       </div>
-                      <span>Soporte Prioritario 24/7</span>
+                      <span>Escalable</span>
                     </li>
                   </ul>
                 </div>
               </div>
               <Link 
-                href="/login" 
+                href="/register?plan=basic" 
                 className="w-full border border-[#0B57F0] text-[#0B57F0] rounded-full py-3.5 text-sm font-semibold hover:bg-[#0B57F0]/5 transition duration-200 mt-8 text-center block"
               >
-                Login
+                Comenzar Gratis
               </Link>
             </div>
           </div>

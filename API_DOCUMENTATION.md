@@ -40,55 +40,6 @@ POST /auth/login
 }
 ```
 
-### Signup
-```http
-POST /auth/signup
-```
-
-**Request Body:**
-```json
-{
-  "email": "user@gym.com",
-  "password": "securePassword123",
-  "name": "Juan Pérez"
-}
-```
-
-**Response (201 Created):** Same shape as login (`token` + `user`).
-
-### Change Password (authenticated)
-```http
-PATCH /auth/change-password
-Authorization: Bearer <token>
-```
-
-**Request Body:**
-```json
-{
-  "currentPassword": "oldPassword123",
-  "newPassword": "newSecurePassword456"
-}
-```
-
-**Response (200 OK):**
-```json
-{
-  "success": true,
-  "message": "Contraseña actualizada correctamente"
-}
-```
-
-**Error responses:**
-- `400 Bad Request`: Validation error, new password too short, or **current password incorrect** (use this status instead of 401 for wrong current password so the frontend does not log the user out).
-- `401 Unauthorized`: Missing, invalid, or expired JWT only.
-- `403 Forbidden`: Optional, if role cannot change password.
-
-**Backend implementation notes:**
-- Verify `currentPassword` against the hashed password stored for the authenticated user (`req.user.id` from JWT).
-- Hash `newPassword` with the same algorithm used on signup/login (e.g. bcrypt).
-- Persist the new hash in the user record.
-- Do not return the password in the response.
-
 ---
 
 ## 1. Members (Clientes/Miembros)

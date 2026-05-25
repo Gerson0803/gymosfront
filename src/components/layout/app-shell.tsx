@@ -22,6 +22,8 @@ export function AppShell({ children }: AppShellProps) {
     return window.localStorage.getItem("gymos-sidebar-collapsed") === "true";
   });
 
+  const [isHydrated, setIsHydrated] = useState(false);
+
   const toggleSidebar = () => {
     setIsSidebarCollapsed((current) => {
       const nextValue = !current;

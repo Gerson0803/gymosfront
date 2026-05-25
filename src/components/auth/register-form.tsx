@@ -1,9 +1,10 @@
 ﻿'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { signup } from '@/lib/api';
 import toast from 'react-hot-toast';
+import { Check } from 'lucide-react';
 
 const inputClass =
   'w-full rounded-3xl border border-[#E5EAF3] bg-[#F5F7FB] px-4 py-3 text-[#0A1733] outline-none transition focus:border-[#0B57F0] focus:ring-2 focus:ring-[#0B57F0]/15';
@@ -11,14 +12,45 @@ const inputClass =
 const primaryBtnClass =
   'w-full rounded-full bg-[#0B57F0] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#0948c9] disabled:cursor-not-allowed disabled:opacity-50';
 
+type Plan = 'BASIC' | 'PRO' | 'CUSTOM';
+
+const plans = [
+  {
+    id: 'BASIC' as Plan,
+    name: 'Básico',
+    price: '$29',
+    features: ['Dashboard', 'Gestión de Miembros'],
+  },
+  {
+    id: 'PRO' as Plan,
+    name: 'Pro',
+    price: '$79',
+    popular: true,
+    features: ['Todo en Básico', 'Check-in QR/Huella', 'Pipeline de Ventas', 'Equipamiento', 'Empleados'],
+  },
+  {
+    id: 'CUSTOM' as Plan,
+    name: 'Personalizado',
+    price: 'Desde $19',
+    features: ['Dashboard', 'Selecciona tus módulos', 'Pagas solo lo que usas'],
+  },
+];
+
 export function RegisterForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [name, setName] = useState('');
   const [registerEmail, setRegisterEmail] = useState('');
   const [registerPassword, setRegisterPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [selectedPlan, setSelectedPlan] = useState<Plan>('BASIC');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const queryPlan = searchParams.get('plan')?.toUpperCase();
+  if (queryPlan && ['BASIC', 'PRO', 'CUSTOM'].includes(queryPlan) && selectedPlan === 'BASIC') {
+    setSelectedPlan(queryPlan as Plan);
+  }
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,7 +80,7 @@ export function RegisterForm() {
     setLoading(true);
 
     try {
-      await signup(registerEmail, registerPassword, name.trim());
+      await signup(registerEmail, registerPassword, name.trim(), selectedPlan);
       toast.success('¡Cuenta creada exitosamente!');
       router.push('/dashboard');
     } catch (err) {
@@ -115,21 +147,70 @@ export function RegisterForm() {
         <p className="text-xs text-[#5B6475]">Mínimo 6 caracteres</p>
       </div>
 
-      <div className="space-y-3">
-        <label htmlFor="register-confirm" className="block text-sm font-medium text-slate-700">
-          Confirmar contraseña
-        </label>
-        <input
-          id="register-confirm"
-          type="password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          placeholder="••••••••"
-          className={inputClass}
-          required
-          disabled={loading}
-        />
-      </div>
+        <div className="space-y-2">
+          <label htmlFor="register-confirm" className="block text-sm font-medium text-[#0A1733]">
+            Confirmar contraseña
+          </label>
+          <input
+            id="register-confirm"
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="********"
+            className={inputClass}
+            required
+            disabled={loading}
+          />
+        </div>
+
+        <div className="space-y-3 pt-2">
+          <label className="block text-sm font-medium text-[#0A1733]">
+            Selecciona tu plan
+          </label>
+          <div className="grid gap-3">
+            {plans.map((plan) => (
+              <button
+                key={plan.id}
+                type="button"
+                onClick={() => setSelectedPlan(plan.id)}
+                className={`relative flex items-start gap-3 rounded-xl border p-3 text-left transition ${
+                  selectedPlan === plan.id
+                    ? 'border-[#0B57F0] bg-[#0B57F0]/5'
+                    : 'border-[#E5EAF3] hover:border-[#0B57F0]/50'
+                }`}
+              >
+                <div className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
+                  selectedPlan === plan.id
+                    ? 'border-[#0B57F0] bg-[#0B57F0]'
+                    : 'border-[#E5EAF3]'
+                }`}>
+                  {selectedPlan === plan.id && <Check className="h-3 w-3 text-white" />}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <span className={`text-sm font-semibold ${selectedPlan === plan.id ? 'text-[#0B57F0]' : 'text-[#0A1733]'}`}>
+                      {plan.name}
+                    </span>
+                    <span className="text-sm font-bold text-[#0A1733]">{plan.price}</span>
+                  </div>
+                  <ul className="mt-1 space-y-0.5">
+                    {plan.features.slice(0, 2).map((f, i) => (
+                      <li key={i} className="text-xs text-[#5B6475]">• {f}</li>
+                    ))}
+                    {plan.features.length > 2 && (
+                      <li className="text-xs text-[#5B6475]">+ más</li>
+                    )}
+                  </ul>
+                </div>
+                {plan.popular && (
+                  <span className="absolute -top-2 right-2 rounded-full bg-[#0B57F0] px-2 py-0.5 text-[10px] font-semibold text-white">
+                    Popular
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
 
       <button type="submit" disabled={loading} className={primaryBtnClass}>
         {loading ? 'Creando cuenta...' : 'Crear cuenta'}
