@@ -7,7 +7,7 @@ import { useMembers } from '@/context/members-context';
 import type { ExperienceLevel, FitnessGoal, Member, MembershipType } from '@/types/member';
 import { PhotoUpload } from '@/components/ui/photo-upload';
 import { premium } from '@/lib/premium-ui';
-import { uploadToS3 } from '@/lib/s3';
+import { uploadAvatar } from '@/lib/s3';
 
 type ClientFormProps = {
   mode: 'create' | 'edit';
@@ -50,7 +50,7 @@ export function ClientForm({ mode, initialMember }: ClientFormProps) {
         const response = await fetch(form.photoUrl);
         const blob = await response.blob();
         const file = new File([blob], 'photo.jpg', { type: blob.type });
-        finalPhotoUrl = await uploadToS3(file);
+        finalPhotoUrl = await uploadAvatar(file);
       }
 
       const payload = {

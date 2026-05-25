@@ -9,8 +9,8 @@ const s3 = new S3Client({
   },
 });
 
-export async function uploadToS3(file: File): Promise<string> {
-  const key = `avatars/${Date.now()}-${file.name}`;
+async function uploadToS3(file: File, folder: string): Promise<string> {
+  const key = `${folder}/${Date.now()}-${file.name}`;
   
   const command = new PutObjectCommand({
     Bucket: process.env.NEXT_PUBLIC_S3_BUCKET_NAME!,
@@ -27,6 +27,18 @@ export async function uploadToS3(file: File): Promise<string> {
   });
 
   return `https://${process.env.NEXT_PUBLIC_S3_BUCKET_NAME}.s3.${process.env.NEXT_PUBLIC_AWS_REGION}.amazonaws.com/${key}`;
+}
+
+export async function uploadAvatar(file: File): Promise<string> {
+  return uploadToS3(file, "avatars");
+}
+
+export async function uploadEmployeePhoto(file: File): Promise<string> {
+  return uploadToS3(file, "employees");
+}
+
+export async function uploadSystemImage(file: File): Promise<string> {
+  return uploadToS3(file, "fotos-del-sistema");
 }
 
 export async function deleteFromS3(key: string): Promise<void> {

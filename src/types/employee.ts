@@ -19,6 +19,7 @@ export interface Employee {
   phone: string;
   status: EmployeeStatus;
   createdAt: string;
+  updatedAt: string;
 }
 
-export type EmployeeFormData = Omit<Employee, "id" | "createdAt">;
+export type EmployeeFormData = Omit<Employee, "id" | "createdAt" | "updatedAt">;

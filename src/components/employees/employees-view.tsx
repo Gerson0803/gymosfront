@@ -10,6 +10,7 @@ import { ROLE_FILTER_OPTIONS, STATUS_FILTER_OPTIONS } from "@/lib/employee-label
 import type { Employee, EmployeeFormData, EmployeeRole, EmployeeStatus } from "@/types/employee";
 import { EmployeeCard } from "./employee-card";
 import { EmployeeFormPanel } from "./employee-form-panel";
+import { uploadEmployeePhoto } from "@/lib/s3";
 
 export default function EmployeesView() {
   const { employees, loading, error, addEmployee, updateEmployee, deleteEmployee } = useEmployees();
@@ -52,11 +53,20 @@ export default function EmployeesView() {
 
   const handleSave = async (data: EmployeeFormData) => {
     try {
+      let finalData = { ...data };
+      
+      if (data.photoUrl.startsWith("blob:")) {
+        const response = await fetch(data.photoUrl);
+        const blob = await response.blob();
+        const file = new File([blob], "photo.jpg", { type: blob.type });
+        finalData = { ...data, photoUrl: await uploadEmployeePhoto(file) };
+      }
+
       if (editingEmployee) {
-        await updateEmployee(editingEmployee.id, data);
+        await updateEmployee(editingEmployee.id, finalData);
         toast.success("Empleado actualizado");
       } else {
-        await addEmployee(data);
+        await addEmployee(finalData);
         toast.success("Empleado creado");
       }
       closePanel();
