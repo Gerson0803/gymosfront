@@ -64,7 +64,7 @@ interface RequestOptions extends RequestInit {
 
 async function apiRequest<T>(
   endpoint: string,
-  options: RequestOptions = {}
+  options: RequestOptions = {},
 ): Promise<T> {
   const { skipAuthRedirect, headers: customHeaders, ...fetchOptions } = options;
   const url = `${API_URL}${endpoint}`;
@@ -189,7 +189,7 @@ export async function GET<T>(endpoint: string): Promise<T> {
 
 export async function POST<T>(
   endpoint: string,
-  data: Record<string, unknown>
+  data: Record<string, unknown>,
 ): Promise<T> {
   return apiRequest<T>(endpoint, {
     method: "POST",
@@ -199,7 +199,7 @@ export async function POST<T>(
 
 export async function PATCH<T>(
   endpoint: string,
-  data: Record<string, unknown>
+  data: Record<string, unknown>,
 ): Promise<T> {
   return apiRequest<T>(endpoint, {
     method: "PATCH",
@@ -216,7 +216,10 @@ export async function login(email: string, password: string) {
   try {
     const response = await apiRequest<{
       success: boolean;
-      data: { token: string; user: { id: string; email: string; name: string; role: string } };
+      data: {
+        token: string;
+        user: { id: string; email: string; name: string; role: string };
+      };
     }>("/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, password }),
@@ -230,9 +233,12 @@ export async function login(email: string, password: string) {
       return response.data;
     }
 
-    throw new Error(response.data?.token ? "No token received" : "Login failed");
+    throw new Error(
+      response.data?.token ? "No token received" : "Login failed",
+    );
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Login failed";
+    const errorMessage =
+      error instanceof Error ? error.message : "Login failed";
     throw new Error(errorMessage);
   }
 }
@@ -241,7 +247,10 @@ export async function signup(email: string, password: string, name: string, plan
   try {
     const response = await apiRequest<{
       success: boolean;
-      data: { token: string; user: { id: string; email: string; name: string; role: string } };
+      data: {
+        token: string;
+        user: { id: string; email: string; name: string; role: string };
+      };
     }>("/auth/signup", {
       method: "POST",
       body: JSON.stringify({ email, password, name, plan }),
@@ -255,9 +264,12 @@ export async function signup(email: string, password: string, name: string, plan
       return response.data;
     }
 
-    throw new Error(response.data?.token ? "No token received" : "Signup failed");
+    throw new Error(
+      response.data?.token ? "No token received" : "Signup failed",
+    );
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Signup failed";
+    const errorMessage =
+      error instanceof Error ? error.message : "Signup failed";
     throw new Error(errorMessage);
   }
 }
@@ -289,33 +301,71 @@ export async function changePassword(currentPassword: string, newPassword: strin
 
 // LEADS
 export async function getLeads() {
-  return apiRequest('/leads');
+  return apiRequest("/leads");
 }
 export async function createLead(data: Record<string, unknown>) {
-  return apiRequest('/leads', { method: 'POST', body: JSON.stringify(data) });
+  return apiRequest("/leads", { method: "POST", body: JSON.stringify(data) });
 }
 export async function updateLeadApi(id: string, data: Record<string, unknown>) {
-  return apiRequest(`/leads/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+  return apiRequest(`/leads/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
 }
 export async function deleteLeadApi(id: string) {
-  return apiRequest(`/leads/${id}`, { method: 'DELETE' });
+  return apiRequest(`/leads/${id}`, { method: "DELETE" });
 }
 export async function moveLeadStage(id: string, status: string) {
-  return apiRequest(`/leads/${id}`, { method: 'PATCH', body: JSON.stringify({ status }) });
+  return apiRequest(`/leads/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
 }
 
 // EQUIPMENT
 export async function getEquipment() {
-  return apiRequest('/equipment');
+  return apiRequest("/equipment");
 }
 export async function createEquipment(data: Record<string, unknown>) {
-  return apiRequest('/equipment', { method: 'POST', body: JSON.stringify(data) });
+  return apiRequest("/equipment", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
 }
-export async function updateEquipmentApi(id: string, data: Record<string, unknown>) {
-  return apiRequest(`/equipment/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+export async function updateEquipmentApi(
+  id: string,
+  data: Record<string, unknown>,
+) {
+  return apiRequest(`/equipment/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
 }
 export async function deleteEquipment(id: string) {
-  return apiRequest(`/equipment/${id}`, { method: 'DELETE' });
+  return apiRequest(`/equipment/${id}`, { method: "DELETE" });
+}
+
+// EMPLOYEES
+export async function getEmployees() {
+  return apiRequest("/employees");
+}
+export async function createEmployee(data: Record<string, unknown>) {
+  return apiRequest("/employees", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+export async function updateEmployeeApi(
+  id: string,
+  data: Record<string, unknown>,
+) {
+  return apiRequest(`/employees/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+export async function deleteEmployeeApi(id: string) {
+  return apiRequest(`/employees/${id}`, { method: "DELETE" });
 }
 
 // MODULES - Module catalog (public)

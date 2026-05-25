@@ -11,14 +11,47 @@ import {
   PointerSensor,
 } from '@dnd-kit/core';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
-import { Lead, LeadStatus } from '@/types/client';
-import { Plus, Edit, Trash2, Loader, Mail, Phone, User } from 'lucide-react';
+import { type LeadFormData } from '@/lib/validations';
+import type {
+  ComboDetails,
+  FitnessProductDetails,
+  Lead,
+  LeadStatus,
+  MembershipDetails,
+  PersonalTrainingDetails,
+} from '@/types/client';
+import { Plus, Edit, Trash2, Loader } from 'lucide-react';
 import { getLeads, createLead, updateLeadApi, deleteLeadApi, moveLeadStage } from '@/lib/api';
 import { LeadFormModal } from './LeadFormModal';
 import { LeadDetailModal } from './LeadDetailModal';
 import { ExcelButtons } from './ExcelButtons';
 
 import { PageHeader } from '@/components/layout/page-header';
+
+type LeadsApiResponse =
+  | Lead[]
+  | {
+      data?: Lead[] | { leads?: Lead[]; items?: Lead[] };
+      leads?: Lead[];
+      items?: Lead[];
+    };
+
+type LeadMutationResponse = Lead | { data?: Lead };
+
+function normalizeLeadsResponse(response: LeadsApiResponse): Lead[] {
+  if (Array.isArray(response)) return response;
+  if (Array.isArray(response.data)) return response.data;
+  if (Array.isArray(response.data?.leads)) return response.data.leads;
+  if (Array.isArray(response.data?.items)) return response.data.items;
+  if (Array.isArray(response.leads)) return response.leads;
+  if (Array.isArray(response.items)) return response.items;
+  return [];
+}
+
+function normalizeLeadMutationResponse(response: LeadMutationResponse): Lead {
+  if ('data' in response && response.data) return response.data;
+  return response as Lead;
+}
 
 const stages: { id: LeadStatus; label: string }[] = [
   { id: 'nuevo', label: 'New Leads' },
@@ -49,13 +82,13 @@ function DraggableCard({ lead, onEdit, onDelete, onViewDetails }: { lead: Lead; 
     if (!details) return null;
     switch (lead.productType) {
       case 'membership':
-        return { primary: details.membershipType, secondary: `$${details.pricePerPeriod?.toLocaleString()}/${details.periodicity === 'monthly' ? 'mes' : details.periodicity === 'quarterly' ? 'trim' : 'año'}` };
+        return `${(details as MembershipDetails).membershipType} - $${(details as MembershipDetails).pricePerPeriod}`;
       case 'personal_training':
-        return { primary: `${details.numberOfSessions} sesiones`, secondary: details.assignedTrainer ? `Entr: ${details.assignedTrainer}` : null };
+        return `${(details as PersonalTrainingDetails).numberOfSessions} sesiones - ${(details as PersonalTrainingDetails).serviceType}`;
       case 'fitness_product':
-        return { primary: details.productName, secondary: `$${details.unitPrice?.toLocaleString()} · Stock: ${details.availableStock}` };
+        return `${(details as FitnessProductDetails).productName} - $${(details as FitnessProductDetails).unitPrice}`;
       case 'combo':
-        return { primary: details.comboType, secondary: `$${details.discountedPrice?.toLocaleString()} · ${details.discountPercentage}% desc` };
+        return `${(details as ComboDetails).comboType}`;
       default:
         return null;
     }
@@ -169,12 +202,9 @@ export default function SalesPipeline() {
   useEffect(() => {
     const loadLeads = async () => {
       try {
-        const data = await getLeads();
-        const raw = data as any;
-        const list = Array.isArray(raw) ? raw
-          : raw.data?.leads || raw.data?.items || raw.data || raw.leads || [];
-        setLeads(list);
-      } catch (err) {
+        const data = await getLeads() as LeadsApiResponse;
+        setLeads(normalizeLeadsResponse(data));
+      } catch {
         setError('Error al cargar leads');
       } finally {
         setLoading(false);
@@ -194,7 +224,7 @@ export default function SalesPipeline() {
     try {
       await moveLeadStage(leadId, newStatus);
       toast.success(newStatus === 'cerrado_ganado' ? '🎉 ¡Nueva venta completada!' : 'Lead movido');
-    } catch (err) {
+    } catch {
       setLeads(previousLeads);
       toast.error('Error al mover lead');
     }
@@ -203,14 +233,12 @@ export default function SalesPipeline() {
   const handleFormSubmit = async (data: any) => {
     try {
       if (editingLead) {
-        await updateLeadApi(editingLead.id, data);
-        const updatedLeads = leads.map(l => l.id === editingLead.id ? { ...l, ...data } as Lead : l);
-        setLeads(updatedLeads);
+        await updateLeadApi(editingLead.id, data as Record<string, unknown>);
+        setLeads(leads.map(l => l.id === editingLead.id ? {...l, ...data} as Lead : l));
         toast.success('Lead actualizado');
       } else {
-        const response = await createLead(data);
-        const raw = response as any;
-        const newLead = raw.data || raw;
+        const response = await createLead(data as Record<string, unknown>) as LeadMutationResponse;
+        const newLead = normalizeLeadMutationResponse(response);
         setLeads([...leads, newLead]);
         toast.success('Lead creado');
       }
@@ -238,7 +266,7 @@ export default function SalesPipeline() {
       setLeads(leads.filter(l => l.id !== id));
       toast.success('Lead eliminado');
       setDeleteConfirmId(null);
-    } catch (err) {
+    } catch {
       toast.error('Error al eliminar lead');
     }
   };
@@ -262,12 +290,9 @@ export default function SalesPipeline() {
               <ExcelButtons onImportComplete={() => {
                 const loadLeads = async () => {
                   try {
-                    const data = await getLeads();
-                    const raw = data as any;
-                    const list = Array.isArray(raw) ? raw
-                      : raw.data?.leads || raw.data?.items || raw.data || raw.leads || [];
-                    setLeads(list);
-                  } catch (err) {
+                    const data = await getLeads() as LeadsApiResponse;
+                    setLeads(normalizeLeadsResponse(data));
+                  } catch {
                     setError('Error al cargar leads');
                   }
                 };
@@ -307,8 +332,20 @@ export default function SalesPipeline() {
       <LeadFormModal
         isOpen={isFormOpen}
         lead={editingLead}
-        onClose={() => { setIsFormOpen(false); setEditingLead(null); }}
+        onClose={() => {
+          setIsFormOpen(false);
+          setEditingLead(null);
+        }}
         onSubmit={handleFormSubmit}
+      />
+
+      <LeadDetailModal
+        isOpen={isDetailOpen}
+        lead={viewingLead}
+        onClose={() => {
+          setIsDetailOpen(false);
+          setViewingLead(null);
+        }}
       />
 
       {/* Delete Confirmation */}

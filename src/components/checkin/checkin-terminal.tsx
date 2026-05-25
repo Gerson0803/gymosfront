@@ -331,13 +331,13 @@ export default function CheckInTerminal() {
                 <p className="mt-3 text-center text-xs text-[#5B6475]">{cameraMessage}</p>
               </div>
             ) : (
-              <div className="relative flex h-40 w-56 items-center justify-center">
+              <div className="relative flex h-40 w-56 items-center justify-center overflow-hidden">
                 <span className="absolute left-0 top-0 h-8 w-8 border-l-2 border-t-2 border-[#0B57F0]" />
                 <span className="absolute right-0 top-0 h-8 w-8 border-r-2 border-t-2 border-[#0B57F0]" />
                 <span className="absolute bottom-0 left-0 h-8 w-8 border-b-2 border-l-2 border-[#0B57F0]" />
                 <span className="absolute bottom-0 right-0 h-8 w-8 border-b-2 border-r-2 border-[#0B57F0]" />
                 <QrCode className="h-16 w-16 text-[#0B57F0]/20" />
-                <div className="absolute left-4 right-4 top-1/2 h-0.5 -translate-y-1/2 bg-[#0B57F0]/60 shadow-[0_0_12px_#0B57F0]" />
+                <div className="scanner-line absolute left-4 right-4 top-0 h-[3px] bg-gradient-to-b from-[#60A5FA] via-[#2563EB] to-[#93C5FD] shadow-[0_0_14px_#2563EB]" />
               </div>
             )}
           </div>
@@ -436,6 +436,21 @@ export default function CheckInTerminal() {
           </div>
         </article>
       </section>
+      <style jsx>{`
+        @keyframes qr-scan {
+          0%,
+          100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(calc(10rem - 3px));
+          }
+        }
+
+        .scanner-line {
+          animation: qr-scan 2s ease-in-out infinite;
+        }
+      `}</style>
     </div>
   );
 }
