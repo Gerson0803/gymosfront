@@ -284,9 +284,9 @@ export default function SalesPipeline() {
 
       <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
         <div className="min-h-0 flex-1 overflow-x-auto overflow-y-hidden overscroll-x-contain">
-          <div className="flex h-full min-w-max items-stretch gap-4">
+          <div className="grid h-full min-w-[1180px] grid-cols-6 items-stretch gap-4 xl:min-w-0">
           {stages.map((stage) => (
-            <div key={stage.id} className="h-full w-[260px] shrink-0">
+            <div key={stage.id} className="h-full min-w-[180px]">
               <DroppableColumn
                 stageId={stage.id}
                 stageName={stage.label}
@@ -301,20 +301,76 @@ export default function SalesPipeline() {
         </div>
       </DndContext>
 
-      {/* Form Modal */}
-      <LeadFormModal
-        isOpen={isFormOpen}
-        lead={editingLead}
-        onClose={() => { setIsFormOpen(false); setEditingLead(null); }}
-        onSubmit={handleFormSubmit}
-      />
+      {isPanelOpen && (
+        <aside className="fixed inset-y-0 right-0 z-50 w-full max-w-xl overflow-y-auto border-l border-[#E5EAF3] bg-white p-5 shadow-[0_24px_80px_-24px_rgba(10,23,51,0.35)] sm:p-6">
+          <div className="mb-6 flex items-start justify-between gap-4 border-b border-[#E5EAF3] pb-5">
+            <div>
+              <p className={premium.labelCaps}>Sales Pipeline</p>
+              <h2 className="mt-1 text-2xl font-bold text-[#0A1733]">{editingLead ? 'Editar Lead' : 'Nuevo Lead'}</h2>
+              <p className="mt-1 text-sm text-[#5B6475]">Capture contact details and qualification data.</p>
+            </div>
+            <button type="button" onClick={() => { setIsPanelOpen(false); setEditingLead(null); reset(); }} className={premium.formSecondaryBtn}>Cerrar</button>
+          </div>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <div className={premium.formSection}>
+              <div className="mb-5">
+                <h3 className="text-lg font-bold text-[#0A1733]">Contact information</h3>
+                <p className="mt-1 text-sm text-[#5B6475]">Basic information for follow-up and communication.</p>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="block">
+                  <span className={premium.formLabel}>Nombre completo</span>
+                  <input {...register('name')} placeholder="Ej: Juan García" className={premium.formInput} />
+                  {errors.name && <p className={premium.formError}>{errors.name.message}</p>}
+                </label>
+                <label className="block">
+                  <span className={premium.formLabel}>Email</span>
+                  <input {...register('email')} type="email" placeholder="juan@email.com" className={premium.formInput} />
+                  {errors.email && <p className={premium.formError}>{errors.email.message}</p>}
+                </label>
+                <label className="block sm:col-span-2">
+                  <span className={premium.formLabel}>Teléfono</span>
+                  <input {...register('phone')} placeholder="+57 300 123 4567" className={premium.formInput} />
+                  {errors.phone && <p className={premium.formError}>{errors.phone.message}</p>}
+                </label>
+              </div>
+            </div>
 
-      {/* Detail Modal */}
-      <LeadDetailModal
-        isOpen={isDetailOpen}
-        lead={viewingLead}
-        onClose={() => { setIsDetailOpen(false); setViewingLead(null); }}
-      />
+            <div className={premium.formSection}>
+              <div className="mb-5">
+                <h3 className="text-lg font-bold text-[#0A1733]">Qualification</h3>
+                <p className="mt-1 text-sm text-[#5B6475]">Goal, budget and lead source.</p>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="block sm:col-span-2">
+                  <span className={premium.formLabel}>Objetivo fitness</span>
+                  <input {...register('fitnessGoal')} placeholder="Ej: Ganar músculo, Perder peso" className={premium.formInput} />
+                  {errors.fitnessGoal && <p className={premium.formError}>{errors.fitnessGoal.message}</p>}
+                </label>
+                <label className="block">
+                  <span className={premium.formLabel}>Presupuesto (COP)</span>
+                  <input {...register('budget', { valueAsNumber: true })} type="number" placeholder="80000" className={premium.formInput} />
+                  {errors.budget && <p className={premium.formError}>{errors.budget.message}</p>}
+                </label>
+                <label className="block">
+                  <span className={premium.formLabel}>Fuente</span>
+                  <select {...register('source')} className={premium.formInput}>
+                  <option value="instagram">Instagram</option>
+                  <option value="facebook">Facebook</option>
+                  <option value="google">Google</option>
+                  <option value="referido">Referido</option>
+                  <option value="walk_in">Walk-in</option>
+                </select>
+                </label>
+              </div>
+            </div>
+
+            <button type="submit" className={`${premium.pillBtn} w-full`}>
+              {editingLead ? 'Actualizar' : 'Guardar'}
+            </button>
+          </form>
+        </aside>
+      )}
 
       {/* Delete Confirmation */}
       {deleteConfirmId && (

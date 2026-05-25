@@ -20,5 +20,6 @@ export const config = {
     "/settings",
     "/settings/:path*",
     "/login",
+    "/register",
   ],
 };

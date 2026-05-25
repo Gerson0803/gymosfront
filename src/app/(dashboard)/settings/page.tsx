@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { useAppSettings } from '@/context/app-settings-context';
+import { changePassword } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { Save, Eye, EyeOff, User, Lock, Bell } from 'lucide-react';
 import { premium } from '@/lib/premium-ui';
+import { GymNameEditor } from '@/components/layout/gym-name-editor';
 
 interface UserData {
   id?: string;
@@ -73,94 +75,57 @@ function SettingsTabs({
 }
 
 function ProfileTab() {
-  const { gymName, setGymName, userDisplayName, setUserDisplayName } = useAppSettings();
-  const [userData, setUserData] = useState<UserData | null>(null);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [role, setRole] = useState('user');
 
   useEffect(() => {
     const storedUserData = localStorage.getItem('userData');
     if (storedUserData) {
       try {
         const data = JSON.parse(storedUserData) as UserData;
-        setUserData(data);
         setName(data.name || '');
         setEmail(data.email || '');
-        setRole(data.role || 'user');
       } catch {
         /* ignore */
       }
     }
   }, []);
 
-  const handleSaveProfile = () => {
-    if (!name.trim()) {
-      toast.error('El nombre no puede estar vacio');
-      return;
-    }
-    const updatedData = { ...userData, name: name.trim(), email, role };
-    localStorage.setItem('userData', JSON.stringify(updatedData));
-    setUserData(updatedData);
-    toast.success('Perfil actualizado');
-  };
-
   return (
     <div className="space-y-6">
       <section className={`${premium.card} p-6 sm:p-8`}>
-        <h2 className="text-lg font-semibold text-[#0A1733]">Informacion de cuenta</h2>
-        <p className="mt-1 text-sm text-[#5B6475]">Datos asociados a tu sesion.</p>
+        <h2 className="text-lg font-semibold text-[#0A1733]">Información de cuenta</h2>
+        <p className="mt-1 text-sm text-[#5B6475]">Datos asociados a tu sesión.</p>
         <div className="mt-6 space-y-4">
           <div>
-            <label className="mb-2 block text-sm font-medium text-[#0A1733]">Email</label>
-            <input type="email" value={email} disabled className={`${inputClass} cursor-not-allowed opacity-70`} />
+            <label className="mb-2 block text-sm font-medium text-[#0A1733]">Nombre</label>
+            <input
+              type="text"
+              value={name}
+              disabled
+              className={`${inputClass} cursor-not-allowed opacity-70`}
+            />
+            <p className="mt-1 text-xs text-[#5B6475]">El nombre no se puede modificar desde aquí.</p>
           </div>
           <div>
-            <label className="mb-2 block text-sm font-medium text-[#0A1733]">Nombre completo</label>
-            <input type="text" value={name} onChange={(e) => setName(e.target.value)} className={inputClass} />
+            <label className="mb-2 block text-sm font-medium text-[#0A1733]">Correo electrónico</label>
+            <input
+              type="email"
+              value={email}
+              disabled
+              className={`${inputClass} cursor-not-allowed opacity-70`}
+            />
+            <p className="mt-1 text-xs text-[#5B6475]">El correo no se puede modificar desde aquí.</p>
           </div>
-          <div>
-            <label className="mb-2 block text-sm font-medium text-[#0A1733]">Rol</label>
-            <select value={role} disabled className={`${inputClass} cursor-not-allowed opacity-70`}>
-              <option value="admin">Administrador</option>
-              <option value="trainer">Entrenador</option>
-              <option value="staff">Personal</option>
-              <option value="user">Usuario</option>
-            </select>
-          </div>
-          <button type="button" onClick={handleSaveProfile} className={premium.pillBtn}>
-            <Save className="h-4 w-4" />
-            Guardar cambios
-          </button>
         </div>
       </section>
 
       <section className={`${premium.card} p-6 sm:p-8`}>
-        <h2 className="text-lg font-semibold text-[#0A1733]">Nombre personalizado</h2>
-        <p className="mt-1 text-sm text-[#5B6475]">Se muestra en la barra lateral de la aplicacion.</p>
-        <div className="mt-4">
-          <input
-            type="text"
-            value={userDisplayName}
-            onChange={(e) => setUserDisplayName(e.target.value)}
-            placeholder="Tu nombre personalizado"
-            className={inputClass}
-          />
-        </div>
-      </section>
-
-      <section className={`${premium.card} p-6 sm:p-8`}>
-        <h2 className="text-lg font-semibold text-[#0A1733]">Informacion del gimnasio</h2>
-        <p className="mt-1 text-sm text-[#5B6475]">Personaliza el nombre de tu centro fitness.</p>
-        <div className="mt-4">
-          <input
-            type="text"
-            value={gymName}
-            onChange={(e) => setGymName(e.target.value)}
-            placeholder="Nombre de tu gimnasio"
-            className={inputClass}
-          />
-        </div>
+        <h2 className="text-lg font-semibold text-[#0A1733]">Información del gimnasio</h2>
+        <p className="mt-1 text-sm text-[#5B6475]">
+          Personaliza el nombre de tu centro. Los cambios se aplican al guardar.
+        </p>
+        <GymNameEditor variant="settings" />
       </section>
     </div>
   );
@@ -174,74 +139,106 @@ function SecurityTab() {
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleChangePassword = () => {
-    if (!oldPassword) {
-      toast.error('Ingresa tu contrasena actual');
-      return;
-    }
-    if (!newPassword || newPassword.length < 6) {
-      toast.error('La nueva contrasena debe tener al menos 6 caracteres');
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      toast.error('Las contrasenas no coinciden');
-      return;
-    }
-    toast.success('Contrasena cambiada exitosamente');
+  const resetPasswordForm = () => {
     setOldPassword('');
     setNewPassword('');
     setConfirmPassword('');
     setShowPasswordForm(false);
   };
 
+  const handleChangePassword = async () => {
+    if (!oldPassword) {
+      toast.error('Ingresa tu contraseña actual');
+      return;
+    }
+    if (!newPassword || newPassword.length < 6) {
+      toast.error('La nueva contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error('Las contraseñas no coinciden');
+      return;
+    }
+    if (oldPassword === newPassword) {
+      toast.error('La nueva contraseña debe ser diferente a la actual');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await changePassword(oldPassword, newPassword);
+      toast.success('Contraseña actualizada correctamente');
+      resetPasswordForm();
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Error al cambiar la contraseña';
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <section className={`${premium.card} p-6 sm:p-8`}>
-      <h2 className="text-lg font-semibold text-[#0A1733]">Cambiar contrasena</h2>
+      <h2 className="text-lg font-semibold text-[#0A1733]">Cambiar contraseña</h2>
+      <p className="mt-1 text-sm text-[#5B6475]">
+        La actualización se guarda en tu cuenta del servidor.
+      </p>
       {!showPasswordForm ? (
-        <button type="button" onClick={() => setShowPasswordForm(true)} className={`${premium.pillBtnOutline} mt-6`}>
-          Cambiar contrasena
+        <button
+          type="button"
+          onClick={() => setShowPasswordForm(true)}
+          className={`${premium.pillBtnOutline} mt-6`}
+          disabled={loading}
+        >
+          Cambiar contraseña
         </button>
       ) : (
         <div className="mt-6 space-y-4">
           <PasswordField
             id="old-password"
-            label="Contrasena actual"
+            label="Contraseña actual"
             value={oldPassword}
             onChange={setOldPassword}
             visible={showPassword}
             onToggle={() => setShowPassword(!showPassword)}
+            disabled={loading}
           />
           <PasswordField
             id="new-password"
-            label="Nueva contrasena"
+            label="Nueva contraseña"
             value={newPassword}
             onChange={setNewPassword}
             visible={showNewPassword}
             onToggle={() => setShowNewPassword(!showNewPassword)}
-            hint="Minimo 6 caracteres"
+            hint="Mínimo 6 caracteres"
+            disabled={loading}
           />
           <PasswordField
             id="confirm-password"
-            label="Confirmar nueva contrasena"
+            label="Confirmar nueva contraseña"
             value={confirmPassword}
             onChange={setConfirmPassword}
             visible={showConfirmPassword}
             onToggle={() => setShowConfirmPassword(!showConfirmPassword)}
+            disabled={loading}
           />
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={handleChangePassword} className={`${premium.pillBtn} flex-1`}>
-              Cambiar contrasena
+            <button
+              type="button"
+              onClick={handleChangePassword}
+              disabled={loading}
+              className={`${premium.pillBtn} flex-1 disabled:cursor-not-allowed disabled:opacity-50`}
+            >
+              {loading ? 'Guardando...' : 'Cambiar contraseña'}
             </button>
             <button
               type="button"
-              onClick={() => {
-                setShowPasswordForm(false);
-                setOldPassword('');
-                setNewPassword('');
-                setConfirmPassword('');
-              }}
-              className={`${premium.pillBtnOutline} flex-1`}
+              onClick={resetPasswordForm}
+              disabled={loading}
+              className={`${premium.pillBtnOutline} flex-1 disabled:cursor-not-allowed disabled:opacity-50`}
             >
               Cancelar
             </button>
@@ -294,6 +291,7 @@ function PasswordField({
   visible,
   onToggle,
   hint,
+  disabled,
 }: {
   id: string;
   label: string;
@@ -302,6 +300,7 @@ function PasswordField({
   visible: boolean;
   onToggle: () => void;
   hint?: string;
+  disabled?: boolean;
 }) {
   return (
     <div>
@@ -316,6 +315,7 @@ function PasswordField({
           onChange={(e) => onChange(e.target.value)}
           placeholder="********"
           className={`${inputClass} pr-11`}
+          disabled={disabled}
         />
         <button
           type="button"
