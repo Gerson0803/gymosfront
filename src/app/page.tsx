@@ -33,10 +33,16 @@ export default function HomePage() {
             </a>
           </div>
 
-          {/* Botón derecha (Desktop) */}
-          <div className="hidden md:block">
-            <Link 
-              href="/login" 
+          {/* Botones derecha (Desktop) */}
+          <div className="hidden md:flex items-center gap-3">
+            <Link
+              href="/register"
+              className="rounded-full border border-[#0B57F0] px-6 py-2.5 text-sm font-semibold text-[#0B57F0] transition hover:bg-[#0B57F0]/5"
+            >
+              Registro
+            </Link>
+            <Link
+              href="/login"
               className="rounded-full bg-[#0B57F0] px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0B57F0]/90"
             >
               Login
@@ -70,8 +76,15 @@ export default function HomePage() {
             >
               Planes
             </a>
-            <Link 
-              href="/login" 
+            <Link
+              href="/register"
+              onClick={() => setMobileMenuOpen(false)}
+              className="rounded-full border border-[#0B57F0] py-3 text-sm font-semibold text-[#0B57F0] text-center transition hover:bg-[#0B57F0]/5 block"
+            >
+              Registro
+            </Link>
+            <Link
+              href="/login"
               onClick={() => setMobileMenuOpen(false)}
               className="rounded-full bg-[#0B57F0] py-3 text-sm font-semibold text-white text-center transition hover:bg-[#0B57F0]/90 block"
             >
@@ -115,13 +128,19 @@ export default function HomePage() {
               GymOS unifica el control de miembros, ventas y equipamiento en una interfaz minimalista y de alto rendimiento. Diseñado para centros fitness premium que exigen precisión.
             </p>
 
-            {/* Botón */}
+            {/* Botones */}
             <div className="flex flex-wrap gap-4">
-              <Link 
-                href="/login" 
+              <Link
+                href="/register"
+                className="rounded-full border border-[#0B57F0] px-8 py-3.5 text-sm font-semibold text-[#0B57F0] transition hover:bg-[#0B57F0]/5 shadow-sm"
+              >
+                Crear cuenta
+              </Link>
+              <Link
+                href="/login"
                 className="rounded-full bg-[#0B57F0] px-8 py-3.5 text-sm font-semibold text-white transition hover:bg-[#0B57F0]/90 shadow-sm"
               >
-                Login
+                Iniciar sesión
               </Link>
             </div>
 
