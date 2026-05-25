@@ -2,6 +2,7 @@
 
 import { Controller, UseFormReturn } from 'react-hook-form';
 import { PersonalTrainingDetails } from '@/types/client';
+import { premium } from '@/lib/premium-ui';
 
 interface PersonalTrainingFormProps {
   form: UseFormReturn;
@@ -9,188 +10,93 @@ interface PersonalTrainingFormProps {
 }
 
 export function PersonalTrainingForm({ form, defaultValues }: PersonalTrainingFormProps) {
-  const { control, formState: { errors } } = form;
+  const { control } = form;
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-[#0A1733]">Detalles de Entrenamiento Personalizado</h3>
-      
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-[#5B6475] mb-1">Tipo de Servicio</label>
-          <Controller
-            control={control}
-            name="productDetails.serviceType"
-            render={({ field }) => (
-              <select
-                {...field}
-                className="w-full rounded-lg border border-[#E5EAF3] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B57F0]"
-              >
-                <option value="">Seleccionar</option>
-                <option value="individual">Individual</option>
-                <option value="group">Grupal</option>
-                <option value="functional">Funcional</option>
-              </select>
-            )}
-          />
-        </div>
+      <div className="grid grid-cols-2 gap-3">
+        <label className="block">
+          <span className={premium.formLabel}>Tipo de Servicio</span>
+          <Controller control={control} name="productDetails.serviceType" render={({ field }) => (
+            <select {...field} className={premium.formInput}>
+              <option value="">Seleccionar</option>
+              <option value="individual">Individual</option>
+              <option value="group">Grupal</option>
+              <option value="functional">Funcional</option>
+            </select>
+          )} />
+        </label>
 
-        <div>
-          <label className="block text-sm font-medium text-[#5B6475] mb-1">Entrenador Asignado</label>
-          <Controller
-            control={control}
-            name="productDetails.assignedTrainer"
-            render={({ field }) => (
-              <input
-                {...field}
-                type="text"
-                placeholder="Nombre del entrenador"
-                className="w-full rounded-lg border border-[#E5EAF3] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B57F0]"
-              />
-            )}
-          />
-        </div>
+        <label className="block">
+          <span className={premium.formLabel}>Entrenador Asignado</span>
+          <Controller control={control} name="productDetails.assignedTrainer" render={({ field }) => (
+            <input {...field} type="text" placeholder="Nombre del entrenador" className={premium.formInput} />
+          )} />
+        </label>
 
-        <div>
-          <label className="block text-sm font-medium text-[#5B6475] mb-1">Número de Sesiones</label>
-          <Controller
-            control={control}
-            name="productDetails.numberOfSessions"
-            render={({ field }) => (
-              <input
-                {...field}
-                type="number"
-                min="1"
-                onChange={(e) => field.onChange(e.target.valueAsNumber)}
-                className="w-full rounded-lg border border-[#E5EAF3] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B57F0]"
-              />
-            )}
-          />
-        </div>
+        <label className="block">
+          <span className={premium.formLabel}>Número de Sesiones</span>
+          <Controller control={control} name="productDetails.numberOfSessions" render={({ field }) => (
+            <input {...field} type="number" min="1" onChange={(e) => field.onChange(e.target.valueAsNumber)} className={premium.formInput} />
+          )} />
+        </label>
 
-        <div>
-          <label className="block text-sm font-medium text-[#5B6475] mb-1">Duración por Sesión (minutos)</label>
-          <Controller
-            control={control}
-            name="productDetails.sessionDurationMinutes"
-            render={({ field }) => (
-              <input
-                {...field}
-                type="number"
-                min="15"
-                step="15"
-                onChange={(e) => field.onChange(e.target.valueAsNumber)}
-                className="w-full rounded-lg border border-[#E5EAF3] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B57F0]"
-              />
-            )}
-          />
-        </div>
+        <label className="block">
+          <span className={premium.formLabel}>Duración por Sesión (min)</span>
+          <Controller control={control} name="productDetails.sessionDurationMinutes" render={({ field }) => (
+            <input {...field} type="number" min="15" step="15" onChange={(e) => field.onChange(e.target.valueAsNumber)} className={premium.formInput} />
+          )} />
+        </label>
 
-        <div>
-          <label className="block text-sm font-medium text-[#5B6475] mb-1">Modalidad</label>
-          <Controller
-            control={control}
-            name="productDetails.modality"
-            render={({ field }) => (
-              <select
-                {...field}
-                className="w-full rounded-lg border border-[#E5EAF3] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B57F0]"
-              >
-                <option value="">Seleccionar</option>
-                <option value="in-person">Presencial</option>
-                <option value="virtual">Virtual</option>
-                <option value="hybrid">Híbrida</option>
-              </select>
-            )}
-          />
-        </div>
+        <label className="block">
+          <span className={premium.formLabel}>Modalidad</span>
+          <Controller control={control} name="productDetails.modality" render={({ field }) => (
+            <select {...field} className={premium.formInput}>
+              <option value="">Seleccionar</option>
+              <option value="in-person">Presencial</option>
+              <option value="virtual">Virtual</option>
+              <option value="hybrid">Híbrida</option>
+            </select>
+          )} />
+        </label>
 
-        <div>
-          <label className="block text-sm font-medium text-[#5B6475] mb-1">Precio por Sesión</label>
-          <Controller
-            control={control}
-            name="productDetails.pricePerSession"
-            render={({ field }) => (
-              <input
-                {...field}
-                type="number"
-                min="0"
-                step="0.01"
-                onChange={(e) => field.onChange(e.target.valueAsNumber)}
-                className="w-full rounded-lg border border-[#E5EAF3] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B57F0]"
-              />
-            )}
-          />
-        </div>
+        <label className="block">
+          <span className={premium.formLabel}>Precio por Sesión</span>
+          <Controller control={control} name="productDetails.pricePerSession" render={({ field }) => (
+            <input {...field} type="number" min="0" step="0.01" onChange={(e) => field.onChange(e.target.valueAsNumber)} className={premium.formInput} />
+          )} />
+        </label>
 
-        <div>
-          <label className="block text-sm font-medium text-[#5B6475] mb-1">Precio del Pack (opcional)</label>
-          <Controller
-            control={control}
-            name="productDetails.packagePrice"
-            render={({ field }) => (
-              <input
-                {...field}
-                type="number"
-                min="0"
-                step="0.01"
-                onChange={(e) => field.onChange(e.target.valueAsNumber)}
-                className="w-full rounded-lg border border-[#E5EAF3] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B57F0]"
-              />
-            )}
-          />
-        </div>
+        <label className="block">
+          <span className={premium.formLabel}>Precio del Pack</span>
+          <Controller control={control} name="productDetails.packagePrice" render={({ field }) => (
+            <input {...field} type="number" min="0" step="0.01" onChange={(e) => field.onChange(e.target.valueAsNumber)} className={premium.formInput} />
+          )} />
+        </label>
 
-        <div>
-          <label className="block text-sm font-medium text-[#5B6475] mb-1">Fecha Primera Sesión</label>
-          <Controller
-            control={control}
-            name="productDetails.firstSessionDate"
-            render={({ field }) => (
-              <input
-                {...field}
-                type="date"
-                className="w-full rounded-lg border border-[#E5EAF3] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B57F0]"
-              />
-            )}
-          />
-        </div>
+        <label className="block">
+          <span className={premium.formLabel}>Fecha Primera Sesión</span>
+          <Controller control={control} name="productDetails.firstSessionDate" render={({ field }) => (
+            <input {...field} type="date" className={premium.formInput} />
+          )} />
+        </label>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-[#5B6475] mb-1">Objetivo del Cliente</label>
-        <Controller
-          control={control}
-          name="productDetails.clientObjective"
-          render={({ field }) => (
-            <textarea
-              {...field}
-              placeholder="Describe el objetivo del cliente"
-              rows={3}
-              className="w-full rounded-lg border border-[#E5EAF3] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B57F0]"
-            />
-          )}
-        />
+        <span className={premium.formLabel}>Objetivo del Cliente</span>
+        <Controller control={control} name="productDetails.clientObjective" render={({ field }) => (
+          <textarea {...field} placeholder="Describe el objetivo del cliente" rows={3} className={premium.formTextarea} />
+        )} />
       </div>
 
       <div className="flex items-center">
-        <Controller
-          control={control}
-          name="productDetails.initialEvaluationRequired"
-          render={({ field }) => (
-            <label className="flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={field.value}
-                onChange={field.onChange}
-                className="w-4 h-4 rounded border-[#E5EAF3]"
-              />
-              <span className="ml-2 text-sm font-medium text-[#5B6475]">Evaluación Inicial Requerida</span>
-            </label>
-          )}
-        />
+        <Controller control={control} name="productDetails.initialEvaluationRequired" render={({ field }) => (
+          <label className="flex items-center cursor-pointer">
+            <input type="checkbox" checked={field.value} onChange={field.onChange} className="w-4 h-4 rounded border-[#E5EAF3] text-[#0B57F0] focus:ring-[#0B57F0]" />
+            <span className="ml-2 text-sm font-medium text-[#5B6475]">Evaluación Inicial Requerida</span>
+          </label>
+        )} />
       </div>
     </div>
   );
 }
-

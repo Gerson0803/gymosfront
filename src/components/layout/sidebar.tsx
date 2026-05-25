@@ -15,6 +15,7 @@ import {
   PanelLeftClose,
   Menu,
   X,
+  Settings,
 } from 'lucide-react';
 import { logout } from '@/lib/api';
 import { useAppSettings } from '@/context/app-settings-context';
@@ -35,16 +36,12 @@ type SidebarProps = {
   onToggleCollapse: () => void;
 };
 
-type SidebarProps = {
-  isCollapsed: boolean;
-  onToggleCollapse: () => void;
-};
-
 export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps) {
   const pathname = usePathname();
   const { gymName } = useAppSettings();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [userDisplayName, setUserDisplayName] = useState('');
+  const { isModuleEnabled } = useModules();
 
   useEffect(() => {
     const stored = localStorage.getItem('userData');

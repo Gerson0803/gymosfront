@@ -157,7 +157,7 @@ export function RegisterForm() {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="********"
-            className={inputCompactClass}
+            className={inputClass}
             required
             disabled={loading}
           />
@@ -211,21 +211,6 @@ export function RegisterForm() {
             ))}
           </div>
         </div>
-      <div className="space-y-3">
-        <label htmlFor="register-confirm" className="block text-sm font-medium text-slate-700">
-          Confirmar contraseña
-        </label>
-        <input
-          id="register-confirm"
-          type="password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          placeholder="••••••••"
-          className={inputClass}
-          required
-          disabled={loading}
-        />
-      </div>
 
       <button type="submit" disabled={loading} className={primaryBtnClass}>
         {loading ? 'Creando cuenta...' : 'Crear cuenta'}

@@ -1,8 +1,6 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import toast from 'react-hot-toast';
 import {
   DndContext,
@@ -13,16 +11,14 @@ import {
   PointerSensor,
 } from '@dnd-kit/core';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
-import { leadSchema, type LeadFormData } from '@/lib/validations';
 import { Lead, LeadStatus } from '@/types/client';
-import { Plus, Edit, Trash2, Loader } from 'lucide-react';
+import { Plus, Edit, Trash2, Loader, Mail, Phone, User } from 'lucide-react';
 import { getLeads, createLead, updateLeadApi, deleteLeadApi, moveLeadStage } from '@/lib/api';
 import { LeadFormModal } from './LeadFormModal';
 import { LeadDetailModal } from './LeadDetailModal';
 import { ExcelButtons } from './ExcelButtons';
 
 import { PageHeader } from '@/components/layout/page-header';
-import { premium } from '@/lib/premium-ui';
 
 const stages: { id: LeadStatus; label: string }[] = [
   { id: 'nuevo', label: 'New Leads' },
@@ -41,29 +37,31 @@ function DraggableCard({ lead, onEdit, onDelete, onViewDetails }: { lead: Lead; 
   const style = transform ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` } : undefined;
 
   const productTypeInfo = {
-    fitness_product: { label: 'Producto', icon: '🏋️', color: 'bg-orange-100 text-orange-700' },
-    membership: { label: 'Membresía', icon: '🎟️', color: 'bg-blue-100 text-blue-700' },
-    personal_training: { label: 'Entrenamiento', icon: '👨‍🏫', color: 'bg-purple-100 text-purple-700' },
-    combo: { label: 'Combo', icon: '📦', color: 'bg-green-100 text-green-700' },
-  }[lead.productType] || { label: 'Producto', icon: '📦', color: 'bg-gray-100 text-gray-700' };
+    fitness_product: { label: 'Producto', icon: '🏋️', color: 'bg-orange-100 text-orange-700 border-orange-200' },
+    membership: { label: 'Membresía', icon: '🎟️', color: 'bg-blue-100 text-blue-700 border-blue-200' },
+    personal_training: { label: 'Entrenamiento', icon: '👨‍🏫', color: 'bg-purple-100 text-purple-700 border-purple-200' },
+    combo: { label: 'Combo', icon: '📦', color: 'bg-green-100 text-green-700 border-green-200' },
+  }[lead.productType] || { label: 'Producto', icon: '📦', color: 'bg-gray-100 text-gray-700 border-gray-200' };
+
+  const details = lead.productDetails as Record<string, any> | null;
 
   const getRelevantInfo = () => {
-    const details = lead.productDetails;
     if (!details) return null;
-
     switch (lead.productType) {
       case 'membership':
-        return `${(details as any).membershipType} - $${(details as any).pricePerPeriod}`;
+        return { primary: details.membershipType, secondary: `$${details.pricePerPeriod?.toLocaleString()}/${details.periodicity === 'monthly' ? 'mes' : details.periodicity === 'quarterly' ? 'trim' : 'año'}` };
       case 'personal_training':
-        return `${(details as any).numberOfSessions} sesiones - ${(details as any).serviceType}`;
+        return { primary: `${details.numberOfSessions} sesiones`, secondary: details.assignedTrainer ? `Entr: ${details.assignedTrainer}` : null };
       case 'fitness_product':
-        return `${(details as any).productName} - $${(details as any).unitPrice}`;
+        return { primary: details.productName, secondary: `$${details.unitPrice?.toLocaleString()} · Stock: ${details.availableStock}` };
       case 'combo':
-        return `${(details as any).comboType}`;
+        return { primary: details.comboType, secondary: `$${details.discountedPrice?.toLocaleString()} · ${details.discountPercentage}% desc` };
       default:
         return null;
     }
   };
+
+  const info = getRelevantInfo();
 
   return (
     <div
@@ -77,26 +75,30 @@ function DraggableCard({ lead, onEdit, onDelete, onViewDetails }: { lead: Lead; 
       }`}
     >
       <div className="flex items-start justify-between gap-2">
-        <h4 className="text-sm font-semibold text-[#0A1733] flex-1">{lead.name}</h4>
-      </div>
-      
-      <div className={`mt-2 rounded-lg px-2 py-1.5 text-xs font-medium ${productTypeInfo.color}`}>
-        {productTypeInfo.icon} {productTypeInfo.label}
+        <h4 className="text-sm font-semibold text-[#0A1733] flex-1 truncate">{lead.name}</h4>
       </div>
 
-      {getRelevantInfo() && (
-        <p className="mt-2 text-xs text-[#5B6475] line-clamp-2 font-medium">{getRelevantInfo()}</p>
+      <div className={`mt-2 inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-xs font-medium ${productTypeInfo.color}`}>
+        <span>{productTypeInfo.icon}</span>
+        <span>{productTypeInfo.label}</span>
+      </div>
+
+      {info && (
+        <div className="mt-2 space-y-0.5">
+          <p className="text-xs font-semibold text-[#0A1733] truncate">{info.primary}</p>
+          {info.secondary && <p className="text-[11px] text-[#5B6475] truncate">{info.secondary}</p>}
+        </div>
       )}
 
-      <div className="mt-4 flex items-center justify-between">
-        <span className="rounded-lg bg-[#F5F7FB] px-2 py-1 text-xs font-medium text-[#5B6475]">
-          {lead.status}
+      <div className="mt-3 flex items-center justify-between">
+        <span className="rounded-md bg-[#F5F7FB] px-2 py-1 text-[11px] font-medium text-[#5B6475] capitalize">
+          {lead.status.replace(/_/g, ' ')}
         </span>
         <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
-          <button type="button" onClick={() => onEdit(lead)} className="rounded-lg p-1.5 text-[#5B6475] hover:bg-[#0B57F0]/5 hover:text-[#0B57F0]">
+          <button type="button" onClick={() => onEdit(lead)} className="rounded-lg p-1.5 text-[#5B6475] hover:bg-[#0B57F0]/5 hover:text-[#0B57F0] transition">
             <Edit className="h-3.5 w-3.5" />
           </button>
-          <button type="button" onClick={() => onDelete(lead.id)} className="rounded-lg p-1.5 text-[#5B6475] hover:bg-red-50 hover:text-red-600">
+          <button type="button" onClick={() => onDelete(lead.id)} className="rounded-lg p-1.5 text-[#5B6475] hover:bg-red-50 hover:text-red-600 transition">
             <Trash2 className="h-3.5 w-3.5" />
           </button>
         </div>
@@ -198,14 +200,15 @@ export default function SalesPipeline() {
     }
   };
 
-  const handleFormSubmit = async (data: LeadFormData) => {
+  const handleFormSubmit = async (data: any) => {
     try {
       if (editingLead) {
-        await updateLeadApi(editingLead.id, data as any);
-        setLeads(leads.map(l => l.id === editingLead.id ? {...l, ...data} as Lead : l));
+        await updateLeadApi(editingLead.id, data);
+        const updatedLeads = leads.map(l => l.id === editingLead.id ? { ...l, ...data } as Lead : l);
+        setLeads(updatedLeads);
         toast.success('Lead actualizado');
       } else {
-        const response = await createLead(data as any);
+        const response = await createLead(data);
         const raw = response as any;
         const newLead = raw.data || raw;
         setLeads([...leads, newLead]);
@@ -273,7 +276,7 @@ export default function SalesPipeline() {
               <button
                 type="button"
                 onClick={() => { setEditingLead(null); setIsFormOpen(true); }}
-                className={premium.pillBtn}
+                className="inline-flex items-center gap-2 rounded-lg bg-[#0B57F0] px-4 py-2 text-sm font-medium text-white hover:bg-[#0B57F0]/90 transition"
               >
                 <Plus className="h-4 w-4" /> Nuevo Lead
               </button>
@@ -301,80 +304,16 @@ export default function SalesPipeline() {
         </div>
       </DndContext>
 
-      {isPanelOpen && (
-        <aside className="fixed inset-y-0 right-0 z-50 w-full max-w-xl overflow-y-auto border-l border-[#E5EAF3] bg-white p-5 shadow-[0_24px_80px_-24px_rgba(10,23,51,0.35)] sm:p-6">
-          <div className="mb-6 flex items-start justify-between gap-4 border-b border-[#E5EAF3] pb-5">
-            <div>
-              <p className={premium.labelCaps}>Sales Pipeline</p>
-              <h2 className="mt-1 text-2xl font-bold text-[#0A1733]">{editingLead ? 'Editar Lead' : 'Nuevo Lead'}</h2>
-              <p className="mt-1 text-sm text-[#5B6475]">Capture contact details and qualification data.</p>
-            </div>
-            <button type="button" onClick={() => { setIsPanelOpen(false); setEditingLead(null); reset(); }} className={premium.formSecondaryBtn}>Cerrar</button>
-          </div>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div className={premium.formSection}>
-              <div className="mb-5">
-                <h3 className="text-lg font-bold text-[#0A1733]">Contact information</h3>
-                <p className="mt-1 text-sm text-[#5B6475]">Basic information for follow-up and communication.</p>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <label className="block">
-                  <span className={premium.formLabel}>Nombre completo</span>
-                  <input {...register('name')} placeholder="Ej: Juan García" className={premium.formInput} />
-                  {errors.name && <p className={premium.formError}>{errors.name.message}</p>}
-                </label>
-                <label className="block">
-                  <span className={premium.formLabel}>Email</span>
-                  <input {...register('email')} type="email" placeholder="juan@email.com" className={premium.formInput} />
-                  {errors.email && <p className={premium.formError}>{errors.email.message}</p>}
-                </label>
-                <label className="block sm:col-span-2">
-                  <span className={premium.formLabel}>Teléfono</span>
-                  <input {...register('phone')} placeholder="+57 300 123 4567" className={premium.formInput} />
-                  {errors.phone && <p className={premium.formError}>{errors.phone.message}</p>}
-                </label>
-              </div>
-            </div>
-
-            <div className={premium.formSection}>
-              <div className="mb-5">
-                <h3 className="text-lg font-bold text-[#0A1733]">Qualification</h3>
-                <p className="mt-1 text-sm text-[#5B6475]">Goal, budget and lead source.</p>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <label className="block sm:col-span-2">
-                  <span className={premium.formLabel}>Objetivo fitness</span>
-                  <input {...register('fitnessGoal')} placeholder="Ej: Ganar músculo, Perder peso" className={premium.formInput} />
-                  {errors.fitnessGoal && <p className={premium.formError}>{errors.fitnessGoal.message}</p>}
-                </label>
-                <label className="block">
-                  <span className={premium.formLabel}>Presupuesto (COP)</span>
-                  <input {...register('budget', { valueAsNumber: true })} type="number" placeholder="80000" className={premium.formInput} />
-                  {errors.budget && <p className={premium.formError}>{errors.budget.message}</p>}
-                </label>
-                <label className="block">
-                  <span className={premium.formLabel}>Fuente</span>
-                  <select {...register('source')} className={premium.formInput}>
-                  <option value="instagram">Instagram</option>
-                  <option value="facebook">Facebook</option>
-                  <option value="google">Google</option>
-                  <option value="referido">Referido</option>
-                  <option value="walk_in">Walk-in</option>
-                </select>
-                </label>
-              </div>
-            </div>
-
-            <button type="submit" className={`${premium.pillBtn} w-full`}>
-              {editingLead ? 'Actualizar' : 'Guardar'}
-            </button>
-          </form>
-        </aside>
-      )}
+      <LeadFormModal
+        isOpen={isFormOpen}
+        lead={editingLead}
+        onClose={() => { setIsFormOpen(false); setEditingLead(null); }}
+        onSubmit={handleFormSubmit}
+      />
 
       {/* Delete Confirmation */}
       {deleteConfirmId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm">
           <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
             <h3 className="text-lg font-semibold mb-2">¿Eliminar lead?</h3>
             <p className="text-sm text-slate-600 mb-4">Esta acción no se puede deshacer.</p>

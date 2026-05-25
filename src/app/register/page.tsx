@@ -1,8 +1,18 @@
 'use client';
 
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { AuthMarketingPanel } from '@/components/auth/auth-marketing-panel';
 import { RegisterForm } from '@/components/auth/register-form';
+import { Loader } from 'lucide-react';
+
+function RegisterFormWrapper() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center p-8"><Loader className="h-8 w-8 animate-spin text-[#0B57F0]" /></div>}>
+      <RegisterForm />
+    </Suspense>
+  );
+}
 
 export default function RegisterPage() {
   return (
@@ -20,7 +30,7 @@ export default function RegisterPage() {
             <p className="mt-2 text-sm text-[#5B6475]">Completa el formulario para empezar a usar GymOS.</p>
           </div>
 
-          <RegisterForm />
+          <RegisterFormWrapper />
 
           <div className="mt-8 rounded-3xl border border-[#E5EAF3] bg-[#F5F7FB] p-5 text-center text-sm text-[#5B6475]">
             ¿Ya tienes cuenta?{' '}

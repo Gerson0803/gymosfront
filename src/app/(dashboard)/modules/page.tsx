@@ -72,7 +72,7 @@ export default function ModulesPage() {
     <div className="space-y-6 pb-4">
       <PageHeader
         title="Módulos"
-        description="Gestiona los módulos disponibles para tu gimnasio"
+        subtitle="Gestiona los módulos disponibles para tu gimnasio"
       />
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
