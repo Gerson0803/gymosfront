@@ -237,14 +237,14 @@ export async function login(email: string, password: string) {
   }
 }
 
-export async function signup(email: string, password: string, name: string) {
+export async function signup(email: string, password: string, name: string, plan?: string) {
   try {
     const response = await apiRequest<{
       success: boolean;
       data: { token: string; user: { id: string; email: string; name: string; role: string } };
     }>("/auth/signup", {
       method: "POST",
-      body: JSON.stringify({ email, password, name }),
+      body: JSON.stringify({ email, password, name, plan }),
     });
 
     if (response.success && response.data.token) {
@@ -316,4 +316,26 @@ export async function updateEquipmentApi(id: string, data: Record<string, unknow
 }
 export async function deleteEquipment(id: string) {
   return apiRequest(`/equipment/${id}`, { method: 'DELETE' });
+}
+
+// MODULES - Module catalog (public)
+export async function getModuleCatalog() {
+  return apiRequest('/modules');
+}
+
+// GYM MODULES - Active modules for current gym
+export async function getGymModules() {
+  return apiRequest('/gym-modules');
+}
+
+export async function activateModule(moduleKey: string) {
+  return apiRequest(`/gym-modules/${moduleKey}/activate`, { method: 'POST' });
+}
+
+export async function deactivateModule(moduleKey: string) {
+  return apiRequest(`/gym-modules/${moduleKey}/deactivate`, { method: 'DELETE' });
+}
+
+export async function getActiveModules() {
+  return apiRequest('/gym-modules/active');
 }

@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useMembers } from '@/context/members-context';
 import { checkinMember } from '@/lib/api';
-import { Search, Download, AlertTriangle, Loader, Plus } from 'lucide-react';
+import { Search, Download, AlertTriangle, Loader, Plus, QrCode } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { PageHeader } from '@/components/layout/page-header';
@@ -37,9 +37,10 @@ function churnLabel(level: string) {
 }
 
 export default function EnhancedClientsTable() {
-  const { members, loading, error, deleteMember, refreshMembers } = useMembers();
+  const { members, loading, error, deleteMember, refreshMembers, updateMember } = useMembers();
   const [search, setSearch] = useState('');
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [checkinLoading, setCheckinLoading] = useState<string | null>(null);
 
   const filteredMembers = useMemo(() => {
     const q = search.toLowerCase();
@@ -77,6 +78,19 @@ export default function EnhancedClientsTable() {
       setDeleteConfirmId(null);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Delete failed');
+    }
+  };
+
+  const handleCheckIn = async (memberId: string) => {
+    setCheckinLoading(memberId);
+    try {
+      await checkinMember(memberId);
+      toast.success('Check-in registered');
+      await refreshMembers();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Check-in failed');
+    } finally {
+      setCheckinLoading(null);
     }
   };
 
@@ -198,6 +212,24 @@ export default function EnhancedClientsTable() {
               </div>
 
               <div className="flex justify-end gap-2 border-t border-[#E5EAF3] px-5 py-3 sm:px-6">
+                <button
+                  type="button"
+                  onClick={() => handleCheckIn(member.id)}
+                  disabled={checkinLoading === member.id}
+                  className="rounded-full px-4 py-1.5 text-xs font-semibold text-emerald-600 hover:bg-emerald-50 disabled:opacity-50"
+                >
+                  {checkinLoading === member.id ? (
+                    <span className="flex items-center gap-1">
+                      <Loader className="h-3 w-3 animate-spin" />
+                      Checking in...
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1">
+                      <QrCode className="h-3 w-3" />
+                      Check-in
+                    </span>
+                  )}
+                </button>
                 <Link
                   href={`/clients/${member.id}/edit`}
                   className="rounded-full px-4 py-1.5 text-xs font-semibold text-[#0B57F0] hover:bg-[#0B57F0]/5"

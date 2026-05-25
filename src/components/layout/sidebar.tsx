@@ -15,17 +15,20 @@ import {
   PanelLeftClose,
   Menu,
   X,
+  Settings,
 } from 'lucide-react';
 import { logout } from '@/lib/api';
 import { useAppSettings } from '@/context/app-settings-context';
+import { useModules } from '@/context/modules-context';
 
-const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Members', href: '/clients', icon: Users },
-  { name: 'Check-in', href: '/checkin', icon: QrCode },
-  { name: 'Sales Pipeline', href: '/pipeline', icon: TrendingUp },
-  { name: 'Equipment', href: '/equipment', icon: Wrench },
-  { name: 'Employees', href: '/employees', icon: UserRound },
+const baseNavigation = [
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, moduleKey: null },
+  { name: 'Members', href: '/clients', icon: Users, moduleKey: 'members' },
+  { name: 'Check-in', href: '/checkin', icon: QrCode, moduleKey: 'checkin' },
+  { name: 'Sales Pipeline', href: '/pipeline', icon: TrendingUp, moduleKey: 'pipeline' },
+  { name: 'Equipment', href: '/equipment', icon: Wrench, moduleKey: 'equipment' },
+  { name: 'Employees', href: '/employees', icon: UserRound, moduleKey: 'employees' },
+  { name: 'Modules', href: '/modules', icon: Settings, moduleKey: null },
 ];
 
 type SidebarProps = {
@@ -38,6 +41,7 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
   const { gymName } = useAppSettings();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [userDisplayName, setUserDisplayName] = useState('');
+  const { isModuleEnabled } = useModules();
 
   useEffect(() => {
     const stored = localStorage.getItem('userData');
@@ -53,6 +57,13 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
   const handleLogout = () => {
     logout();
   };
+
+  const navigation = baseNavigation.filter((item) => {
+    if (item.moduleKey === null) return true;
+    return isModuleEnabled(item.moduleKey);
+  });
+
+  const mobileNavigation = navigation;
 
   return (
     <>
