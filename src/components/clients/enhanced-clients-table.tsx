@@ -135,13 +135,13 @@ export default function EnhancedClientsTable() {
           return (
             <article
               key={member.id}
-              className={`relative overflow-hidden ${premium.card} pl-5 transition hover:shadow-[0_8px_32px_-8px_rgba(10,23,51,0.1)]`}
+              className="relative overflow-hidden rounded-[1.75rem] border border-[#E5EAF3] bg-white shadow-[0_4px_24px_-4px_rgba(10,23,51,0.06)] transition hover:shadow-[0_8px_32px_-8px_rgba(10,23,51,0.1)]"
             >
               <span
-                className="absolute left-0 top-4 bottom-4 w-1 rounded-r-full bg-emerald-500"
+                className="absolute bottom-0 left-0 top-0 w-1.5 rounded-l-[1.75rem] bg-emerald-500"
                 aria-hidden
               />
-              <div className="grid grid-cols-1 items-center gap-6 p-5 sm:p-6 md:grid-cols-[minmax(0,1.4fr)_repeat(5,minmax(0,1fr))]">
+              <div className="grid grid-cols-1 items-center gap-6 p-5 pl-7 sm:p-6 sm:pl-8 md:grid-cols-[minmax(0,1.4fr)_repeat(5,minmax(0,1fr))]">
                 <div className="flex items-center gap-4 min-w-0">
                   <div className="relative shrink-0">
                     <ProfileAvatar

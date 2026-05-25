@@ -14,7 +14,21 @@ type AppShellProps = {
 export function AppShell({ children }: AppShellProps) {
   const { isAuthenticated, loading } = useMembers();
   const router = useRouter();
-  const [isHydrated, setIsHydrated] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    if (typeof window === "undefined") {
+      return false;
+    }
+
+    return window.localStorage.getItem("gymos-sidebar-collapsed") === "true";
+  });
+
+  const toggleSidebar = () => {
+    setIsSidebarCollapsed((current) => {
+      const nextValue = !current;
+      window.localStorage.setItem("gymos-sidebar-collapsed", String(nextValue));
+      return nextValue;
+    });
+  };
 
   useEffect(() => {
     setIsHydrated(true);
@@ -39,9 +53,13 @@ export function AppShell({ children }: AppShellProps) {
 
   return (
     <div className={`min-h-screen ${premium.pageBg} text-[#0A1733]`}>
-      <Sidebar />
-      <main className="min-h-screen pl-0 transition-[padding] md:pl-64">
-        <div className="mx-auto max-w-[1400px] px-4 py-6 sm:px-6 sm:py-8 lg:px-10">
+      <Sidebar isCollapsed={isSidebarCollapsed} onToggleCollapse={toggleSidebar} />
+      <main
+        className={`min-h-screen pl-0 transition-[padding] duration-300 ease-out ${
+          isSidebarCollapsed ? "md:pl-[72px]" : "md:pl-[260px]"
+        }`}
+      >
+        <div className="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
           {children}
         </div>
       </main>
