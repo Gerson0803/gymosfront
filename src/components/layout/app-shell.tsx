@@ -31,12 +31,16 @@ export function AppShell({ children }: AppShellProps) {
   };
 
   useEffect(() => {
-    if (!loading && !isAuthenticated) {
+    setIsHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (isHydrated && !loading && !isAuthenticated) {
       router.replace("/login");
     }
-  }, [isAuthenticated, loading, router]);
+  }, [isAuthenticated, loading, router, isHydrated]);
 
-  if (loading || !isAuthenticated) {
+  if (!isHydrated || loading || !isAuthenticated) {
     return (
       <div className={`flex min-h-screen items-center justify-center ${premium.pageBg}`}>
         <div className="space-y-4 text-center">

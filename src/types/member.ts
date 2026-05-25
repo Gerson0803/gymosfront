@@ -81,12 +81,9 @@ export type Lead = {
   name: string;
   email: string;
   phone: string;
-  fitnessGoal: string;
-  budget: number;
   source: "instagram" | "google" | "referido" | "walk_in" | "facebook";
   status: LeadStatus;
   assignedAdvisor: string;
-  conversionProbability: number; // 0-100
   notes?: string;
   createdAt: string;
 };
