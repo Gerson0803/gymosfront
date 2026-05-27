@@ -4,7 +4,7 @@ import { type ReactNode, useEffect, useState } from "react";
 import { Loader } from "lucide-react";
 import Sidebar from "./sidebar";
 import { useMembers } from "@/context/members-context";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { premium } from "@/lib/premium-ui";
 import { GlobalHeader } from "./global-header";
 import { getStoredUserData } from "@/lib/user-session";
@@ -16,6 +16,7 @@ type AppShellProps = {
 export function AppShell({ children }: AppShellProps) {
   const { isAuthenticated, loading } = useMembers();
   const router = useRouter();
+  const pathname = usePathname();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
     if (typeof window === "undefined") {
       return false;
@@ -57,6 +58,8 @@ export function AppShell({ children }: AppShellProps) {
     );
   }
 
+  const isPipelinePage = pathname === "/pipeline";
+
   return (
     <div className={`min-h-screen ${premium.pageBg} text-[#0A1733]`}>
       <Sidebar
@@ -68,8 +71,16 @@ export function AppShell({ children }: AppShellProps) {
           isSidebarCollapsed ? "md:pl-[72px]" : "md:pl-[260px]"
         }`}
       >
-        <div className="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-          <GlobalHeader userDisplayName={userDisplayName} />
+        <div className="relative mx-auto max-w-[1600px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+          <div
+            className={`absolute right-4 z-20 sm:right-6 lg:right-8 ${
+              isPipelinePage
+                ? "top-2 sm:top-3 lg:top-4"
+                : "top-3 sm:top-4 lg:top-5"
+            }`}
+          >
+            <GlobalHeader userDisplayName={userDisplayName} />
+          </div>
           {children}
         </div>
       </main>

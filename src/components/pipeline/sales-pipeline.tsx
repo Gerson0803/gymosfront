@@ -448,7 +448,7 @@ export default function SalesPipeline() {
         <PageHeader
           title="Sales Pipeline"
           headerActions={
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 lg:mr-[180px] xl:mr-[200px]">
               <ExcelButtons
                 onImportComplete={() => {
                   const loadLeads = async () => {
