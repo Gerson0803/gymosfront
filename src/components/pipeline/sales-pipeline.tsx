@@ -63,12 +63,12 @@ function normalizeLeadMutationResponse(response: LeadMutationResponse): Lead {
 }
 
 const stages: { id: LeadStatus; label: string }[] = [
-  { id: "nuevo", label: "New Leads" },
-  { id: "contactado", label: "Contacted" },
-  { id: "tour_agendado", label: "Tour Scheduled" },
-  { id: "propuesta", label: "Proposal" },
-  { id: "negociacion", label: "Negotiation" },
-  { id: "cerrado_ganado", label: "Closed Won" },
+  { id: "nuevo", label: "Prospección" },
+  { id: "contactado", label: "Contacto inicial" },
+  { id: "tour_agendado", label: "Diagnóstico" },
+  { id: "propuesta", label: "Propuesta enviada" },
+  { id: "negociacion", label: "Negociación" },
+  { id: "cerrado_ganado", label: "Cierre" },
 ];
 
 function getLeadProductInfo(lead: Lead) {
@@ -150,59 +150,53 @@ function LeadCardContent({
   return (
     <div
       onClick={() => onViewDetails?.(lead)}
-      className={`rounded-2xl border border-[#E5EAF3] bg-white p-4 shadow-[0_2px_12px_-4px_rgba(10,23,51,0.06)] transition hover:shadow-[0_8px_24px_-8px_rgba(10,23,51,0.1)] ${
-        dragging ? "cursor-grabbing opacity-50" : "cursor-grab"
+      className={`rounded-xl border border-[#E5EAF3] bg-white p-2.5 shadow-[0_2px_12px_-4px_rgba(10,23,51,0.06)] transition hover:shadow-[0_8px_24px_-8px_rgba(10,23,51,0.1)] ${
+        dragging ? "cursor-grabbing opacity-50" : "cursor-pointer"
       }`}
     >
-      <div className="flex items-start justify-between gap-2">
-        <h4 className="text-sm font-semibold text-[#0A1733] flex-1 truncate">
-          {lead.name}
-        </h4>
-      </div>
-
-      <div
-        className={`mt-2 inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-xs font-medium ${productTypeInfo.color}`}
-      >
-        <span>{productTypeInfo.icon}</span>
-        <span>{productTypeInfo.label}</span>
+      <div className="flex items-start justify-between gap-2.5">
+        <div className="min-w-0 flex-1">
+          <h4 className="truncate text-sm font-semibold text-[#0A1733]">
+            {lead.name}
+          </h4>
+          <div
+            className={`mt-1.5 inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-medium ${productTypeInfo.color}`}
+          >
+            <span>{productTypeInfo.icon}</span>
+            <span>{productTypeInfo.label}</span>
+          </div>
+        </div>
       </div>
 
       {info && (
-        <div className="mt-2 space-y-0.5">
-          <p className="text-xs font-semibold text-[#0A1733] truncate">
+        <div className="mt-1.5 flex items-center justify-between gap-2.5 text-xs">
+          <p className="min-w-0 flex-1 truncate font-medium text-[#0A1733]">
             {info.primary}
           </p>
           {info.secondary && (
-            <p className="text-[11px] text-[#5B6475] truncate">
-              {info.secondary}
-            </p>
+            <p className="shrink-0 truncate text-[#5B6475]">{info.secondary}</p>
           )}
         </div>
       )}
 
-      <div className="mt-3 flex items-center justify-between">
-        <span className="rounded-md bg-[#F5F7FB] px-2 py-1 text-[11px] font-medium text-[#5B6475] capitalize">
-          {lead.status.replace(/_/g, " ")}
-        </span>
-        {onEdit && onDelete ? (
-          <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
-            <button
-              type="button"
-              onClick={() => onEdit(lead)}
-              className="rounded-lg p-1.5 text-[#5B6475] hover:bg-[#0B57F0]/5 hover:text-[#0B57F0] transition"
-            >
-              <Edit className="h-3.5 w-3.5" />
-            </button>
-            <button
-              type="button"
-              onClick={() => onDelete(lead.id)}
-              className="rounded-lg p-1.5 text-[#5B6475] hover:bg-red-50 hover:text-red-600 transition"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
-          </div>
-        ) : null}
-      </div>
+      {onEdit && onDelete ? (
+        <div className="mt-2.5 flex items-center justify-end gap-1.5 border-t border-[#E5EAF3] pt-1.5" onClick={(e) => e.stopPropagation()}>
+          <button
+            type="button"
+            onClick={() => onEdit(lead)}
+            className="rounded-lg p-1.5 text-[#5B6475] transition hover:bg-[#0B57F0]/5 hover:text-[#0B57F0]"
+          >
+            <Edit className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => onDelete(lead.id)}
+            className="rounded-lg p-1.5 text-[#5B6475] transition hover:bg-red-50 hover:text-red-600"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -267,18 +261,18 @@ function DroppableColumn({
     <div
       ref={setNodeRef}
       id={stageId}
-      className={`flex h-full min-h-0 flex-col rounded-[1.25rem] border border-[#E5EAF3] bg-[#EEF2F8]/60 p-4 transition ${
+      className={`flex flex-1 min-h-0 flex-col overflow-hidden rounded-[1.25rem] border border-[#E5EAF3] bg-[#EEF2F8]/60 p-4 transition ${
         isOver ? "ring-2 ring-[#0B57F0]/20" : ""
       }`}
     >
-      <div className="mb-4 flex shrink-0 items-center justify-between gap-2">
+      <div className="mb-3 flex shrink-0 items-center justify-between gap-2 border-b border-[#DDE4F0] pb-2.5">
         <h3 className="text-sm font-semibold text-[#0A1733]">{stageName}</h3>
         <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#0B57F0] text-xs font-bold text-white">
           {leads?.length || 0}
         </span>
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-x-hidden overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <div className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-x-hidden overflow-y-auto pr-1 [scrollbar-width:thin] [-ms-overflow-style:auto] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#C8D2E3]">
         {(leads || []).map((lead) => (
           <DraggableCard
             key={lead.id}
@@ -291,7 +285,7 @@ function DroppableColumn({
         {(!leads || leads.length === 0) && (
           <div className="flex flex-1 items-center justify-center rounded-2xl border-2 border-dashed border-[#E5EAF3] bg-white/50">
             <p className="text-xs font-medium text-[#5B6475]">
-              Drop leads here
+              Suelta los prospectos aquí
             </p>
           </div>
         )}
@@ -345,7 +339,7 @@ export default function SalesPipeline() {
         const data = (await getLeads()) as LeadsApiResponse;
         setLeads(normalizeLeadsResponse(data));
       } catch {
-        setError("Error al cargar leads");
+        setError("Error al cargar prospectos");
       } finally {
         setLoading(false);
       }
@@ -373,11 +367,11 @@ export default function SalesPipeline() {
       toast.success(
         newStatus === "cerrado_ganado"
           ? "🎉 ¡Nueva venta completada!"
-          : "Lead movido",
+          : "Prospecto movido",
       );
     } catch {
       setLeads(previousLeads);
-      toast.error("Error al mover lead");
+      toast.error("Error al mover el prospecto");
     }
   };
 
@@ -390,20 +384,20 @@ export default function SalesPipeline() {
             l.id === editingLead.id ? ({ ...l, ...data } as Lead) : l,
           ),
         );
-        toast.success("Lead actualizado");
+        toast.success("Prospecto actualizado");
       } else {
         const response = (await createLead(
           data as Record<string, unknown>,
         )) as LeadMutationResponse;
         const newLead = normalizeLeadMutationResponse(response);
         setLeads([...leads, newLead]);
-        toast.success("Lead creado");
+        toast.success("Prospecto creado");
       }
       setIsFormOpen(false);
       setEditingLead(null);
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : "Error al guardar lead";
+        err instanceof Error ? err.message : "Error al guardar el prospecto";
       toast.error(errorMessage);
     }
   };
@@ -422,10 +416,10 @@ export default function SalesPipeline() {
     try {
       await deleteLeadApi(id);
       setLeads(leads.filter((l) => l.id !== id));
-      toast.success("Lead eliminado");
+      toast.success("Prospecto eliminado");
       setDeleteConfirmId(null);
     } catch {
-      toast.error("Error al eliminar lead");
+      toast.error("Error al eliminar el prospecto");
     }
   };
 
@@ -443,10 +437,10 @@ export default function SalesPipeline() {
     );
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden">
+    <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
       <div className="shrink-0 [&_header]:!mb-4">
         <PageHeader
-          title="Sales Pipeline"
+          title="Pipeline de ventas"
           headerActions={
             <div className="flex items-center gap-3 lg:mr-[180px] xl:mr-[200px]">
               <ExcelButtons
@@ -470,7 +464,7 @@ export default function SalesPipeline() {
                 }}
                 className="inline-flex items-center gap-2 rounded-lg bg-[#0B57F0] px-4 py-2 text-sm font-medium text-white hover:bg-[#0B57F0]/90 transition"
               >
-                <Plus className="h-4 w-4" /> Nuevo Lead
+                <Plus className="h-4 w-4" /> Nuevo prospecto
               </button>
             </div>
           }
@@ -484,10 +478,10 @@ export default function SalesPipeline() {
         onDragEnd={handleDragEnd}
         onDragCancel={() => setActiveLeadId(null)}
       >
-        <div className="min-h-0 flex-1 overflow-x-auto overflow-y-hidden overscroll-x-contain">
-          <div className="grid h-full min-w-[1180px] grid-cols-6 items-stretch gap-4 xl:min-w-0">
+        <div className="flex min-h-0 flex-1 overflow-x-scroll overflow-y-hidden overscroll-x-contain pb-2">
+          <div className="flex flex-1 gap-6 min-w-[1680px] xl:min-w-0">
             {stages.map((stage) => (
-              <div key={stage.id} className="h-full min-w-[180px]">
+              <div key={stage.id} className="flex flex-1 min-w-[260px]">
                 <DroppableColumn
                   stageId={stage.id}
                   stageName={stage.label}

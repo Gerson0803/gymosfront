@@ -6,15 +6,15 @@ type StatusBadgeProps = {
 
 const statusMap: Record<ClientStatus, { label: string; classes: string }> = {
   active: {
-    label: "Active",
+    label: "Activo",
     classes: "bg-emerald-50 text-emerald-700 border-emerald-200",
   },
   "at-risk": {
-    label: "At Risk",
+    label: "En riesgo",
     classes: "bg-amber-50 text-amber-700 border-amber-200",
   },
   inactive: {
-    label: "Inactive",
+    label: "Inactivo",
     classes: "bg-rose-50 text-rose-700 border-rose-200",
   },
 };

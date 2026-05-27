@@ -22,32 +22,32 @@ import { useModules } from "@/context/modules-context";
 
 const baseNavigation = [
   {
-    name: "Dashboard",
+    name: "Tablero",
     href: "/dashboard",
     icon: LayoutDashboard,
     moduleKey: null,
   },
-  { name: "Members", href: "/clients", icon: Users, moduleKey: "members" },
-  { name: "Check-in", href: "/checkin", icon: QrCode, moduleKey: "checkin" },
+  { name: "Miembros", href: "/clients", icon: Users, moduleKey: "members" },
+  { name: "Control de acceso", href: "/checkin", icon: QrCode, moduleKey: "checkin" },
   {
-    name: "Sales Pipeline",
+    name: "Pipeline de ventas",
     href: "/pipeline",
     icon: TrendingUp,
     moduleKey: "pipeline",
   },
   {
-    name: "Equipment",
+    name: "Equipos",
     href: "/equipment",
     icon: Wrench,
     moduleKey: "equipment",
   },
   {
-    name: "Employees",
+    name: "Empleados",
     href: "/employees",
     icon: UserRound,
     moduleKey: "employees",
   },
-  { name: "Modules", href: "/modules", icon: Settings, moduleKey: null },
+  { name: "Módulos", href: "/modules", icon: Settings, moduleKey: null },
 ];
 
 type SidebarProps = {
@@ -107,15 +107,14 @@ export default function Sidebar({
                 }`}
               >
                 <h1 className="text-lg font-bold text-[#0B57F0]">GymOS</h1>
-                <p className="text-xs text-[#5B6475]">Admin suite</p>
               </div>
             </button>
             {!isCollapsed && (
               <button
                 type="button"
                 onClick={onToggleCollapseAction}
-                aria-label="Contraer sidebar"
-                title="Contraer sidebar"
+                aria-label="Contraer barra lateral"
+                title="Contraer barra lateral"
                 className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-[#5B6475] transition hover:bg-[#F5F7FB] hover:text-[#0A1733] focus:outline-none focus:ring-2 focus:ring-[#0B57F0]/20"
               >
                 <PanelLeftClose className="h-5 w-5" strokeWidth={1.75} />
@@ -175,7 +174,7 @@ export default function Sidebar({
             type="button"
             onClick={handleLogout}
             aria-label="Cerrar sesión"
-            title={isCollapsed ? "Logout" : undefined}
+            title={isCollapsed ? "Salir" : undefined}
             className={`flex w-full items-center rounded-xl py-3 text-left text-sm font-medium text-[#5B6475] transition hover:bg-[#F5F7FB] hover:text-[#0A1733] focus:outline-none focus:ring-2 focus:ring-[#0B57F0]/20 ${
               isCollapsed
                 ? "h-11 justify-center px-0"
@@ -193,7 +192,7 @@ export default function Sidebar({
                   : "w-auto translate-x-0 opacity-100"
               }`}
             >
-              Logout
+              Salir
             </span>
           </button>
         </div>
@@ -235,7 +234,7 @@ export default function Sidebar({
               </div>
               <div>
                 <h1 className="text-lg font-bold text-[#0B57F0]">GymOS</h1>
-                <p className="text-xs text-[#5B6475]">Admin suite</p>
+                <p className="text-xs text-[#5B6475]">Panel administrativo</p>
               </div>
             </div>
             <button
@@ -291,7 +290,7 @@ export default function Sidebar({
                 className="h-5 w-5 shrink-0 text-[#5B6475]"
                 strokeWidth={1.75}
               />
-              Logout
+              Salir
             </button>
           </div>
         </aside>

@@ -48,7 +48,7 @@ function getCheckInErrorMessage(error: unknown): string {
     return "Tu sesión expiró o no es válida. Inicia sesión nuevamente.";
   }
 
-  return message;
+  return message === "Unknown error" ? "Error desconocido" : message;
 }
 
 function shouldLogoutForCheckInError(error: unknown): boolean {
@@ -74,7 +74,7 @@ export default function CheckInTerminal() {
   const [isCheckingQr, setIsCheckingQr] = useState(false);
   const [isCameraScanning, setIsCameraScanning] = useState(false);
   const [cameraMessage, setCameraMessage] = useState(
-    "Point the camera at the member QR code.",
+    "Apunta la cámara al código QR del miembro.",
   );
 
   const [selectedMemberId, setSelectedMemberId] = useState("");
@@ -89,7 +89,7 @@ export default function CheckInTerminal() {
 
   const loadMembers = useCallback(async () => {
     if (!apiUrl) {
-      setCameraMessage("Set NEXT_PUBLIC_API_URL to load members");
+      setCameraMessage("Configura NEXT_PUBLIC_API_URL para cargar miembros");
       setLoadingMembers(false);
       return;
     }
@@ -106,7 +106,7 @@ export default function CheckInTerminal() {
       const message = getCheckInErrorMessage(error);
       setMembers([]);
       setMembersError(message);
-      toast.error(`Error loading members: ${message}`);
+      toast.error(`Error al cargar miembros: ${message}`);
       if (shouldLogoutForCheckInError(error)) {
         window.setTimeout(() => logout(), 900);
       }
@@ -130,11 +130,11 @@ export default function CheckInTerminal() {
     async (overridePayload?: string) => {
       const value = (overridePayload ?? qrPayload).trim();
       if (!value) {
-        toast.error("Scan or paste a valid QR");
+        toast.error("Escanea o pega un QR válido");
         return;
       }
       if (!apiUrl) {
-        toast.error("Configure NEXT_PUBLIC_API_URL");
+        toast.error("Configura NEXT_PUBLIC_API_URL");
         return;
       }
 
@@ -147,16 +147,16 @@ export default function CheckInTerminal() {
         });
 
         if (response.success === false) {
-          throw new Error(response.message || "QR check-in failed");
+          throw new Error(response.message || "Falló el registro de ingreso por QR");
         }
 
-        toast.success("QR check-in registered");
+        toast.success("Ingreso por QR registrado");
         setQrPayload("");
         notifyMembersRefresh();
         await loadMembers();
       } catch (error) {
         const message = getCheckInErrorMessage(error);
-        toast.error(message || "QR check-in error");
+        toast.error(message || "Error en el ingreso por QR");
         if (shouldLogoutForCheckInError(error)) {
           window.setTimeout(() => logout(), 900);
         }
@@ -172,7 +172,7 @@ export default function CheckInTerminal() {
 
     const startCamera = async () => {
       try {
-        setCameraMessage("Starting camera...");
+        setCameraMessage("Iniciando cámara...");
         if (scannerRef.current) {
           try {
             await scannerRef.current.stop();
@@ -199,10 +199,10 @@ export default function CheckInTerminal() {
           },
           () => undefined,
         );
-        setCameraMessage("Camera active. Center the QR in the frame.");
+        setCameraMessage("Cámara activa. Centra el QR en el marco.");
       } catch (error) {
         const message =
-          error instanceof Error ? error.message : "Could not open camera";
+          error instanceof Error ? error.message : "No se pudo abrir la cámara";
         setCameraMessage(message);
         toast.error(message);
         setIsCameraScanning(false);
@@ -224,11 +224,11 @@ export default function CheckInTerminal() {
 
   const handleRegisterFingerprint = async () => {
     if (!selectedMemberId) {
-      toast.error("Select a member");
+      toast.error("Selecciona un miembro");
       return;
     }
     if (!window.PublicKeyCredential) {
-      toast.error("WebAuthn not supported in this browser");
+      toast.error("WebAuthn no es compatible con este navegador");
       return;
     }
 
@@ -241,7 +241,7 @@ export default function CheckInTerminal() {
           user: {
             id: new TextEncoder().encode(selectedMemberId),
             name: `member-${selectedMemberId}`,
-            displayName: selectedMember?.name ?? "GymOS Member",
+            displayName: selectedMember?.name ?? "Miembro de GymOS",
           },
           pubKeyCredParams: [{ type: "public-key", alg: -7 }],
           authenticatorSelection: {
@@ -253,7 +253,7 @@ export default function CheckInTerminal() {
         },
       })) as PublicKeyCredential | null;
 
-      if (!credential) throw new Error("Could not create biometric credential");
+      if (!credential) throw new Error("No se pudo crear la credencial biométrica");
 
       const credentialId = bytesToBase64Url(new Uint8Array(credential.rawId));
       await registerBiometricCredential({
@@ -261,12 +261,12 @@ export default function CheckInTerminal() {
         credentialId,
       });
 
-      toast.success("Biometric registered");
+      toast.success("Biometría registrada");
       notifyMembersRefresh();
       await loadMembers();
     } catch (error) {
       const message = getCheckInErrorMessage(error);
-      toast.error(message || "Registration error");
+      toast.error(message || "Error en el registro");
       if (shouldLogoutForCheckInError(error)) {
         window.setTimeout(() => logout(), 900);
       }
@@ -277,7 +277,7 @@ export default function CheckInTerminal() {
 
   const handleFingerprintCheckIn = async () => {
     if (!window.PublicKeyCredential) {
-      toast.error("WebAuthn not supported");
+      toast.error("WebAuthn no es compatible");
       return;
     }
 
@@ -292,7 +292,7 @@ export default function CheckInTerminal() {
           false;
 
         if (!hasCredential) {
-          throw new Error("No fingerprint registered. Register first.");
+          throw new Error("No hay huella registrada. Regístrala primero.");
         }
       }
 
@@ -304,7 +304,7 @@ export default function CheckInTerminal() {
         },
       })) as PublicKeyCredential | null;
 
-      if (!assertion) throw new Error("Biometric verification failed");
+      if (!assertion) throw new Error("Falló la verificación biométrica");
 
       const credentialId = bytesToBase64Url(new Uint8Array(assertion.rawId));
       const response = await biometricCheckIn({
@@ -315,17 +315,17 @@ export default function CheckInTerminal() {
       });
 
       if (!response.success) {
-        throw new Error(response.message || "Biometric check-in failed");
+        throw new Error(response.message || "Falló el ingreso biométrico");
       }
 
       toast.success(
-        `Biometric check-in registered for ${response.data?.memberName ?? "member"}`,
+        `Ingreso biométrico registrado para ${response.data?.memberName ?? "el miembro"}`,
       );
       notifyMembersRefresh();
       await loadMembers();
     } catch (error) {
       const message = getCheckInErrorMessage(error);
-      toast.error(message || "Biometric check-in error");
+      toast.error(message || "Error en el ingreso biométrico");
       if (shouldLogoutForCheckInError(error)) {
         window.setTimeout(() => logout(), 900);
       }
@@ -338,8 +338,8 @@ export default function CheckInTerminal() {
     <div className="space-y-8 pb-8">
       <PageHeader
         centered
-        title="Welcome to GymOS"
-        subtitle="Please select your preferred check-in method."
+        title="Bienvenido a GymOS"
+        subtitle="Selecciona tu método de ingreso preferido."
       />
 
       <section className="grid gap-6 lg:grid-cols-2">
@@ -348,10 +348,10 @@ export default function CheckInTerminal() {
             <QrCode className="h-6 w-6 text-[#0B57F0]" strokeWidth={1.75} />
           </div>
           <h2 className="font-serif text-2xl font-semibold text-[#0A1733]">
-            Check-in via App
+            Ingreso por app
           </h2>
           <p className="mt-2 text-sm text-[#5B6475]">
-            Present your GymOS mobile app QR code to the scanner below.
+            Presenta el código QR de tu app de GymOS al lector de abajo.
           </p>
 
           <div className="relative my-8 flex min-h-[200px] flex-1 flex-col items-center justify-center rounded-2xl border border-dashed border-[#E5EAF3] bg-[#F5F7FB]/80 p-6">
@@ -383,13 +383,13 @@ export default function CheckInTerminal() {
             className={`${premium.pillBtn} w-full`}
           >
             <ScanLine className="h-4 w-4" />
-            {isCameraScanning ? "Stop Scan" : "Start Scan"}
+            {isCameraScanning ? "Detener escaneo" : "Iniciar escaneo"}
           </button>
 
           <textarea
             value={qrPayload}
             onChange={(e) => setQrPayload(e.target.value)}
-            placeholder="Paste QR payload or member ID"
+            placeholder="Pega el QR o el ID del miembro"
             className="mt-4 min-h-[72px] w-full rounded-2xl border border-[#E5EAF3] bg-[#F5F7FB] px-4 py-3 text-sm text-[#0A1733] outline-none focus:border-[#0B57F0]/40 focus:ring-2 focus:ring-[#0B57F0]/10"
           />
 
@@ -399,7 +399,7 @@ export default function CheckInTerminal() {
             disabled={isCheckingQr}
             className="mt-3 text-center text-sm font-semibold text-[#0B57F0] hover:underline disabled:opacity-50"
           >
-            {isCheckingQr ? "Registering..." : "Enter Member ID Manually"}
+            {isCheckingQr ? "Registrando..." : "Ingresar ID manualmente"}
           </button>
         </article>
 
@@ -411,16 +411,16 @@ export default function CheckInTerminal() {
             />
           </div>
           <h2 className="font-serif text-2xl font-semibold text-[#0A1733]">
-            Biometric Access
+            Acceso biométrico
           </h2>
           <p className="mt-2 text-sm text-[#5B6475]">
-            Use your registered fingerprint for immediate access.
+            Usa tu huella registrada para acceder de inmediato.
           </p>
 
           <div className="my-6 flex justify-center">
             <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-700">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              Scanner Ready
+              Escáner listo
             </span>
           </div>
 
@@ -435,7 +435,7 @@ export default function CheckInTerminal() {
           </div>
 
           <label className="sr-only" htmlFor="biometric-member">
-            Select profile
+            Seleccionar perfil
           </label>
           <div className="relative">
             <User className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#5B6475]" />
@@ -446,7 +446,7 @@ export default function CheckInTerminal() {
               disabled={loadingMembers}
               className="w-full appearance-none rounded-full border border-[#E5EAF3] bg-white py-3.5 pl-11 pr-10 text-sm font-medium text-[#0A1733] outline-none focus:border-[#0B57F0]/40 focus:ring-2 focus:ring-[#0B57F0]/10"
             >
-              <option value="">Select Profile... (optional)</option>
+              <option value="">Selecciona un perfil... (opcional)</option>
               {members.map((m) => (
                 <option key={m.id} value={m.id}>
                   {m.name}
@@ -468,7 +468,7 @@ export default function CheckInTerminal() {
               disabled={isRegisteringFingerprint || !selectedMemberId}
               className={premium.pillBtnOutline}
             >
-              {isRegisteringFingerprint ? "..." : "Register"}
+              {isRegisteringFingerprint ? "..." : "Registrar"}
             </button>
             <button
               type="button"
@@ -476,7 +476,7 @@ export default function CheckInTerminal() {
               disabled={isCheckingFingerprint}
               className={premium.pillBtn}
             >
-              {isCheckingFingerprint ? "Validating..." : "Check-in"}
+              {isCheckingFingerprint ? "Validando..." : "Ingreso"}
             </button>
           </div>
         </article>

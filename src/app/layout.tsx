@@ -5,6 +5,8 @@ import { Toaster } from 'react-hot-toast';
 import { MembersProvider } from '@/context/members-context';
 import { AppSettingsProvider } from '@/context/app-settings-context';
 import TitleUpdater from '@/components/layout/title-updater';
+import DoomOverlay from '@/components/easter-eggs/DoomOverlay';
+import { ToastController } from '@/components/ui/toast-controller';
 
 const inter = Inter({
   variable: "--font-inter",
@@ -36,7 +38,9 @@ export default function RootLayout({
           <MembersProvider>
             <TitleUpdater />
             {children}
+            <ToastController />
             <Toaster position="top-right" />
+            <DoomOverlay />
           </MembersProvider>
         </AppSettingsProvider>
       </body>
