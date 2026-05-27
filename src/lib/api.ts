@@ -1,4 +1,11 @@
 import { clearAuthCookie } from "./auth-cookie";
+import type {
+  BiometricCheckInRequest,
+  BiometricCheckInResponse,
+  BiometricMemberStatusResponse,
+  CheckInMemberOption,
+  CheckInMemberOptionsResponse,
+} from "@/types/checkin";
 
 // Centralized API layer for members management
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -28,7 +35,7 @@ export function setAuthToken(token: string) {
 
 export function getAuthToken(): string | null {
   if (authToken) return authToken;
-  
+
   if (typeof window !== "undefined") {
     const stored = localStorage.getItem("authToken");
     if (stored) {
@@ -36,7 +43,7 @@ export function getAuthToken(): string | null {
       return authToken;
     }
   }
-  
+
   return null;
 }
 
@@ -97,10 +104,7 @@ async function apiRequest<T>(
         errorData.error?.message ||
         `API error: ${response.status} ${response.statusText}`;
 
-      if (
-        response.status === 404 &&
-        endpoint.includes("change-password")
-      ) {
+      if (response.status === 404 && endpoint.includes("change-password")) {
         errorMessage =
           "El servidor no tiene activo el endpoint de cambio de contraseña. Reinicia el backend (backend-gymos) con npm run start:dev.";
       }
@@ -125,6 +129,40 @@ async function apiRequest<T>(
     console.error(`[API Error] ${endpoint}:`, error);
     throw error;
   }
+}
+
+async function publicApiRequest<T>(
+  endpoint: string,
+  options: RequestOptions = {},
+): Promise<T> {
+  const { headers: customHeaders, ...fetchOptions } = options;
+  const url = `${API_URL}${endpoint}`;
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...customHeaders,
+  };
+
+  console.log(`[Public API] ${fetchOptions.method || "GET"} ${url}`);
+
+  const response = await fetch(url, {
+    ...fetchOptions,
+    headers,
+  });
+
+  const data = (await response.json().catch(() => ({}))) as {
+    message?: string;
+    error?: { message?: string };
+  };
+
+  if (!response.ok) {
+    const errorMessage =
+      data.message ||
+      data.error?.message ||
+      `API error: ${response.status} ${response.statusText}`;
+    throw new Error(errorMessage);
+  }
+
+  return data as T;
 }
 
 // Members API endpoints
@@ -161,6 +199,48 @@ export async function checkinMember(id: string) {
   return apiRequest(`/members/${id}/checkin`, {
     method: "POST",
   });
+}
+
+export async function getCheckInMemberOptions(): Promise<
+  CheckInMemberOption[]
+> {
+  const response = await publicApiRequest<CheckInMemberOptionsResponse>(
+    "/members/checkin-options",
+    { method: "GET" },
+  );
+
+  return response.data ?? [];
+}
+
+export async function biometricCheckIn(
+  data: BiometricCheckInRequest,
+): Promise<BiometricCheckInResponse> {
+  return publicApiRequest<BiometricCheckInResponse>(
+    "/attendance/biometric-checkin",
+    {
+      method: "POST",
+      body: JSON.stringify(data),
+    },
+  );
+}
+
+export async function registerBiometricCredential(data: {
+  memberId: string;
+  credentialId: string;
+}) {
+  return apiRequest("/attendance/biometric/register", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function getBiometricMemberStatus(
+  memberId: string,
+): Promise<BiometricMemberStatusResponse> {
+  return apiRequest<BiometricMemberStatusResponse>(
+    `/attendance/biometric/member/${memberId}`,
+    { method: "GET" },
+  );
 }
 
 export async function exportMembersCSV() {
@@ -243,7 +323,12 @@ export async function login(email: string, password: string) {
   }
 }
 
-export async function signup(email: string, password: string, name: string, plan?: string) {
+export async function signup(
+  email: string,
+  password: string,
+  name: string,
+  plan?: string,
+) {
   try {
     const response = await apiRequest<{
       success: boolean;
@@ -282,7 +367,10 @@ export function logout() {
   }
 }
 
-export async function changePassword(currentPassword: string, newPassword: string) {
+export async function changePassword(
+  currentPassword: string,
+  newPassword: string,
+) {
   const response = await apiRequest<{
     success: boolean;
     message?: string;
@@ -370,22 +458,24 @@ export async function deleteEmployeeApi(id: string) {
 
 // MODULES - Module catalog (public)
 export async function getModuleCatalog() {
-  return apiRequest('/modules');
+  return apiRequest("/modules");
 }
 
 // GYM MODULES - Active modules for current gym
 export async function getGymModules() {
-  return apiRequest('/gym-modules');
+  return apiRequest("/gym-modules");
 }
 
 export async function activateModule(moduleKey: string) {
-  return apiRequest(`/gym-modules/${moduleKey}/activate`, { method: 'POST' });
+  return apiRequest(`/gym-modules/${moduleKey}/activate`, { method: "POST" });
 }
 
 export async function deactivateModule(moduleKey: string) {
-  return apiRequest(`/gym-modules/${moduleKey}/deactivate`, { method: 'DELETE' });
+  return apiRequest(`/gym-modules/${moduleKey}/deactivate`, {
+    method: "DELETE",
+  });
 }
 
 export async function getActiveModules() {
-  return apiRequest('/gym-modules/active');
+  return apiRequest("/gym-modules/active");
 }
