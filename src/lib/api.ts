@@ -131,40 +131,6 @@ async function apiRequest<T>(
   }
 }
 
-async function publicApiRequest<T>(
-  endpoint: string,
-  options: RequestOptions = {},
-): Promise<T> {
-  const { headers: customHeaders, ...fetchOptions } = options;
-  const url = `${API_URL}${endpoint}`;
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...customHeaders,
-  };
-
-  console.log(`[Public API] ${fetchOptions.method || "GET"} ${url}`);
-
-  const response = await fetch(url, {
-    ...fetchOptions,
-    headers,
-  });
-
-  const data = (await response.json().catch(() => ({}))) as {
-    message?: string;
-    error?: { message?: string };
-  };
-
-  if (!response.ok) {
-    const errorMessage =
-      data.message ||
-      data.error?.message ||
-      `API error: ${response.status} ${response.statusText}`;
-    throw new Error(errorMessage);
-  }
-
-  return data as T;
-}
-
 // Members API endpoints
 export async function getMembers() {
   return apiRequest("/members");
@@ -204,9 +170,12 @@ export async function checkinMember(id: string) {
 export async function getCheckInMemberOptions(): Promise<
   CheckInMemberOption[]
 > {
-  const response = await publicApiRequest<CheckInMemberOptionsResponse>(
+  const response = await apiRequest<CheckInMemberOptionsResponse>(
     "/members/checkin-options",
-    { method: "GET" },
+    {
+      method: "GET",
+      skipAuthRedirect: true,
+    },
   );
 
   return response.data ?? [];
@@ -215,13 +184,11 @@ export async function getCheckInMemberOptions(): Promise<
 export async function biometricCheckIn(
   data: BiometricCheckInRequest,
 ): Promise<BiometricCheckInResponse> {
-  return publicApiRequest<BiometricCheckInResponse>(
-    "/attendance/biometric-checkin",
-    {
-      method: "POST",
-      body: JSON.stringify(data),
-    },
-  );
+  return apiRequest<BiometricCheckInResponse>("/attendance/biometric-checkin", {
+    method: "POST",
+    body: JSON.stringify(data),
+    skipAuthRedirect: true,
+  });
 }
 
 export async function registerBiometricCredential(data: {
@@ -231,6 +198,7 @@ export async function registerBiometricCredential(data: {
   return apiRequest("/attendance/biometric/register", {
     method: "POST",
     body: JSON.stringify(data),
+    skipAuthRedirect: true,
   });
 }
 
@@ -239,7 +207,25 @@ export async function getBiometricMemberStatus(
 ): Promise<BiometricMemberStatusResponse> {
   return apiRequest<BiometricMemberStatusResponse>(
     `/attendance/biometric/member/${memberId}`,
-    { method: "GET" },
+    {
+      method: "GET",
+      skipAuthRedirect: true,
+    },
+  );
+}
+
+export async function qrCheckIn(data: {
+  qrData: string;
+  duration?: number;
+  activities?: string[];
+}) {
+  return apiRequest<{ success?: boolean; message?: string }>(
+    "/attendance/qr-checkin",
+    {
+      method: "POST",
+      body: JSON.stringify(data),
+      skipAuthRedirect: true,
+    },
   );
 }
 

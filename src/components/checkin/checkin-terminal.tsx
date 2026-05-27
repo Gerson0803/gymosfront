@@ -10,6 +10,8 @@ import {
   biometricCheckIn,
   getBiometricMemberStatus,
   getCheckInMemberOptions,
+  logout,
+  qrCheckIn,
   registerBiometricCredential,
 } from "@/lib/api";
 import type { CheckInMemberOption } from "@/types/checkin";
@@ -35,6 +37,30 @@ function notifyMembersRefresh() {
   window.dispatchEvent(new Event("members:refresh"));
 }
 
+function getCheckInErrorMessage(error: unknown): string {
+  const message = error instanceof Error ? error.message : "Unknown error";
+
+  if (
+    message.includes("401") ||
+    /unauthorized/i.test(message) ||
+    /jwt/i.test(message)
+  ) {
+    return "Tu sesión expiró o no es válida. Inicia sesión nuevamente.";
+  }
+
+  return message;
+}
+
+function shouldLogoutForCheckInError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : "";
+
+  return (
+    message.includes("401") ||
+    /unauthorized/i.test(message) ||
+    /jwt/i.test(message)
+  );
+}
+
 export default function CheckInTerminal() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
   const scannerRef = useRef<Html5Qrcode | null>(null);
@@ -42,6 +68,7 @@ export default function CheckInTerminal() {
 
   const [members, setMembers] = useState<CheckInMemberOption[]>([]);
   const [loadingMembers, setLoadingMembers] = useState(true);
+  const [membersError, setMembersError] = useState<string | null>(null);
 
   const [qrPayload, setQrPayload] = useState("");
   const [isCheckingQr, setIsCheckingQr] = useState(false);
@@ -69,14 +96,20 @@ export default function CheckInTerminal() {
 
     try {
       setLoadingMembers(true);
+      setMembersError(null);
       const list = await getCheckInMemberOptions();
       setMembers(list);
       if (!selectedMemberId && list.length > 0) {
         setSelectedMemberId(list[0].id);
       }
     } catch (error) {
-      const msg = error instanceof Error ? error.message : "Unknown error";
-      toast.error(`Error loading members: ${msg}`);
+      const message = getCheckInErrorMessage(error);
+      setMembers([]);
+      setMembersError(message);
+      toast.error(`Error loading members: ${message}`);
+      if (shouldLogoutForCheckInError(error)) {
+        window.setTimeout(() => logout(), 900);
+      }
     } finally {
       setLoadingMembers(false);
     }
@@ -107,19 +140,14 @@ export default function CheckInTerminal() {
 
       try {
         setIsCheckingQr(true);
-        const res = await fetch(`${apiUrl}/attendance/qr-checkin`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            qrData: value,
-            duration: 60,
-            activities: ["pesas", "cardio"],
-          }),
+        const response = await qrCheckIn({
+          qrData: value,
+          duration: 60,
+          activities: ["pesas", "cardio"],
         });
 
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          throw new Error(err.message || "QR check-in failed");
+        if (response.success === false) {
+          throw new Error(response.message || "QR check-in failed");
         }
 
         toast.success("QR check-in registered");
@@ -127,9 +155,11 @@ export default function CheckInTerminal() {
         notifyMembersRefresh();
         await loadMembers();
       } catch (error) {
-        toast.error(
-          error instanceof Error ? error.message : "QR check-in error",
-        );
+        const message = getCheckInErrorMessage(error);
+        toast.error(message || "QR check-in error");
+        if (shouldLogoutForCheckInError(error)) {
+          window.setTimeout(() => logout(), 900);
+        }
       } finally {
         setIsCheckingQr(false);
       }
@@ -235,9 +265,11 @@ export default function CheckInTerminal() {
       notifyMembersRefresh();
       await loadMembers();
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Registration error",
-      );
+      const message = getCheckInErrorMessage(error);
+      toast.error(message || "Registration error");
+      if (shouldLogoutForCheckInError(error)) {
+        window.setTimeout(() => logout(), 900);
+      }
     } finally {
       setIsRegisteringFingerprint(false);
     }
@@ -292,9 +324,11 @@ export default function CheckInTerminal() {
       notifyMembersRefresh();
       await loadMembers();
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Biometric check-in error",
-      );
+      const message = getCheckInErrorMessage(error);
+      toast.error(message || "Biometric check-in error");
+      if (shouldLogoutForCheckInError(error)) {
+        window.setTimeout(() => logout(), 900);
+      }
     } finally {
       setIsCheckingFingerprint(false);
     }
@@ -421,6 +455,11 @@ export default function CheckInTerminal() {
             </select>
             <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#5B6475]" />
           </div>
+          {membersError ? (
+            <p className="mt-2 text-sm font-medium text-red-600">
+              {membersError}
+            </p>
+          ) : null}
 
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <button
