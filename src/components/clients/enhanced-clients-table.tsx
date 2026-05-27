@@ -11,29 +11,29 @@ import { premium } from '@/lib/premium-ui';
 import { ProfileAvatar } from '@/components/ui/profile-avatar';
 
 function formatLastCheckIn(date?: string) {
-  if (!date) return 'Never';
+  if (!date) return 'Nunca';
   const d = new Date(date);
   const now = new Date();
   const isToday = d.toDateString() === now.toDateString();
-  const time = d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-  return isToday ? `Today, ${time}` : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const time = d.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+  return isToday ? `Hoy, ${time}` : d.toLocaleDateString('es-CO', { month: 'short', day: 'numeric' });
 }
 
 function tierLabel(type: string) {
   const map: Record<string, string> = {
-    basica: 'Basic',
+    basica: 'Básica',
     premium: 'Premium',
-    vip: 'VIP Elite',
-    estudiante: 'Student',
+    vip: 'VIP elite',
+    estudiante: 'Estudiante',
   };
   return map[type] ?? type;
 }
 
 function churnLabel(level: string) {
-  if (level === 'bajo') return { text: 'Low', dot: 'bg-emerald-500' };
-  if (level === 'medio') return { text: 'Medium', dot: 'bg-amber-500' };
-  if (level === 'alto') return { text: 'High', dot: 'bg-red-500' };
-  return { text: 'Critical', dot: 'bg-red-600' };
+  if (level === 'bajo') return { text: 'Bajo', dot: 'bg-emerald-500' };
+  if (level === 'medio') return { text: 'Medio', dot: 'bg-amber-500' };
+  if (level === 'alto') return { text: 'Alto', dot: 'bg-red-500' };
+  return { text: 'Crítico', dot: 'bg-red-600' };
 }
 
 export default function EnhancedClientsTable() {
@@ -53,7 +53,7 @@ export default function EnhancedClientsTable() {
   }, [members, search]);
 
   const exportToCSV = () => {
-    const headers = ['Name', 'Email', 'Tier', 'Plan', 'Risk', 'Last Check-in'];
+    const headers = ['Nombre', 'Correo', 'Nivel', 'Plan', 'Riesgo', 'Último ingreso'];
     const rows = filteredMembers.map((m) => [
       m.name,
       m.email,
@@ -68,16 +68,16 @@ export default function EnhancedClientsTable() {
     link.href = URL.createObjectURL(blob);
     link.download = `members_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
-    toast.success('Export complete');
+    toast.success('Exportación completa');
   };
 
   const handleDelete = async (id: string) => {
     try {
       await deleteMember(id);
-      toast.success('Member removed');
+      toast.success('Miembro eliminado');
       setDeleteConfirmId(null);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Delete failed');
+      toast.error(err instanceof Error ? err.message : 'Error al eliminar');
     }
   };
 
@@ -85,10 +85,10 @@ export default function EnhancedClientsTable() {
     setCheckinLoading(memberId);
     try {
       await checkinMember(memberId);
-      toast.success('Check-in registered');
+      toast.success('Ingreso registrado');
       await refreshMembers();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Check-in failed');
+      toast.error(err instanceof Error ? err.message : 'Error al registrar el ingreso');
     } finally {
       setCheckinLoading(null);
     }
@@ -114,13 +114,13 @@ export default function EnhancedClientsTable() {
   return (
     <div className="space-y-6 pb-4">
       <PageHeader
-        title="Members"
+        title="Miembros"
         search={
           <div className="relative">
             <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#5B6475]" />
             <input
               type="text"
-              placeholder="Search members by name, email, or ID..."
+              placeholder="Buscar miembros por nombre, correo o ID..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className={premium.searchInput}
@@ -131,11 +131,11 @@ export default function EnhancedClientsTable() {
           <>
             <Link href="/clients/new" className={premium.pillBtn}>
               <Plus className="h-4 w-4" />
-              Nuevo Miembro
+              Nuevo miembro
             </Link>
             <button type="button" onClick={exportToCSV} className={premium.pillBtnOutline}>
               <Download className="h-4 w-4" />
-              Export
+              Exportar
             </button>
           </>
         }
@@ -175,35 +175,35 @@ export default function EnhancedClientsTable() {
                 </div>
 
                 <div>
-                  <p className={premium.labelCaps}>Tier</p>
+                  <p className={premium.labelCaps}>Nivel</p>
                   <span className="mt-1.5 inline-flex rounded-lg bg-[#0B57F0]/10 px-2.5 py-1 text-xs font-semibold text-[#0B57F0]">
                     {tierLabel(member.membershipType)}
                   </span>
                 </div>
 
                 <div>
-                  <p className={premium.labelCaps}>Plan Cost</p>
+                  <p className={premium.labelCaps}>Costo del plan</p>
                   <p className="mt-1.5 text-sm font-semibold text-[#0A1733]">
-                    ${((member.monthlyPrice || 0) / 1000).toFixed(0)}/mo
+                    ${((member.monthlyPrice || 0) / 1000).toFixed(0)}/mes
                   </p>
                 </div>
 
                 <div>
-                  <p className={premium.labelCaps}>Frequency</p>
+                  <p className={premium.labelCaps}>Frecuencia</p>
                   <p className="mt-1.5 text-sm font-semibold text-[#0A1733]">
-                    {member.averageCheckInsPerWeek ?? 0}x/week
+                    {member.averageCheckInsPerWeek ?? 0}x/semana
                   </p>
                 </div>
 
                 <div>
-                  <p className={premium.labelCaps}>Last Check-in</p>
+                  <p className={premium.labelCaps}>Último ingreso</p>
                   <p className="mt-1.5 text-sm font-semibold text-[#0A1733]">
                     {formatLastCheckIn(member.lastCheckIn)}
                   </p>
                 </div>
 
                 <div>
-                  <p className={premium.labelCaps}>Churn Risk</p>
+                  <p className={premium.labelCaps}>Riesgo de fuga</p>
                   <div className="mt-1.5 flex items-center gap-2">
                     <span className={`h-2 w-2 rounded-full ${churn.dot}`} />
                     <span className="text-sm font-semibold text-[#0A1733]">{churn.text}</span>
@@ -221,12 +221,12 @@ export default function EnhancedClientsTable() {
                   {checkinLoading === member.id ? (
                     <span className="flex items-center gap-1">
                       <Loader className="h-3 w-3 animate-spin" />
-                      Checking in...
+                      Registrando...
                     </span>
                   ) : (
                     <span className="flex items-center gap-1">
                       <QrCode className="h-3 w-3" />
-                      Check-in
+                      Ingreso
                     </span>
                   )}
                 </button>
@@ -234,14 +234,14 @@ export default function EnhancedClientsTable() {
                   href={`/clients/${member.id}/edit`}
                   className="rounded-full px-4 py-1.5 text-xs font-semibold text-[#0B57F0] hover:bg-[#0B57F0]/5"
                 >
-                  Edit
+                  Editar
                 </Link>
                 <button
                   type="button"
                   onClick={() => setDeleteConfirmId(member.id)}
                   className="rounded-full px-4 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50"
                 >
-                  Remove
+                  Eliminar
                 </button>
               </div>
             </article>
@@ -249,29 +249,29 @@ export default function EnhancedClientsTable() {
         })}
 
         {filteredMembers.length === 0 && (
-          <p className="py-12 text-center text-sm text-[#5B6475]">No members match your search.</p>
+          <p className="py-12 text-center text-sm text-[#5B6475]">No hay miembros que coincidan con tu búsqueda.</p>
         )}
       </div>
 
       {deleteConfirmId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div className={`${premium.card} max-w-md w-full p-6`}>
-            <h3 className="text-lg font-semibold text-[#0A1733]">Remove member?</h3>
-            <p className="mt-2 text-sm text-[#5B6475]">This action cannot be undone.</p>
+            <h3 className="text-lg font-semibold text-[#0A1733]">¿Eliminar miembro?</h3>
+            <p className="mt-2 text-sm text-[#5B6475]">Esta acción no se puede deshacer.</p>
             <div className="mt-6 flex gap-3">
               <button
                 type="button"
                 onClick={() => setDeleteConfirmId(null)}
                 className={`flex-1 ${premium.pillBtnOutline}`}
               >
-                Cancel
+                Cancelar
               </button>
               <button
                 type="button"
                 onClick={() => handleDelete(deleteConfirmId)}
                 className="flex-1 rounded-full bg-red-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-red-700"
               >
-                Delete
+                Eliminar
               </button>
             </div>
           </div>

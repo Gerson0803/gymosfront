@@ -79,7 +79,7 @@ export default function EquipmentTable() {
   const getMaintenanceStatus = (eq: Equipment) => {
     if (!eq.nextMaintenance) return null;
     const daysUntil = Math.floor((new Date(eq.nextMaintenance).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-    if (daysUntil < 0) return { text: `${Math.abs(daysUntil)} días atrasado`, color: 'text-red-600', icon: AlertTriangle };
+    if (daysUntil < 0) return { text: `${Math.abs(daysUntil)} días de retraso`, color: 'text-red-600', icon: AlertTriangle };
     if (daysUntil <= 7) return { text: `En ${daysUntil} días`, color: 'text-yellow-600', icon: Clock };
     return { text: `En ${daysUntil} días`, color: 'text-green-600', icon: CheckCircle };
   };
@@ -176,11 +176,11 @@ export default function EquipmentTable() {
   if (error) return <div className="text-red-600 p-4 rounded-lg bg-red-50 border border-red-200">{error}</div>;
 
   const categoryTabs = [
-    { id: 'all', label: 'All Equipment' },
+    { id: 'all', label: 'Todo el equipamiento' },
     { id: 'cardio', label: 'Cardio' },
-    { id: 'pesas', label: 'Strength' },
-    { id: 'maquinas', label: 'Machines' },
-    { id: 'funcional', label: 'Functional' },
+    { id: 'pesas', label: 'Pesas' },
+    { id: 'maquinas', label: 'Máquinas' },
+    { id: 'funcional', label: 'Funcional' },
   ];
 
   const getMaintenanceDays = (eq: Equipment) => {
@@ -196,13 +196,13 @@ export default function EquipmentTable() {
   return (
     <div className="space-y-6 pb-4">
       <PageHeader
-        title="Equipment"
+        title="Equipamiento"
         search={
           <div className="relative">
             <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#5B6475]" />
             <input
               type="text"
-              placeholder="Search equipment..."
+              placeholder="Buscar equipamiento..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className={premium.searchInput}
@@ -211,7 +211,7 @@ export default function EquipmentTable() {
         }
         actions={
           <button type="button" onClick={handleOpenCreate} className={premium.pillBtn}>
-            <Plus className="h-4 w-4" /> Add Equipment
+            <Plus className="h-4 w-4" /> Agregar equipo
           </button>
         }
       />
@@ -247,7 +247,7 @@ export default function EquipmentTable() {
                 {isOperational && (
                   <span className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                    Operational
+                    Operativo
                   </span>
                 )}
               </div>
@@ -263,7 +263,7 @@ export default function EquipmentTable() {
                   <button
                     type="button"
                     className="rounded-full p-2 text-[#5B6475] hover:bg-[#F5F7FB]"
-                    aria-label="Options"
+                    aria-label="Opciones"
                   >
                     <MoreVertical className="h-4 w-4" />
                   </button>
@@ -271,24 +271,24 @@ export default function EquipmentTable() {
 
                 <div className="mt-5 grid grid-cols-2 gap-4">
                   <div>
-                    <p className={premium.labelCaps}>Location</p>
+                    <p className={premium.labelCaps}>Ubicación</p>
                     <p className="mt-1 flex items-center gap-1 text-sm font-semibold text-[#0A1733]">
                       <MapPin className="h-3.5 w-3.5 text-[#0B57F0]" />
                       {eq.location || '—'}
                     </p>
                   </div>
                   <div>
-                    <p className={premium.labelCaps}>Usage</p>
+                    <p className={premium.labelCaps}>Uso</p>
                     <p className="mt-1 text-sm font-semibold text-[#0A1733]">
-                      {(eq.totalUsageHours || 0).toLocaleString()} hrs
+                      {(eq.totalUsageHours || 0).toLocaleString()} h
                     </p>
                   </div>
                 </div>
 
                 <div className="mt-5">
                   <div className="mb-2 flex items-center justify-between text-xs">
-                    <span className="font-medium text-[#5B6475]">Next Maintenance</span>
-                    <span className="font-semibold text-[#0A1733]">{maintDays} Days</span>
+                    <span className="font-medium text-[#5B6475]">Próximo mantenimiento</span>
+                    <span className="font-semibold text-[#0A1733]">{maintDays} días</span>
                   </div>
                   <div className="h-1.5 overflow-hidden rounded-full bg-[#E5EAF3]">
                     <div
@@ -304,7 +304,7 @@ export default function EquipmentTable() {
                     onClick={() => handleEdit(eq)}
                     className="flex-1 rounded-full border border-[#E5EAF3] py-2 text-xs font-semibold text-[#0B57F0] hover:bg-[#0B57F0]/5"
                   >
-                    Edit
+                    Editar
                   </button>
                   <button
                     type="button"
@@ -327,17 +327,17 @@ export default function EquipmentTable() {
           <div className={`${premium.formPanel} max-h-[90vh] w-full max-w-3xl overflow-y-auto p-5 sm:p-6`}>
             <div className="mb-6 flex items-start justify-between gap-4 border-b border-[#E5EAF3] pb-5">
               <div>
-                <p className={premium.labelCaps}>Equipment</p>
-                <h2 className="mt-1 text-2xl font-bold text-[#0A1733]">{editingEquipment ? 'Editar Equipo' : 'Crear Nuevo Equipo'}</h2>
-                <p className="mt-1 text-sm text-[#5B6475]">Organize asset details, location and maintenance planning.</p>
+                <p className={premium.labelCaps}>Equipamiento</p>
+                <h2 className="mt-1 text-2xl font-bold text-[#0A1733]">{editingEquipment ? 'Editar equipo' : 'Crear nuevo equipo'}</h2>
+                <p className="mt-1 text-sm text-[#5B6475]">Organiza los detalles del activo, la ubicación y el plan de mantenimiento.</p>
               </div>
               <button type="button" onClick={() => setIsCreateModalOpen(false)} disabled={isSubmitting} className={premium.formSecondaryBtn}>Cerrar</button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className={premium.formSection}>
                 <div className="mb-5">
-                  <h3 className="text-lg font-bold text-[#0A1733]">Asset details</h3>
-                  <p className="mt-1 text-sm text-[#5B6475]">Basic information to identify this equipment.</p>
+                  <h3 className="text-lg font-bold text-[#0A1733]">Detalles del activo</h3>
+                  <p className="mt-1 text-sm text-[#5B6475]">Información básica para identificar este equipo.</p>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <label className="block sm:col-span-2">
@@ -397,15 +397,15 @@ export default function EquipmentTable() {
                     <input type="number" placeholder="Ej: 250" value={formData.totalUsageHours} onChange={(e) => setFormData({...formData, totalUsageHours: e.target.value === '' ? '' : Number(e.target.value)})} className={premium.formInput} />
                   </label>
                   <label className="block">
-                    <span className={premium.formLabel}>Fecha de Compra</span>
+                    <span className={premium.formLabel}>Fecha de compra</span>
                     <input type="date" value={formData.purchaseDate} onChange={(e) => setFormData({...formData, purchaseDate: e.target.value})} className={premium.formInput} />
                   </label>
                   <label className="block">
-                    <span className={premium.formLabel}>Intervalo de Mantenimiento (días)</span>
+                    <span className={premium.formLabel}>Intervalo de mantenimiento (días)</span>
                     <input type="number" placeholder="Ej: 90" value={formData.maintenanceIntervalDays} onChange={(e) => setFormData({...formData, maintenanceIntervalDays: e.target.value === '' ? '' : Number(e.target.value)})} className={premium.formInput} />
                   </label>
                   <label className="block sm:col-span-2">
-                    <span className={premium.formLabel}>Próximo Mantenimiento</span>
+                    <span className={premium.formLabel}>Próximo mantenimiento</span>
                     <input type="date" value={formData.nextMaintenance} onChange={(e) => setFormData({...formData, nextMaintenance: e.target.value})} className={premium.formInput} />
                   </label>
                 </div>

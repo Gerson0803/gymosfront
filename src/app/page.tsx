@@ -45,7 +45,7 @@ export default function HomePage() {
               href="/login"
               className="rounded-full bg-[#0B57F0] px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0B57F0]/90"
             >
-              Login
+              Iniciar sesión
             </Link>
           </div>
 
@@ -53,7 +53,7 @@ export default function HomePage() {
           <button 
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="md:hidden p-2 text-[#0A1733] focus:outline-none"
-            aria-label="Toggle Menu"
+            aria-label="Abrir menú"
           >
             {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
@@ -88,7 +88,7 @@ export default function HomePage() {
               onClick={() => setMobileMenuOpen(false)}
               className="rounded-full bg-[#0B57F0] py-3 text-sm font-semibold text-white text-center transition hover:bg-[#0B57F0]/90 block"
             >
-              Login
+              Iniciar sesión
             </Link>
           </div>
         )}
@@ -100,7 +100,7 @@ export default function HomePage() {
         <div className="absolute right-0 top-0 bottom-0 w-full md:w-1/2 h-full z-0 pointer-events-none opacity-20 md:opacity-100">
           <img 
             src="https://gymos-images.s3.us-east-1.amazonaws.com/fotos-del-sistema/Imagen%20Home.png" 
-            alt="GymOS Hero Background" 
+            alt="Fondo principal de GymOS" 
             className="h-full w-full object-cover object-center"
           />
           {/* Fades para que se mezcle con el fondo blanco de la izquierda y abajo */}
@@ -113,14 +113,14 @@ export default function HomePage() {
             {/* Badge */}
             <div>
               <span className="inline-flex items-center rounded-full bg-[#0B57F0]/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-[#0B57F0]">
-                Plataforma Elite
+                Plataforma elite
               </span>
             </div>
 
             {/* Título */}
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-[#0A1733] leading-[1.1]">
               Gestión de gimnasios, <br />
-              <span className="text-[#0B57F0]">llevada a la perfección.</span>
+              <span className="text-[#0B57F0]">llevada al máximo nivel.</span>
             </h1>
 
             {/* Descripción */}
@@ -160,7 +160,7 @@ export default function HomePage() {
                 </div>
               </div>
               <p className="text-sm font-medium text-[#5B6475] ml-4">
-                Confiado por más de 5,000 centros elite.
+                Confiado por más de 5,000 centros de alto nivel.
               </p>
             </div>
           </div>
@@ -173,7 +173,7 @@ export default function HomePage() {
           {/* Header */}
           <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-[#0A1733]">
-              Control Total
+              Control total
             </h2>
             <p className="text-base md:text-lg text-[#5B6475]">
               Herramientas de precisión diseñadas para optimizar la operación de tu centro fitness.
@@ -203,7 +203,7 @@ export default function HomePage() {
                 <Kanban className="h-6 w-6" />
               </div>
               <h3 className="text-xl font-bold text-[#0A1733] mb-4">
-                Sales Pipeline
+                Embudo de ventas
               </h3>
               <p className="text-sm md:text-base text-[#5B6475] leading-relaxed">
                 Visualiza y gestiona prospectos con un tablero Kanban intuitivo. Automatiza seguimientos y convierte leads en miembros activos con mayor eficiencia.
@@ -233,7 +233,7 @@ export default function HomePage() {
           {/* Header */}
           <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-[#0A1733]">
-              Planes a tu Medida
+              Planes a tu medida
             </h2>
             <p className="text-base md:text-lg text-[#5B6475]">
               Elige el plan que mejor se adapte a tu centro fitness.
@@ -259,7 +259,7 @@ export default function HomePage() {
                       <div className="rounded-full bg-[#0B57F0]/10 p-0.5 mt-0.5">
                         <Check className="h-3.5 w-3.5 text-[#0B57F0]" />
                       </div>
-                      <span>Dashboard Principal</span>
+                      <span>Tablero principal</span>
                     </li>
                     <li className="flex items-start space-x-3 text-sm text-[#5B6475]">
                       <div className="rounded-full bg-[#0B57F0]/10 p-0.5 mt-0.5">
@@ -274,7 +274,7 @@ export default function HomePage() {
                 href="/register?plan=basic" 
                 className="w-full border border-[#0B57F0] text-[#0B57F0] rounded-full py-3.5 text-sm font-semibold hover:bg-[#0B57F0]/5 transition duration-200 mt-8 text-center block"
               >
-                Comenzar Gratis
+                Comenzar gratis
               </Link>
             </div>
 
@@ -300,31 +300,31 @@ export default function HomePage() {
                       <div className="rounded-full bg-white/20 p-0.5 mt-0.5">
                         <Check className="h-3.5 w-3.5 text-white" />
                       </div>
-                      <span>Todo de Básico +</span>
+                      <span>Todo lo del plan básico +</span>
                     </li>
                     <li className="flex items-start space-x-3 text-sm text-white">
                       <div className="rounded-full bg-white/20 p-0.5 mt-0.5">
                         <Check className="h-3.5 w-3.5 text-white" />
                       </div>
-                      <span>Check-in QR / Huella</span>
+                      <span>Ingreso por QR / huella</span>
                     </li>
                     <li className="flex items-start space-x-3 text-sm text-white">
                       <div className="rounded-full bg-white/20 p-0.5 mt-0.5">
                         <Check className="h-3.5 w-3.5 text-white" />
                       </div>
-                      <span>Pipeline de Ventas</span>
+                      <span>Embudo de ventas</span>
                     </li>
                     <li className="flex items-start space-x-3 text-sm text-white">
                       <div className="rounded-full bg-white/20 p-0.5 mt-0.5">
                         <Check className="h-3.5 w-3.5 text-white" />
                       </div>
-                      <span>Gestión de Equipamiento</span>
+                      <span>Gestión de equipamiento</span>
                     </li>
                     <li className="flex items-start space-x-3 text-sm text-white">
                       <div className="rounded-full bg-white/20 p-0.5 mt-0.5">
                         <Check className="h-3.5 w-3.5 text-white" />
                       </div>
-                      <span>Gestión de Empleados</span>
+                      <span>Gestión de empleados</span>
                     </li>
                   </ul>
                 </div>
@@ -333,7 +333,7 @@ export default function HomePage() {
                 href="/register?plan=custom" 
                 className="w-full border border-[#0B57F0] text-white rounded-full py-3.5 text-sm font-semibold hover:bg-[#0B57F0]/5 transition duration-200 mt-8 text-center block"
               >
-                Comenzar Gratis
+                Comenzar gratis
               </Link>
             </div>
 
@@ -354,7 +354,7 @@ export default function HomePage() {
                       <div className="rounded-full bg-[#0B57F0]/10 p-0.5 mt-0.5">
                         <Check className="h-3.5 w-3.5 text-[#0B57F0]" />
                       </div>
-                      <span>Dashboard Principal</span>
+                      <span>Tablero principal</span>
                     </li>
                     <li className="flex items-start space-x-3 text-sm text-[#5B6475]">
                       <div className="rounded-full bg-[#0B57F0]/10 p-0.5 mt-0.5">
@@ -381,7 +381,7 @@ export default function HomePage() {
                 href="/register?plan=basic" 
                 className="w-full border border-[#0B57F0] text-[#0B57F0] rounded-full py-3.5 text-sm font-semibold hover:bg-[#0B57F0]/5 transition duration-200 mt-8 text-center block"
               >
-                Comenzar Gratis
+                Comenzar gratis
               </Link>
             </div>
           </div>

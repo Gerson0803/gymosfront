@@ -126,7 +126,7 @@ export default function EnhancedDashboard() {
         <div className="flex items-start gap-3">
           <AlertTriangle className="mt-0.5 h-6 w-6 text-red-600" />
           <div>
-            <h3 className="text-lg font-semibold text-red-900">Error al cargar datos</h3>
+            <h3 className="text-lg font-semibold text-red-900">Error al cargar los datos</h3>
             <p className="mt-1 text-sm text-red-700">{error}</p>
           </div>
         </div>
@@ -137,25 +137,25 @@ export default function EnhancedDashboard() {
   return (
     <div className="space-y-6 pb-4">
       <PageHeader
-        title="Overview"
-        subtitle="Here's what's happening at your facility today."
+        title="Resumen general"
+        subtitle="Así se está moviendo tu gimnasio hoy."
       />
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className={`lg:col-span-2 ${premium.card} p-6 sm:p-8`}>
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-bold text-[#0A1733]">Member Health Alerts</h2>
-              <p className="text-sm text-[#5B6475]">Members requiring immediate attention</p>
+              <h2 className="text-lg font-bold text-[#0A1733]">Alertas de estado</h2>
+              <p className="text-sm text-[#5B6475]">Miembros que requieren atención inmediata</p>
             </div>
             <span className="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600">
-              Action Required
+              Requiere acción
             </span>
           </div>
 
           {stats.highRisk.length === 0 ? (
             <p className="rounded-2xl border border-dashed border-[#E5EAF3] bg-[#F5F7FB] px-4 py-8 text-center text-sm text-[#5B6475]">
-              No high-risk members at this time.
+              No hay miembros de alto riesgo por ahora.
             </p>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2">
@@ -177,13 +177,13 @@ export default function EnhancedDashboard() {
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-semibold text-[#0A1733]">{member.name}</p>
                       <p className="text-xs text-[#5B6475]">
-                        Last visit:{' '}
-                        {daysSince !== null ? `${daysSince} days ago` : 'Never'}
+                        Última visita:{' '}
+                        {daysSince !== null ? `hace ${daysSince} días` : 'Nunca'}
                       </p>
                     </div>
                     <div className="text-right">
                       <p className="text-[10px] font-semibold uppercase tracking-wider text-[#5B6475]">
-                        Risk
+                        Riesgo
                       </p>
                       <p className="text-lg font-bold text-red-600">{member.churnRiskScore}%</p>
                     </div>
@@ -195,7 +195,7 @@ export default function EnhancedDashboard() {
         </div>
 
         <div className={`${premium.card} flex flex-col p-6 sm:p-8`}>
-          <p className="text-sm font-medium text-[#5B6475]">Total Members</p>
+          <p className="text-sm font-medium text-[#5B6475]">Total de miembros</p>
           <div className="mt-2 flex items-baseline gap-2">
             <span className="text-5xl font-bold text-[#0B57F0]">{stats.total}</span>
             <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-600">
@@ -226,35 +226,35 @@ export default function EnhancedDashboard() {
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          label="Active Members"
+          label="Miembros activos"
           value={String(stats.active)}
-          sub={`of ${stats.total} total`}
+          sub={`de ${stats.total} en total`}
           icon={UserCheck}
           iconBg="bg-[#0B57F0]/10"
           iconColor="text-[#0B57F0]"
         />
         <StatCard
-          label="Revenue Generated"
+          label="Ingresos generados"
           value={`$${(stats.monthlyRevenue / 1000).toFixed(1)}k`}
-          sub="Monthly recurring"
+          sub="Recurrente mensual"
           icon={DollarSign}
           iconBg="bg-emerald-50"
           iconColor="text-emerald-600"
           accent="#10b981"
         />
         <StatCard
-          label="Abandonment Risk"
+          label="Riesgo de abandono"
           value={`${stats.avgRisk}%`}
-          sub="Average risk score"
+          sub="Puntaje de riesgo promedio"
           icon={TrendingDown}
           iconBg="bg-amber-50"
           iconColor="text-amber-600"
           accent="#f59e0b"
         />
         <StatCard
-          label="At-Risk Members"
+          label="Miembros en riesgo"
           value={String(stats.highRisk.length)}
-          sub="High / critical churn"
+          sub="Alta o crítica probabilidad de fuga"
           icon={Users}
           iconBg="bg-violet-50"
           iconColor="text-violet-600"
@@ -264,8 +264,8 @@ export default function EnhancedDashboard() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <div className={`${premium.card} p-6 sm:p-8`}>
-          <h3 className="text-lg font-bold text-[#0A1733]">Membership Types</h3>
-          <p className="mb-6 text-sm text-[#5B6475]">Distribution over time</p>
+          <h3 className="text-lg font-bold text-[#0A1733]">Tipos de membresía</h3>
+          <p className="mb-6 text-sm text-[#5B6475]">Distribución en el tiempo</p>
           <ResponsiveContainer width="100%" height={280}>
             <AreaChart data={stats.chartData}>
               <defs>
@@ -295,8 +295,8 @@ export default function EnhancedDashboard() {
         </div>
 
         <div className={`${premium.card} p-6 sm:p-8`}>
-          <h3 className="text-lg font-bold text-[#0A1733]">Abandonment Risk</h3>
-          <p className="mb-6 text-sm text-[#5B6475]">Risk level breakdown</p>
+          <h3 className="text-lg font-bold text-[#0A1733]">Riesgo de abandono</h3>
+          <p className="mb-6 text-sm text-[#5B6475]">Desglose por nivel de riesgo</p>
           <div className="flex flex-col items-center justify-center py-4">
             <div className="relative flex h-40 w-40 items-center justify-center rounded-full border-[10px] border-[#E5EAF3]">
               <div
@@ -308,16 +308,16 @@ export default function EnhancedDashboard() {
               />
               <div className="text-center">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-[#5B6475]">
-                  Avg Risk
+                  Riesgo promedio
                 </p>
                 <p className="text-3xl font-bold text-[#0A1733]">{stats.avgRisk}%</p>
               </div>
             </div>
             <div className="mt-8 flex flex-wrap justify-center gap-6 text-sm">
               {[
-                { label: 'Low', color: 'bg-emerald-500' },
-                { label: 'Medium', color: 'bg-[#0B57F0]' },
-                { label: 'High', color: 'bg-red-500' },
+                { label: 'Bajo', color: 'bg-emerald-500' },
+                { label: 'Medio', color: 'bg-[#0B57F0]' },
+                { label: 'Alto', color: 'bg-red-500' },
               ].map((item) => (
                 <div key={item.label} className="flex items-center gap-2 text-[#5B6475]">
                   <span className={`h-2.5 w-2.5 rounded-full ${item.color}`} />
