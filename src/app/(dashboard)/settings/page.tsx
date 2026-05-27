@@ -1,25 +1,18 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useAppSettings } from '@/context/app-settings-context';
-import { changePassword } from '@/lib/api';
-import toast from 'react-hot-toast';
-import { Save, Eye, EyeOff, User, Lock, Bell } from 'lucide-react';
-import { premium } from '@/lib/premium-ui';
-import { GymNameEditor } from '@/components/layout/gym-name-editor';
-
-interface UserData {
-  id?: string;
-  email?: string;
-  name?: string;
-  role?: string;
-}
+import { useState } from "react";
+import { useAppSettings } from "@/context/app-settings-context";
+import { changePassword } from "@/lib/api";
+import toast from "react-hot-toast";
+import { Save, Eye, EyeOff, User, Lock, Bell } from "lucide-react";
+import { premium } from "@/lib/premium-ui";
+import { getStoredUserData } from "@/lib/user-session";
 
 const inputClass =
-  'w-full rounded-2xl border border-[#E5EAF3] bg-[#F5F7FB] px-4 py-3 text-sm text-[#0A1733] outline-none transition focus:border-[#0B57F0] focus:ring-2 focus:ring-[#0B57F0]/15';
+  "w-full rounded-2xl border border-[#E5EAF3] bg-[#F5F7FB] px-4 py-3 text-sm text-[#0A1733] outline-none transition focus:border-[#0B57F0] focus:ring-2 focus:ring-[#0B57F0]/15";
 
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState('profile');
+  const [activeTab, setActiveTab] = useState("profile");
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -28,7 +21,9 @@ export default function SettingsPage() {
         <h1 className="mt-2 font-serif text-3xl font-semibold tracking-tight text-[#0A1733] sm:text-4xl">
           Ajustes
         </h1>
-        <p className="mt-2 text-sm text-[#5B6475]">Administra tu cuenta y preferencias de GymOS.</p>
+        <p className="mt-2 text-sm text-[#5B6475]">
+          Administra tu cuenta y preferencias de GymOS.
+        </p>
       </header>
       <SettingsTabs activeTab={activeTab} setActiveTab={setActiveTab} />
     </div>
@@ -43,9 +38,9 @@ function SettingsTabs({
   setActiveTab: (tab: string) => void;
 }) {
   const tabs = [
-    { id: 'profile', label: 'Perfil', icon: User },
-    { id: 'security', label: 'Seguridad', icon: Lock },
-    { id: 'preferences', label: 'Preferencias', icon: Bell },
+    { id: "profile", label: "Perfil", icon: User },
+    { id: "security", label: "Seguridad", icon: Lock },
+    { id: "preferences", label: "Preferencias", icon: Bell },
   ];
 
   return (
@@ -58,8 +53,8 @@ function SettingsTabs({
             onClick={() => setActiveTab(id)}
             className={`inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition ${
               activeTab === id
-                ? 'border-[#0B57F0] text-[#0B57F0]'
-                : 'border-transparent text-[#5B6475] hover:text-[#0A1733]'
+                ? "border-[#0B57F0] text-[#0B57F0]"
+                : "border-transparent text-[#5B6475] hover:text-[#0A1733]"
             }`}
           >
             <Icon className="h-4 w-4" strokeWidth={1.75} />
@@ -67,65 +62,57 @@ function SettingsTabs({
           </button>
         ))}
       </div>
-      {activeTab === 'profile' && <ProfileTab />}
-      {activeTab === 'security' && <SecurityTab />}
-      {activeTab === 'preferences' && <PreferencesTab />}
+      {activeTab === "profile" && <ProfileTab />}
+      {activeTab === "security" && <SecurityTab />}
+      {activeTab === "preferences" && <PreferencesTab />}
     </>
   );
 }
 
 function ProfileTab() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-
-  useEffect(() => {
-    const storedUserData = localStorage.getItem('userData');
-    if (storedUserData) {
-      try {
-        const data = JSON.parse(storedUserData) as UserData;
-        setName(data.name || '');
-        setEmail(data.email || '');
-      } catch {
-        /* ignore */
-      }
-    }
-  }, []);
+  const [userData] = useState(() => getStoredUserData());
+  const name = userData.name || "";
+  const email = userData.email || "";
 
   return (
     <div className="space-y-6">
       <section className={`${premium.card} p-6 sm:p-8`}>
-        <h2 className="text-lg font-semibold text-[#0A1733]">Información de cuenta</h2>
-        <p className="mt-1 text-sm text-[#5B6475]">Datos asociados a tu sesión.</p>
+        <h2 className="text-lg font-semibold text-[#0A1733]">
+          Información de cuenta
+        </h2>
+        <p className="mt-1 text-sm text-[#5B6475]">
+          Datos asociados a tu sesión.
+        </p>
         <div className="mt-6 space-y-4">
           <div>
-            <label className="mb-2 block text-sm font-medium text-[#0A1733]">Nombre</label>
+            <label className="mb-2 block text-sm font-medium text-[#0A1733]">
+              Nombre
+            </label>
             <input
               type="text"
               value={name}
               disabled
               className={`${inputClass} cursor-not-allowed opacity-70`}
             />
-            <p className="mt-1 text-xs text-[#5B6475]">El nombre no se puede modificar desde aquí.</p>
+            <p className="mt-1 text-xs text-[#5B6475]">
+              El nombre no se puede modificar desde aquí.
+            </p>
           </div>
           <div>
-            <label className="mb-2 block text-sm font-medium text-[#0A1733]">Correo electrónico</label>
+            <label className="mb-2 block text-sm font-medium text-[#0A1733]">
+              Correo electrónico
+            </label>
             <input
               type="email"
               value={email}
               disabled
               className={`${inputClass} cursor-not-allowed opacity-70`}
             />
-            <p className="mt-1 text-xs text-[#5B6475]">El correo no se puede modificar desde aquí.</p>
+            <p className="mt-1 text-xs text-[#5B6475]">
+              El correo no se puede modificar desde aquí.
+            </p>
           </div>
         </div>
-      </section>
-
-      <section className={`${premium.card} p-6 sm:p-8`}>
-        <h2 className="text-lg font-semibold text-[#0A1733]">Información del gimnasio</h2>
-        <p className="mt-1 text-sm text-[#5B6475]">
-          Personaliza el nombre de tu centro. Los cambios se aplican al guardar.
-        </p>
-        <GymNameEditor variant="settings" />
       </section>
     </div>
   );
@@ -133,47 +120,47 @@ function ProfileTab() {
 
 function SecurityTab() {
   const [showPasswordForm, setShowPasswordForm] = useState(false);
-  const [oldPassword, setOldPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const resetPasswordForm = () => {
-    setOldPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
+    setOldPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
     setShowPasswordForm(false);
   };
 
   const handleChangePassword = async () => {
     if (!oldPassword) {
-      toast.error('Ingresa tu contraseña actual');
+      toast.error("Ingresa tu contraseña actual");
       return;
     }
     if (!newPassword || newPassword.length < 6) {
-      toast.error('La nueva contraseña debe tener al menos 6 caracteres');
+      toast.error("La nueva contraseña debe tener al menos 6 caracteres");
       return;
     }
     if (newPassword !== confirmPassword) {
-      toast.error('Las contraseñas no coinciden');
+      toast.error("Las contraseñas no coinciden");
       return;
     }
     if (oldPassword === newPassword) {
-      toast.error('La nueva contraseña debe ser diferente a la actual');
+      toast.error("La nueva contraseña debe ser diferente a la actual");
       return;
     }
 
     setLoading(true);
     try {
       await changePassword(oldPassword, newPassword);
-      toast.success('Contraseña actualizada correctamente');
+      toast.success("Contraseña actualizada correctamente");
       resetPasswordForm();
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : 'Error al cambiar la contraseña';
+        err instanceof Error ? err.message : "Error al cambiar la contraseña";
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -182,7 +169,9 @@ function SecurityTab() {
 
   return (
     <section className={`${premium.card} p-6 sm:p-8`}>
-      <h2 className="text-lg font-semibold text-[#0A1733]">Cambiar contraseña</h2>
+      <h2 className="text-lg font-semibold text-[#0A1733]">
+        Cambiar contraseña
+      </h2>
       <p className="mt-1 text-sm text-[#5B6475]">
         La actualización se guarda en tu cuenta del servidor.
       </p>
@@ -232,7 +221,7 @@ function SecurityTab() {
               disabled={loading}
               className={`${premium.pillBtn} flex-1 disabled:cursor-not-allowed disabled:opacity-50`}
             >
-              {loading ? 'Guardando...' : 'Cambiar contraseña'}
+              {loading ? "Guardando..." : "Cambiar contraseña"}
             </button>
             <button
               type="button"
@@ -250,7 +239,12 @@ function SecurityTab() {
 }
 
 function PreferencesTab() {
-  const { notifications, setNotifications, emailNotifications, setEmailNotifications } = useAppSettings();
+  const {
+    notifications,
+    setNotifications,
+    emailNotifications,
+    setEmailNotifications,
+  } = useAppSettings();
 
   return (
     <section className={`${premium.card} p-6 sm:p-8`}>
@@ -273,7 +267,7 @@ function PreferencesTab() {
       </div>
       <button
         type="button"
-        onClick={() => toast.success('Preferencias guardadas')}
+        onClick={() => toast.success("Preferencias guardadas")}
         className={`${premium.pillBtn} mt-6`}
       >
         <Save className="h-4 w-4" />
@@ -304,13 +298,16 @@ function PasswordField({
 }) {
   return (
     <div>
-      <label htmlFor={id} className="mb-2 block text-sm font-medium text-[#0A1733]">
+      <label
+        htmlFor={id}
+        className="mb-2 block text-sm font-medium text-[#0A1733]"
+      >
         {label}
       </label>
       <div className="relative">
         <input
           id={id}
-          type={visible ? 'text' : 'password'}
+          type={visible ? "text" : "password"}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder="********"
@@ -322,7 +319,11 @@ function PasswordField({
           onClick={onToggle}
           className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5B6475] hover:text-[#0A1733]"
         >
-          {visible ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+          {visible ? (
+            <EyeOff className="h-5 w-5" />
+          ) : (
+            <Eye className="h-5 w-5" />
+          )}
         </button>
       </div>
       {hint ? <p className="mt-1 text-xs text-[#5B6475]">{hint}</p> : null}

@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
 import {
   LayoutDashboard,
   Users,
@@ -16,43 +16,52 @@ import {
   Menu,
   X,
   Settings,
-} from 'lucide-react';
-import { logout } from '@/lib/api';
-import { useAppSettings } from '@/context/app-settings-context';
-import { useModules } from '@/context/modules-context';
+} from "lucide-react";
+import { logout } from "@/lib/api";
+import { useModules } from "@/context/modules-context";
 
 const baseNavigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, moduleKey: null },
-  { name: 'Members', href: '/clients', icon: Users, moduleKey: 'members' },
-  { name: 'Check-in', href: '/checkin', icon: QrCode, moduleKey: 'checkin' },
-  { name: 'Sales Pipeline', href: '/pipeline', icon: TrendingUp, moduleKey: 'pipeline' },
-  { name: 'Equipment', href: '/equipment', icon: Wrench, moduleKey: 'equipment' },
-  { name: 'Employees', href: '/employees', icon: UserRound, moduleKey: 'employees' },
-  { name: 'Modules', href: '/modules', icon: Settings, moduleKey: null },
+  {
+    name: "Dashboard",
+    href: "/dashboard",
+    icon: LayoutDashboard,
+    moduleKey: null,
+  },
+  { name: "Members", href: "/clients", icon: Users, moduleKey: "members" },
+  { name: "Check-in", href: "/checkin", icon: QrCode, moduleKey: "checkin" },
+  {
+    name: "Sales Pipeline",
+    href: "/pipeline",
+    icon: TrendingUp,
+    moduleKey: "pipeline",
+  },
+  {
+    name: "Equipment",
+    href: "/equipment",
+    icon: Wrench,
+    moduleKey: "equipment",
+  },
+  {
+    name: "Employees",
+    href: "/employees",
+    icon: UserRound,
+    moduleKey: "employees",
+  },
+  { name: "Modules", href: "/modules", icon: Settings, moduleKey: null },
 ];
 
 type SidebarProps = {
   isCollapsed: boolean;
-  onToggleCollapse: () => void;
+  onToggleCollapseAction: () => void;
 };
 
-export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps) {
+export default function Sidebar({
+  isCollapsed,
+  onToggleCollapseAction,
+}: SidebarProps) {
   const pathname = usePathname();
-  const { gymName } = useAppSettings();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [userDisplayName, setUserDisplayName] = useState('');
   const { isModuleEnabled } = useModules();
-
-  useEffect(() => {
-    const stored = localStorage.getItem('userData');
-    if (!stored) return;
-    try {
-      const data = JSON.parse(stored) as { name?: string };
-      setUserDisplayName(data.name?.trim() || '');
-    } catch {
-      /* ignore */
-    }
-  }, []);
 
   const handleLogout = () => {
     logout();
@@ -63,24 +72,28 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
     return isModuleEnabled(item.moduleKey);
   });
 
-  const mobileNavigation = navigation;
-
   return (
     <>
       <aside
         className={`fixed inset-y-0 left-0 z-40 hidden h-screen flex-col border-r border-[#E5EAF3] bg-white transition-[width] duration-300 ease-out md:flex ${
-          isCollapsed ? 'w-[72px]' : 'w-[260px]'
+          isCollapsed ? "w-[72px]" : "w-[260px]"
         }`}
       >
-        <div className={`border-b border-[#E5EAF3] py-5 transition-[padding] duration-300 ease-out ${isCollapsed ? 'px-2' : 'px-6'}`}>
-          <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between gap-3'}`}>
+        <div
+          className={`border-b border-[#E5EAF3] py-5 transition-[padding] duration-300 ease-out ${isCollapsed ? "px-2" : "px-6"}`}
+        >
+          <div
+            className={`flex items-center ${isCollapsed ? "justify-center" : "justify-between gap-3"}`}
+          >
             <button
               type="button"
-              onClick={isCollapsed ? onToggleCollapse : undefined}
-              aria-label={isCollapsed ? 'Expandir sidebar' : undefined}
-              title={isCollapsed ? 'Expandir sidebar' : undefined}
+              onClick={isCollapsed ? onToggleCollapseAction : undefined}
+              aria-label={isCollapsed ? "Expandir sidebar" : undefined}
+              title={isCollapsed ? "Expandir sidebar" : undefined}
               className={`flex min-w-0 items-center transition-all duration-300 ease-out focus:outline-none focus:ring-2 focus:ring-[#0B57F0]/20 ${
-                isCollapsed ? 'h-11 w-11 justify-center rounded-xl hover:bg-[#F5F7FB]' : 'pointer-events-none gap-3'
+                isCollapsed
+                  ? "h-11 w-11 justify-center rounded-xl hover:bg-[#F5F7FB]"
+                  : "pointer-events-none gap-3"
               }`}
             >
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#0B57F0] text-white shadow-sm">
@@ -88,17 +101,19 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
               </span>
               <div
                 className={`min-w-0 overflow-hidden transition-all duration-300 ease-out ${
-                  isCollapsed ? 'w-0 -translate-x-2 opacity-0' : 'w-auto translate-x-0 opacity-100'
+                  isCollapsed
+                    ? "w-0 -translate-x-2 opacity-0"
+                    : "w-auto translate-x-0 opacity-100"
                 }`}
               >
                 <h1 className="text-lg font-bold text-[#0B57F0]">GymOS</h1>
-                <p className="truncate text-xs text-[#5B6475]">{gymName || 'Elite Management'}</p>
+                <p className="text-xs text-[#5B6475]">Admin suite</p>
               </div>
             </button>
             {!isCollapsed && (
               <button
                 type="button"
-                onClick={onToggleCollapse}
+                onClick={onToggleCollapseAction}
                 aria-label="Contraer sidebar"
                 title="Contraer sidebar"
                 className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-[#5B6475] transition hover:bg-[#F5F7FB] hover:text-[#0A1733] focus:outline-none focus:ring-2 focus:ring-[#0B57F0]/20"
@@ -109,7 +124,9 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
           </div>
         </div>
 
-        <nav className={`flex-1 space-y-1 py-5 transition-[padding] duration-300 ease-out ${isCollapsed ? 'px-2' : 'px-3'}`}>
+        <nav
+          className={`flex-1 space-y-1 py-5 transition-[padding] duration-300 ease-out ${isCollapsed ? "px-2" : "px-3"}`}
+        >
           {navigation.map((item) => {
             const isActive =
               pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -120,11 +137,11 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
                 title={isCollapsed ? item.name : undefined}
                 aria-label={item.name}
                 className={`relative flex items-center overflow-hidden rounded-xl py-3 text-sm font-medium transition ${
-                  isCollapsed ? 'h-11 justify-center px-0' : 'gap-3 px-4'
+                  isCollapsed ? "h-11 justify-center px-0" : "gap-3 px-4"
                 } ${
                   isActive
-                    ? 'bg-[#0B57F0]/8 text-[#0B57F0]'
-                    : 'text-[#5B6475] hover:bg-[#F5F7FB] hover:text-[#0A1733]'
+                    ? "bg-[#0B57F0]/8 text-[#0B57F0]"
+                    : "text-[#5B6475] hover:bg-[#F5F7FB] hover:text-[#0A1733]"
                 }`}
               >
                 {isActive && (
@@ -134,12 +151,14 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
                   />
                 )}
                 <item.icon
-                  className={`h-5 w-5 shrink-0 ${isActive ? 'text-[#0B57F0]' : 'text-[#5B6475]'}`}
+                  className={`h-5 w-5 shrink-0 ${isActive ? "text-[#0B57F0]" : "text-[#5B6475]"}`}
                   strokeWidth={1.75}
                 />
                 <span
                   className={`min-w-0 whitespace-nowrap transition-all duration-300 ease-out ${
-                    isCollapsed ? 'w-0 -translate-x-2 overflow-hidden opacity-0' : 'w-auto translate-x-0 opacity-100'
+                    isCollapsed
+                      ? "w-0 -translate-x-2 overflow-hidden opacity-0"
+                      : "w-auto translate-x-0 opacity-100"
                   }`}
                 >
                   {item.name}
@@ -149,26 +168,29 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
           })}
         </nav>
 
-        <div className={`mt-auto space-y-3 border-t border-[#E5EAF3] transition-[padding] duration-300 ease-out ${isCollapsed ? 'p-2' : 'p-4'}`}>
-          {userDisplayName && !isCollapsed ? (
-            <div className="rounded-xl border border-[#0B57F0]/15 bg-[#0B57F0]/5 px-4 py-3 transition-opacity duration-300 ease-out">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#5B6475]">Tu nombre</p>
-              <p className="mt-1 text-sm font-semibold text-[#0A1733]">{userDisplayName}</p>
-            </div>
-          ) : null}
+        <div
+          className={`mt-auto border-t border-[#E5EAF3] transition-[padding] duration-300 ease-out ${isCollapsed ? "p-2" : "p-4"}`}
+        >
           <button
             type="button"
             onClick={handleLogout}
             aria-label="Cerrar sesión"
-            title={isCollapsed ? 'Logout' : undefined}
+            title={isCollapsed ? "Logout" : undefined}
             className={`flex w-full items-center rounded-xl py-3 text-left text-sm font-medium text-[#5B6475] transition hover:bg-[#F5F7FB] hover:text-[#0A1733] focus:outline-none focus:ring-2 focus:ring-[#0B57F0]/20 ${
-              isCollapsed ? 'h-11 justify-center px-0' : 'justify-start gap-3 px-4'
+              isCollapsed
+                ? "h-11 justify-center px-0"
+                : "justify-start gap-3 px-4"
             }`}
           >
-            <LogOut className="h-5 w-5 shrink-0 text-[#5B6475]" strokeWidth={1.75} />
+            <LogOut
+              className="h-5 w-5 shrink-0 text-[#5B6475]"
+              strokeWidth={1.75}
+            />
             <span
               className={`min-w-0 whitespace-nowrap transition-all duration-300 ease-out ${
-                isCollapsed ? 'w-0 -translate-x-2 overflow-hidden opacity-0' : 'w-auto translate-x-0 opacity-100'
+                isCollapsed
+                  ? "w-0 -translate-x-2 overflow-hidden opacity-0"
+                  : "w-auto translate-x-0 opacity-100"
               }`}
             >
               Logout
@@ -189,7 +211,7 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
 
       <div
         className={`fixed inset-0 z-50 md:hidden ${
-          isMobileOpen ? 'pointer-events-auto' : 'pointer-events-none'
+          isMobileOpen ? "pointer-events-auto" : "pointer-events-none"
         }`}
         aria-hidden={!isMobileOpen}
       >
@@ -198,12 +220,12 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
           onClick={() => setIsMobileOpen(false)}
           aria-label="Cerrar menú"
           className={`absolute inset-0 bg-[#0A1733]/35 transition-opacity duration-300 ease-out ${
-            isMobileOpen ? 'opacity-100' : 'opacity-0'
+            isMobileOpen ? "opacity-100" : "opacity-0"
           }`}
         />
         <aside
           className={`relative flex h-full w-[260px] max-w-[82vw] flex-col border-r border-[#E5EAF3] bg-white transition-transform duration-300 ease-out ${
-            isMobileOpen ? 'translate-x-0' : '-translate-x-full'
+            isMobileOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
           <div className="flex items-center justify-between border-b border-[#E5EAF3] px-6 py-6">
@@ -213,7 +235,7 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
               </div>
               <div>
                 <h1 className="text-lg font-bold text-[#0B57F0]">GymOS</h1>
-                <p className="text-xs text-[#5B6475]">{gymName || 'Elite Management'}</p>
+                <p className="text-xs text-[#5B6475]">Admin suite</p>
               </div>
             </div>
             <button
@@ -238,8 +260,8 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
                   onClick={() => setIsMobileOpen(false)}
                   className={`relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition ${
                     isActive
-                      ? 'bg-[#0B57F0]/8 text-[#0B57F0]'
-                      : 'text-[#5B6475] hover:bg-[#F5F7FB] hover:text-[#0A1733]'
+                      ? "bg-[#0B57F0]/8 text-[#0B57F0]"
+                      : "text-[#5B6475] hover:bg-[#F5F7FB] hover:text-[#0A1733]"
                   }`}
                 >
                   {isActive && (
@@ -249,7 +271,7 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
                     />
                   )}
                   <item.icon
-                    className={`h-5 w-5 shrink-0 ${isActive ? 'text-[#0B57F0]' : 'text-[#5B6475]'}`}
+                    className={`h-5 w-5 shrink-0 ${isActive ? "text-[#0B57F0]" : "text-[#5B6475]"}`}
                     strokeWidth={1.75}
                   />
                   <span>{item.name}</span>
@@ -258,20 +280,17 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
             })}
           </nav>
 
-          <div className="mt-auto space-y-3 border-t border-[#E5EAF3] p-4">
-            {userDisplayName ? (
-              <div className="rounded-xl border border-[#0B57F0]/15 bg-[#0B57F0]/5 px-4 py-3">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#5B6475]">Tu nombre</p>
-                <p className="mt-1 text-sm font-semibold text-[#0A1733]">{userDisplayName}</p>
-              </div>
-            ) : null}
+          <div className="mt-auto border-t border-[#E5EAF3] p-4">
             <button
               type="button"
               onClick={handleLogout}
               aria-label="Cerrar sesión"
               className="flex w-full items-center justify-start gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-[#5B6475] transition hover:bg-[#F5F7FB] hover:text-[#0A1733] focus:outline-none focus:ring-2 focus:ring-[#0B57F0]/20"
             >
-              <LogOut className="h-5 w-5 shrink-0 text-[#5B6475]" strokeWidth={1.75} />
+              <LogOut
+                className="h-5 w-5 shrink-0 text-[#5B6475]"
+                strokeWidth={1.75}
+              />
               Logout
             </button>
           </div>
