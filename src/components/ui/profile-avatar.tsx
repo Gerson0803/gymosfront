@@ -51,7 +51,7 @@ export function ProfileAvatar({
           fill
           className="object-cover"
           sizes={`${s.px}px`}
-          unoptimized={photoUrl.startsWith("data:")}
+          unoptimized={photoUrl.startsWith("data:") || photoUrl.includes("amazonaws.com")}
         />
       </div>
     );

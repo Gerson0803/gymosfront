@@ -1,298 +1,331 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { v4 as uuidv4 } from 'uuid';
-import { Client, Lead, RetentionAlert, ClientStatus, ChurnRiskLevel, LeadStatus, Equipment, MaintenanceRecord } from '@/types/client';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { v4 as uuidv4 } from "uuid";
+import {
+  Client,
+  Lead,
+  RetentionAlert,
+  ClientStatus,
+  ChurnRiskLevel,
+  LeadStatus,
+  Equipment,
+  MaintenanceRecord,
+} from "@/types/client";
 
 // Datos mock realistas
 const initialClients: Client[] = [
   {
-    id: '1',
-    name: 'Carlos Rodríguez',
-    email: 'carlos@email.com',
-    phone: '+57 300 123 4567',
-    birthDate: '1990-05-15',
-    gender: 'M',
-    goal: 'ganar_musculo',
-    experienceLevel: 'intermedio',
-    membershipType: 'premium',
-    joinedAt: '2024-01-10',
-    membershipEnd: '2025-01-10',
+    id: "1",
+    name: "Carlos Rodríguez",
+    email: "carlos@email.com",
+    phone: "+57 300 123 4567",
+    birthDate: "1990-05-15",
+    gender: "M",
+    goal: "ganar_musculo",
+    experienceLevel: "intermedio",
+    membershipType: "premium",
+    joinedAt: "2024-01-10",
+    membershipEnd: "2025-01-10",
     monthlyPrice: 120000,
-    membershipStatus: 'activo',
-    status: 'active',
+    membershipStatus: "activo",
+    status: "active",
     lastCheckIn: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
     checkInsLast30Days: 12,
     averageCheckInsPerWeek: 3.5,
-    preferredSchedule: 'tarde',
+    preferredSchedule: "tarde",
     churnRiskScore: 15,
-    churnRiskLevel: 'bajo',
-    acquisitionSource: 'instagram',
-    assignedTrainer: 'Entrenador Juan',
-    notes: 'Muy comprometido, objetivo: ganar 5kg de músculo',
+    churnRiskLevel: "bajo",
+    acquisitionSource: "instagram",
+    assignedTrainer: "Entrenador Juan",
+    notes: "Muy comprometido, objetivo: ganar 5kg de músculo",
     attendance: [],
-    createdAt: '2024-01-10T10:00:00Z',
-    updatedAt: new Date().toISOString()
+    createdAt: "2024-01-10T10:00:00Z",
+    updatedAt: new Date().toISOString(),
   },
   {
-    id: '2',
-    name: 'María López',
-    email: 'maria@email.com',
-    phone: '+57 301 234 5678',
-    birthDate: '1985-08-22',
-    gender: 'F',
-    goal: 'perder_peso',
-    experienceLevel: 'principiante',
-    membershipType: 'basica',
-    joinedAt: '2024-02-15',
-    membershipEnd: '2025-02-15',
+    id: "2",
+    name: "María López",
+    email: "maria@email.com",
+    phone: "+57 301 234 5678",
+    birthDate: "1985-08-22",
+    gender: "F",
+    goal: "perder_peso",
+    experienceLevel: "principiante",
+    membershipType: "basica",
+    joinedAt: "2024-02-15",
+    membershipEnd: "2025-02-15",
     monthlyPrice: 80000,
-    membershipStatus: 'activo',
-    status: 'at-risk',
+    membershipStatus: "activo",
+    status: "at-risk",
     lastCheckIn: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000).toISOString(),
     checkInsLast30Days: 4,
     averageCheckInsPerWeek: 1.2,
-    preferredSchedule: 'manana',
+    preferredSchedule: "manana",
     churnRiskScore: 72,
-    churnRiskLevel: 'alto',
-    acquisitionSource: 'google',
-    assignedTrainer: 'Entrenadora Ana',
-    notes: 'Ha faltado mucho últimamente. Posible riesgo de abandono.',
+    churnRiskLevel: "alto",
+    acquisitionSource: "google",
+    assignedTrainer: "Entrenadora Ana",
+    notes: "Ha faltado mucho últimamente. Posible riesgo de abandono.",
     attendance: [],
-    createdAt: '2024-02-15T09:00:00Z',
-    updatedAt: new Date().toISOString()
+    createdAt: "2024-02-15T09:00:00Z",
+    updatedAt: new Date().toISOString(),
   },
   {
-    id: '3',
-    name: 'Andrés Martínez',
-    email: 'andres@email.com',
-    phone: '+57 302 345 6789',
-    birthDate: '1995-03-10',
-    gender: 'M',
-    goal: 'rendimiento',
-    experienceLevel: 'avanzado',
-    membershipType: 'vip',
-    joinedAt: '2023-11-01',
-    membershipEnd: '2024-11-01',
+    id: "3",
+    name: "Andrés Martínez",
+    email: "andres@email.com",
+    phone: "+57 302 345 6789",
+    birthDate: "1995-03-10",
+    gender: "M",
+    goal: "rendimiento",
+    experienceLevel: "avanzado",
+    membershipType: "vip",
+    joinedAt: "2023-11-01",
+    membershipEnd: "2024-11-01",
     monthlyPrice: 180000,
-    membershipStatus: 'vencido',
-    status: 'active',
+    membershipStatus: "vencido",
+    status: "active",
     lastCheckIn: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
     checkInsLast30Days: 18,
     averageCheckInsPerWeek: 5.2,
-    preferredSchedule: 'manana',
+    preferredSchedule: "manana",
     churnRiskScore: 8,
-    churnRiskLevel: 'bajo',
-    acquisitionSource: 'referido',
-    assignedTrainer: 'Entrenador Pedro',
-    notes: 'Miembro modelo. Entrena 5-6 veces por semana.',
+    churnRiskLevel: "bajo",
+    acquisitionSource: "referido",
+    assignedTrainer: "Entrenador Pedro",
+    notes: "Miembro modelo. Entrena 5-6 veces por semana.",
     attendance: [],
-    createdAt: '2023-11-01T07:00:00Z',
-    updatedAt: new Date().toISOString()
+    createdAt: "2023-11-01T07:00:00Z",
+    updatedAt: new Date().toISOString(),
   },
   {
-    id: '4',
-    name: 'Laura Sánchez',
-    email: 'laura@email.com',
-    phone: '+57 303 456 7890',
-    birthDate: '1992-11-30',
-    gender: 'F',
-    goal: 'salud_general',
-    experienceLevel: 'principiante',
-    membershipType: 'estudiante',
-    joinedAt: '2024-03-01',
-    membershipEnd: '2024-09-01',
+    id: "4",
+    name: "Laura Sánchez",
+    email: "laura@email.com",
+    phone: "+57 303 456 7890",
+    birthDate: "1992-11-30",
+    gender: "F",
+    goal: "salud_general",
+    experienceLevel: "principiante",
+    membershipType: "estudiante",
+    joinedAt: "2024-03-01",
+    membershipEnd: "2024-09-01",
     monthlyPrice: 60000,
-    membershipStatus: 'vencido',
-    status: 'inactive',
+    membershipStatus: "vencido",
+    status: "inactive",
     lastCheckIn: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
     checkInsLast30Days: 2,
     averageCheckInsPerWeek: 0.5,
-    preferredSchedule: 'tarde',
+    preferredSchedule: "tarde",
     churnRiskScore: 85,
-    churnRiskLevel: 'critico',
-    acquisitionSource: 'facebook',
-    notes: 'Sin asistencia en 2 semanas. Intentar contactar urgentemente.',
+    churnRiskLevel: "critico",
+    acquisitionSource: "facebook",
+    notes: "Sin asistencia en 2 semanas. Intentar contactar urgentemente.",
     attendance: [],
-    createdAt: '2024-03-01T14:00:00Z',
-    updatedAt: new Date().toISOString()
+    createdAt: "2024-03-01T14:00:00Z",
+    updatedAt: new Date().toISOString(),
   },
   {
-    id: '5',
-    name: 'Diego Fernández',
-    email: 'diego@email.com',
-    phone: '+57 304 567 8901',
-    birthDate: '1988-07-18',
-    gender: 'M',
-    goal: 'resistencia',
-    experienceLevel: 'intermedio',
-    membershipType: 'premium',
-    joinedAt: '2024-01-20',
-    membershipEnd: '2025-01-20',
+    id: "5",
+    name: "Diego Fernández",
+    email: "diego@email.com",
+    phone: "+57 304 567 8901",
+    birthDate: "1988-07-18",
+    gender: "M",
+    goal: "resistencia",
+    experienceLevel: "intermedio",
+    membershipType: "premium",
+    joinedAt: "2024-01-20",
+    membershipEnd: "2025-01-20",
     monthlyPrice: 120000,
-    membershipStatus: 'activo',
-    status: 'at-risk',
+    membershipStatus: "activo",
+    status: "at-risk",
     lastCheckIn: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
     checkInsLast30Days: 8,
     averageCheckInsPerWeek: 2.1,
-    preferredSchedule: 'noche',
+    preferredSchedule: "noche",
     churnRiskScore: 45,
-    churnRiskLevel: 'medio',
-    acquisitionSource: 'calle',
-    assignedTrainer: 'Entrenador Juan',
-    notes: 'Frecuencia ha disminuido. Monitorear.',
+    churnRiskLevel: "medio",
+    acquisitionSource: "calle",
+    assignedTrainer: "Entrenador Juan",
+    notes: "Frecuencia ha disminuido. Monitorear.",
     attendance: [],
-    createdAt: '2024-01-20T18:00:00Z',
-    updatedAt: new Date().toISOString()
-  }
+    createdAt: "2024-01-20T18:00:00Z",
+    updatedAt: new Date().toISOString(),
+  },
 ];
 
 const initialLeads: Lead[] = [];
 
 const initialAlerts: RetentionAlert[] = [
   {
-    id: '1',
-    clientId: '2',
-    clientName: 'María López',
-    type: 'ausencia_prolongada',
-    severity: 'critica',
-    description: 'No ha asistido en 9 días. Promedio histórico: 4x/semana',
+    id: "1",
+    clientId: "2",
+    clientName: "María López",
+    type: "ausencia_prolongada",
+    severity: "critica",
+    description: "No ha asistido en 9 días. Promedio histórico: 4x/semana",
     daysSinceLastVisit: 9,
-    recommendedAction: 'Llamada urgente de su entrenadora Ana. Ofrecer sesión gratuita de re-engagement.',
-    status: 'pendiente',
-    createdAt: new Date().toISOString()
+    recommendedAction:
+      "Llamada urgente de su entrenadora Ana. Ofrecer sesión gratuita de re-engagement.",
+    status: "pendiente",
+    createdAt: new Date().toISOString(),
   },
   {
-    id: '2',
-    clientId: '4',
-    clientName: 'Laura Sánchez',
-    type: 'ausencia_prolongada',
-    severity: 'critica',
-    description: 'Sin asistencia en 15 días. Riesgo crítico de abandono.',
+    id: "2",
+    clientId: "4",
+    clientName: "Laura Sánchez",
+    type: "ausencia_prolongada",
+    severity: "critica",
+    description: "Sin asistencia en 15 días. Riesgo crítico de abandono.",
     daysSinceLastVisit: 15,
-    recommendedAction: 'Intervención inmediata. Llamar hoy. Ofrecer 1 semana gratis + cambio de horario.',
-    status: 'pendiente',
-    createdAt: new Date().toISOString()
+    recommendedAction:
+      "Intervención inmediata. Llamar hoy. Ofrecer 1 semana gratis + cambio de horario.",
+    status: "pendiente",
+    createdAt: new Date().toISOString(),
   },
   {
-    id: '3',
-    clientId: '5',
-    clientName: 'Diego Fernández',
-    type: 'bajo_engagement',
-    severity: 'accion_requerida',
-    description: 'Frecuencia bajó de 4x a 2x por semana en último mes',
+    id: "3",
+    clientId: "5",
+    clientName: "Diego Fernández",
+    type: "bajo_engagement",
+    severity: "accion_requerida",
+    description: "Frecuencia bajó de 4x a 2x por semana en último mes",
     daysSinceLastVisit: 5,
-    recommendedAction: 'Invitar a clase grupal nueva de HIIT. Proponer desafío 21 días.',
-    status: 'en_progreso',
-    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
-  }
+    recommendedAction:
+      "Invitar a clase grupal nueva de HIIT. Proponer desafío 21 días.",
+    status: "en_progreso",
+    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+  },
 ];
 
 const initialEquipment: Equipment[] = [
   {
-    id: '1',
-    name: 'Cinta de Correr Pro',
-    category: 'cardio',
-    brand: 'Technogym',
-    model: 'Run 500',
-    serialNumber: 'TG-2024-001',
-    purchaseDate: '2023-06-15',
-    warrantyEnd: '2025-06-15',
+    id: "1",
+    name: "Cinta de Correr Pro",
+    category: "cardio",
+    brand: "Technogym",
+    model: "Run 500",
+    serialNumber: "TG-2024-001",
+    purchaseDate: "2023-06-15",
+    warrantyEnd: "2025-06-15",
     price: 8500000,
-    status: 'operativo',
-    location: 'Zona Cardio',
-    lastMaintenance: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-    nextMaintenance: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
+    status: "operativo",
+    location: "Zona Cardio",
+    lastMaintenance: new Date(
+      Date.now() - 15 * 24 * 60 * 60 * 1000,
+    ).toISOString(),
+    nextMaintenance: new Date(
+      Date.now() + 15 * 24 * 60 * 60 * 1000,
+    ).toISOString(),
     maintenanceIntervalDays: 30,
     totalUsageHours: 450,
     maintenanceHistory: [],
-    notes: 'Mantenimiento mensual programado',
-    createdAt: '2023-06-15T10:00:00Z',
-    updatedAt: new Date().toISOString()
+    notes: "Mantenimiento mensual programado",
+    createdAt: "2023-06-15T10:00:00Z",
+    updatedAt: new Date().toISOString(),
   },
   {
-    id: '2',
-    name: 'Bicicleta Estática',
-    category: 'cardio',
-    brand: 'Life Fitness',
-    model: 'IC7',
-    serialNumber: 'LF-2024-002',
-    purchaseDate: '2023-08-20',
-    warrantyEnd: '2025-08-20',
+    id: "2",
+    name: "Bicicleta Estática",
+    category: "cardio",
+    brand: "Life Fitness",
+    model: "IC7",
+    serialNumber: "LF-2024-002",
+    purchaseDate: "2023-08-20",
+    warrantyEnd: "2025-08-20",
     price: 4200000,
-    status: 'en_mantenimiento',
-    location: 'Zona Cardio',
-    lastMaintenance: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000).toISOString(),
-    nextMaintenance: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    status: "en_mantenimiento",
+    location: "Zona Cardio",
+    lastMaintenance: new Date(
+      Date.now() - 35 * 24 * 60 * 60 * 1000,
+    ).toISOString(),
+    nextMaintenance: new Date(
+      Date.now() - 5 * 24 * 60 * 60 * 1000,
+    ).toISOString(),
     maintenanceIntervalDays: 30,
     totalUsageHours: 380,
     maintenanceHistory: [],
-    notes: 'Requiere ajuste de resistencia. Fuera de servicio temporalmente.',
-    createdAt: '2023-08-20T10:00:00Z',
-    updatedAt: new Date().toISOString()
+    notes: "Requiere ajuste de resistencia. Fuera de servicio temporalmente.",
+    createdAt: "2023-08-20T10:00:00Z",
+    updatedAt: new Date().toISOString(),
   },
   {
-    id: '3',
-    name: 'Press de Banca',
-    category: 'pesas',
-    brand: 'Hammer Strength',
-    model: 'Plate Loaded',
-    serialNumber: 'HS-2024-003',
-    purchaseDate: '2023-05-10',
-    warrantyEnd: '2025-05-10',
+    id: "3",
+    name: "Press de Banca",
+    category: "pesas",
+    brand: "Hammer Strength",
+    model: "Plate Loaded",
+    serialNumber: "HS-2024-003",
+    purchaseDate: "2023-05-10",
+    warrantyEnd: "2025-05-10",
     price: 6800000,
-    status: 'operativo',
-    location: 'Sala de Pesas',
-    lastMaintenance: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-    nextMaintenance: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000).toISOString(),
+    status: "operativo",
+    location: "Sala de Pesas",
+    lastMaintenance: new Date(
+      Date.now() - 10 * 24 * 60 * 60 * 1000,
+    ).toISOString(),
+    nextMaintenance: new Date(
+      Date.now() + 20 * 24 * 60 * 60 * 1000,
+    ).toISOString(),
     maintenanceIntervalDays: 30,
     totalUsageHours: 520,
     maintenanceHistory: [],
-    notes: 'Equipo de alta rotación, revisar semanalmente',
-    createdAt: '2023-05-10T10:00:00Z',
-    updatedAt: new Date().toISOString()
+    notes: "Equipo de alta rotación, revisar semanalmente",
+    createdAt: "2023-05-10T10:00:00Z",
+    updatedAt: new Date().toISOString(),
   },
   {
-    id: '4',
-    name: 'Máquina de Poleas',
-    category: 'maquinas',
-    brand: 'Cable Crossover',
-    model: 'Dual Pulley',
-    serialNumber: 'CC-2024-004',
-    purchaseDate: '2023-07-01',
-    warrantyEnd: '2025-07-01',
+    id: "4",
+    name: "Máquina de Poleas",
+    category: "maquinas",
+    brand: "Cable Crossover",
+    model: "Dual Pulley",
+    serialNumber: "CC-2024-004",
+    purchaseDate: "2023-07-01",
+    warrantyEnd: "2025-07-01",
     price: 9500000,
-    status: 'operativo',
-    location: 'Zona Funcional',
-    lastMaintenance: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString(),
-    nextMaintenance: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+    status: "operativo",
+    location: "Zona Funcional",
+    lastMaintenance: new Date(
+      Date.now() - 25 * 24 * 60 * 60 * 1000,
+    ).toISOString(),
+    nextMaintenance: new Date(
+      Date.now() + 5 * 24 * 60 * 60 * 1000,
+    ).toISOString(),
     maintenanceIntervalDays: 30,
     totalUsageHours: 410,
     maintenanceHistory: [],
-    notes: 'Verificar cables y poleas',
-    createdAt: '2023-07-01T10:00:00Z',
-    updatedAt: new Date().toISOString()
+    notes: "Verificar cables y poleas",
+    createdAt: "2023-07-01T10:00:00Z",
+    updatedAt: new Date().toISOString(),
   },
   {
-    id: '5',
-    name: 'Elíptica',
-    category: 'cardio',
-    brand: 'Precor',
-    model: 'EFX 835',
-    serialNumber: 'PC-2024-005',
-    purchaseDate: '2023-09-15',
-    warrantyEnd: '2025-09-15',
+    id: "5",
+    name: "Elíptica",
+    category: "cardio",
+    brand: "Precor",
+    model: "EFX 835",
+    serialNumber: "PC-2024-005",
+    purchaseDate: "2023-09-15",
+    warrantyEnd: "2025-09-15",
     price: 7200000,
-    status: 'fuera_servicio',
-    location: 'Zona Cardio',
-    lastMaintenance: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(),
-    nextMaintenance: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+    status: "fuera_servicio",
+    location: "Zona Cardio",
+    lastMaintenance: new Date(
+      Date.now() - 45 * 24 * 60 * 60 * 1000,
+    ).toISOString(),
+    nextMaintenance: new Date(
+      Date.now() - 15 * 24 * 60 * 60 * 1000,
+    ).toISOString(),
     maintenanceIntervalDays: 30,
     totalUsageHours: 290,
     maintenanceHistory: [],
-    notes: 'Motor dañado. Esperando repuesto. Estimado de reparación: 2 semanas.',
-    createdAt: '2023-09-15T10:00:00Z',
-    updatedAt: new Date().toISOString()
-  }
+    notes:
+      "Motor dañado. Esperando repuesto. Estimado de reparación: 2 semanas.",
+    createdAt: "2023-09-15T10:00:00Z",
+    updatedAt: new Date().toISOString(),
+  },
 ];
 
 interface GymState {
@@ -300,37 +333,60 @@ interface GymState {
   leads: Lead[];
   alerts: RetentionAlert[];
   equipment: Equipment[];
-  gymName: string;
-  
+
   // Client actions
-  addClient: (client: Omit<Client, 'id' | 'createdAt' | 'updatedAt' | 'churnRiskScore' | 'churnRiskLevel' | 'attendance'>) => void;
+  addClient: (
+    client: Omit<
+      Client,
+      | "id"
+      | "createdAt"
+      | "updatedAt"
+      | "churnRiskScore"
+      | "churnRiskLevel"
+      | "attendance"
+    >,
+  ) => void;
   updateClient: (id: string, client: Partial<Client>) => void;
   deleteClient: (id: string) => void;
-  recordCheckIn: (clientId: string, duration?: number, activities?: string[]) => void;
-  
+  recordCheckIn: (
+    clientId: string,
+    duration?: number,
+    activities?: string[],
+  ) => void;
+
   // Lead actions
-  addLead: (lead: Omit<Lead, 'id' | 'createdAt' | 'conversionProbability'>) => void;
+  addLead: (
+    lead: Omit<Lead, "id" | "createdAt" | "conversionProbability">,
+  ) => void;
   updateLead: (id: string, lead: Partial<Lead>) => void;
   deleteLead: (id: string) => void;
   moveLead: (leadId: string, newStatus: LeadStatus) => void;
-  
+
   // Alert actions
-  addAlert: (alert: Omit<RetentionAlert, 'id' | 'createdAt'>) => void;
+  addAlert: (alert: Omit<RetentionAlert, "id" | "createdAt">) => void;
   updateAlert: (id: string, alert: Partial<RetentionAlert>) => void;
   resolveAlert: (id: string) => void;
-  
+
   // Equipment actions
-  addEquipment: (equipment: Omit<Equipment, 'id' | 'createdAt' | 'updatedAt' | 'maintenanceHistory'>) => void;
+  addEquipment: (
+    equipment: Omit<
+      Equipment,
+      "id" | "createdAt" | "updatedAt" | "maintenanceHistory"
+    >,
+  ) => void;
   updateEquipment: (id: string, equipment: Partial<Equipment>) => void;
   deleteEquipment: (id: string) => void;
-  scheduleMaintenance: (equipmentId: string, maintenance: Omit<MaintenanceRecord, 'id' | 'equipmentId' | 'createdAt'>) => void;
+  scheduleMaintenance: (
+    equipmentId: string,
+    maintenance: Omit<MaintenanceRecord, "id" | "equipmentId" | "createdAt">,
+  ) => void;
   completeMaintenance: (equipmentId: string, maintenanceId: string) => void;
-  
-  // Settings actions
-  setGymName: (name: string) => void;
-  
+
   // Utilities
-  calculateChurnRisk: (client: Client) => { score: number; level: ChurnRiskLevel };
+  calculateChurnRisk: (client: Client) => {
+    score: number;
+    level: ChurnRiskLevel;
+  };
   calculateStatus: (lastCheckIn?: string) => ClientStatus;
 }
 
@@ -341,7 +397,6 @@ export const useGymStore = create<GymState>()(
       leads: initialLeads,
       alerts: initialAlerts,
       equipment: initialEquipment,
-      gymName: 'GymOS',
 
       // Client actions
       addClient: (clientData) => {
@@ -366,7 +421,11 @@ export const useGymStore = create<GymState>()(
         set((state) => {
           const updatedClients = state.clients.map((c) => {
             if (c.id === id) {
-              const updated = { ...c, ...clientData, updatedAt: new Date().toISOString() };
+              const updated = {
+                ...c,
+                ...clientData,
+                updatedAt: new Date().toISOString(),
+              };
               // Recalcular churn risk si cambiaron factores relevantes
               if (clientData.checkInsLast30Days || clientData.lastCheckIn) {
                 const { score, level } = get().calculateChurnRisk(updated);
@@ -389,7 +448,7 @@ export const useGymStore = create<GymState>()(
         }));
       },
 
-      recordCheckIn: (clientId, duration = 60, activities = ['pesas']) => {
+      recordCheckIn: (clientId, duration = 60, activities = ["pesas"]) => {
         set((state) => {
           const client = state.clients.find((c) => c.id === clientId);
           if (!client) return state;
@@ -432,15 +491,17 @@ export const useGymStore = create<GymState>()(
           ...leadData,
           id: uuidv4(),
           createdAt: new Date().toISOString(),
-          status: leadData.status || 'nuevo',
-          assignedAdvisor: leadData.assignedAdvisor || 'Sin asignar',
+          status: leadData.status || "nuevo",
+          assignedAdvisor: leadData.assignedAdvisor || "Sin asignar",
         };
         set((state) => ({ leads: [...state.leads, newLead] }));
       },
 
       updateLead: (id, leadData) => {
         set((state) => ({
-          leads: state.leads.map((l) => (l.id === id ? { ...l, ...leadData } : l)),
+          leads: state.leads.map((l) =>
+            l.id === id ? { ...l, ...leadData } : l,
+          ),
         }));
       },
 
@@ -450,7 +511,9 @@ export const useGymStore = create<GymState>()(
 
       moveLead: (leadId, newStatus) => {
         set((state) => ({
-          leads: state.leads.map((l) => (l.id === leadId ? { ...l, status: newStatus } : l)),
+          leads: state.leads.map((l) =>
+            l.id === leadId ? { ...l, status: newStatus } : l,
+          ),
         }));
       },
 
@@ -466,14 +529,22 @@ export const useGymStore = create<GymState>()(
 
       updateAlert: (id, alertData) => {
         set((state) => ({
-          alerts: state.alerts.map((a) => (a.id === id ? { ...a, ...alertData } : a)),
+          alerts: state.alerts.map((a) =>
+            a.id === id ? { ...a, ...alertData } : a,
+          ),
         }));
       },
 
       resolveAlert: (id) => {
         set((state) => ({
-          alerts: state.alerts.map((a) => 
-            a.id === id ? { ...a, status: 'resuelta', resolvedAt: new Date().toISOString() } : a
+          alerts: state.alerts.map((a) =>
+            a.id === id
+              ? {
+                  ...a,
+                  status: "resuelta",
+                  resolvedAt: new Date().toISOString(),
+                }
+              : a,
           ),
         }));
       },
@@ -485,9 +556,10 @@ export const useGymStore = create<GymState>()(
         // Factor 1: Días desde última visita (40% peso)
         if (client.lastCheckIn) {
           const daysSince = Math.floor(
-            (Date.now() - new Date(client.lastCheckIn).getTime()) / (1000 * 60 * 60 * 24)
+            (Date.now() - new Date(client.lastCheckIn).getTime()) /
+              (1000 * 60 * 60 * 24),
           );
-          
+
           if (daysSince > 14) score += 40;
           else if (daysSince > 7) score += 25;
           else if (daysSince > 3) score += 10;
@@ -496,10 +568,15 @@ export const useGymStore = create<GymState>()(
         }
 
         // Factor 2: Frecuencia vs esperado (30% peso)
-        const expectedVisitsPerWeek = client.experienceLevel === 'principiante' ? 2 : 
-                                     client.experienceLevel === 'intermedio' ? 3.5 : 4.5;
-        const frequencyRatio = client.averageCheckInsPerWeek / expectedVisitsPerWeek;
-        
+        const expectedVisitsPerWeek =
+          client.experienceLevel === "principiante"
+            ? 2
+            : client.experienceLevel === "intermedio"
+              ? 3.5
+              : 4.5;
+        const frequencyRatio =
+          client.averageCheckInsPerWeek / expectedVisitsPerWeek;
+
         if (frequencyRatio < 0.3) score += 30;
         else if (frequencyRatio < 0.6) score += 15;
         else if (frequencyRatio < 0.8) score += 5;
@@ -507,36 +584,38 @@ export const useGymStore = create<GymState>()(
         // Factor 3: Membresía próxima a vencer (20% peso)
         if (client.membershipEnd) {
           const daysUntilExpiry = Math.floor(
-            (new Date(client.membershipEnd).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+            (new Date(client.membershipEnd).getTime() - Date.now()) /
+              (1000 * 60 * 60 * 24),
           );
-          
+
           if (daysUntilExpiry < 7) score += 20;
           else if (daysUntilExpiry < 30) score += 10;
         }
 
         // Factor 4: Nivel de experiencia (10% peso)
-        if (client.experienceLevel === 'principiante') score += 10;
+        if (client.experienceLevel === "principiante") score += 10;
 
         let level: ChurnRiskLevel;
-        if (score >= 75) level = 'critico';
-        else if (score >= 50) level = 'alto';
-        else if (score >= 25) level = 'medio';
-        else level = 'bajo';
+        if (score >= 75) level = "critico";
+        else if (score >= 50) level = "alto";
+        else if (score >= 25) level = "medio";
+        else level = "bajo";
 
         return { score: Math.min(score, 100), level };
       },
 
       // Calculadora de Status
       calculateStatus: (lastCheckIn?: string) => {
-        if (!lastCheckIn) return 'inactive';
-        
+        if (!lastCheckIn) return "inactive";
+
         const daysSince = Math.floor(
-          (Date.now() - new Date(lastCheckIn).getTime()) / (1000 * 60 * 60 * 24)
+          (Date.now() - new Date(lastCheckIn).getTime()) /
+            (1000 * 60 * 60 * 24),
         );
-        
-        if (daysSince <= 7) return 'active';
-        if (daysSince <= 21) return 'at-risk';
-        return 'inactive';
+
+        if (daysSince <= 7) return "active";
+        if (daysSince <= 21) return "at-risk";
+        return "inactive";
       },
 
       // Equipment actions
@@ -555,7 +634,9 @@ export const useGymStore = create<GymState>()(
       updateEquipment: (id, equipmentData) => {
         set((state) => ({
           equipment: state.equipment.map((e) =>
-            e.id === id ? { ...e, ...equipmentData, updatedAt: new Date().toISOString() } : e
+            e.id === id
+              ? { ...e, ...equipmentData, updatedAt: new Date().toISOString() }
+              : e,
           ),
         }));
       },
@@ -594,14 +675,18 @@ export const useGymStore = create<GymState>()(
             if (e.id === equipmentId) {
               const updatedHistory = e.maintenanceHistory.map((m) =>
                 m.id === maintenanceId
-                  ? { ...m, status: 'completado' as const, completedDate: new Date().toISOString() }
-                  : m
+                  ? {
+                      ...m,
+                      status: "completado" as const,
+                      completedDate: new Date().toISOString(),
+                    }
+                  : m,
               );
               return {
                 ...e,
                 maintenanceHistory: updatedHistory,
                 lastMaintenance: new Date().toISOString(),
-                status: 'operativo',
+                status: "operativo",
                 updatedAt: new Date().toISOString(),
               };
             }
@@ -609,47 +694,48 @@ export const useGymStore = create<GymState>()(
           }),
         }));
       },
-
-      setGymName: (name: string) => {
-        set({ gymName: name.trim() || 'GymOS' });
-      },
     }),
     {
-      name: 'gymos-storage',
+      name: "gymos-storage",
       version: 1,
       partialize: (state: GymState) => ({
         clients: state.clients,
         leads: state.leads,
         alerts: state.alerts,
         equipment: state.equipment,
-        gymName: state.gymName,
       }),
-      migrate: (persistedState: any, version: number) => {
+      migrate: (persistedState: unknown) => {
         // Si está vacío o no es objeto, retornar undefined para usar valores por defecto
-        if (!persistedState || typeof persistedState !== 'object') {
+        if (!persistedState || typeof persistedState !== "object") {
           return undefined;
         }
+
+        const state = persistedState as Record<string, unknown>;
+
         // Asegurar que todas las propiedades requeridas existan
         return {
-          ...persistedState,
-          clients: persistedState.clients || initialClients,
-          leads: persistedState.leads || initialLeads,
-          alerts: persistedState.alerts || initialAlerts,
-          equipment: persistedState.equipment || initialEquipment,
-          gymName: persistedState.gymName || 'GymOS',
+          ...state,
+          clients: Array.isArray(state.clients)
+            ? state.clients
+            : initialClients,
+          leads: Array.isArray(state.leads) ? state.leads : initialLeads,
+          alerts: Array.isArray(state.alerts) ? state.alerts : initialAlerts,
+          equipment: Array.isArray(state.equipment)
+            ? state.equipment
+            : initialEquipment,
         };
       },
       // Evita crash si el localStorage contiene JSON inválido.
       deserialize: (str: string) => {
         try {
           return JSON.parse(str);
-        } catch (err) {
+        } catch {
           try {
-            localStorage.removeItem('gymos-storage');
+            localStorage.removeItem("gymos-storage");
           } catch {}
           return {};
         }
       },
-    } as any
-  )
+    },
+  ),
 );

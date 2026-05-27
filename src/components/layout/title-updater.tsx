@@ -1,14 +1,11 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { useAppSettings } from '@/context/app-settings-context';
+import { useEffect } from "react";
 
 export default function TitleUpdater() {
-  const { gymName } = useAppSettings();
-
   useEffect(() => {
-    document.title = `${gymName} - GymOS`;
-  }, [gymName]);
+    document.title = "GymOS";
+  }, []);
 
   return null;
 }

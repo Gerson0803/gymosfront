@@ -43,7 +43,7 @@ export function EmployeeFormPanel({
   useEffect(() => {
     if (!open) return;
     if (editingEmployee) {
-      const { id: _id, createdAt: _created, ...rest } = editingEmployee;
+      const { id: _id, createdAt: _created, updatedAt: _updated, ...rest } = editingEmployee;
       setForm(rest);
     } else {
       setForm({

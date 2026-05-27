@@ -4,11 +4,12 @@ import { useEffect, useId, useRef } from "react";
 import { Upload, X } from "lucide-react";
 import { IMAGE_ACCEPT, validateImageFile } from "@/lib/file-upload";
 import { ProfileAvatar } from "./profile-avatar";
+import { deleteFromS3 } from "@/lib/s3";
 import toast from "react-hot-toast";
 
 type PhotoUploadProps = {
   value: string;
-  onChange: (previewUrl: string) => void;
+  onChange: (url: string) => void;
   name?: string;
   onRevoke?: (url: string) => void;
 };
@@ -43,9 +44,16 @@ export function PhotoUpload({
     onChange(URL.createObjectURL(file));
   };
 
-  const handleRemove = () => {
+  const handleRemove = async () => {
     if (value.startsWith("blob:")) {
       URL.revokeObjectURL(value);
+    } else if (value.includes("amazonaws.com")) {
+      try {
+        const key = value.split(".com/")[1];
+        await deleteFromS3(key);
+      } catch (err) {
+        console.error("Error deleting from S3:", err);
+      }
     }
     onChange("");
     if (inputRef.current) inputRef.current.value = "";

@@ -28,41 +28,26 @@ function formatTime12h(time24: string): string {
   return `${String(h).padStart(2, "0")}:${m} ${period}`;
 }
 
-function dayLabel(index: number): string {
-  return WEEK_DAYS.find((d) => d.key === DAY_ORDER[index])!.label;
+function normalizeDayToken(token: string): string {
+  return token
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\./g, "")
+    .slice(0, 3);
 }
 
-function compressDayRange(sortedKeys: DayKey[]): string {
-  if (sortedKeys.length === 0) return "";
-
-  const indices = sortedKeys.map((k) => DAY_ORDER.indexOf(k)).sort((a, b) => a - b);
-  const ranges: string[] = [];
-  let start = indices[0];
-  let end = indices[0];
-
-  for (let i = 1; i < indices.length; i++) {
-    if (indices[i] === end + 1) {
-      end = indices[i];
-    } else {
-      ranges.push(
-        start === end ? dayLabel(start) : `${dayLabel(start)} - ${dayLabel(end)}`,
-      );
-      start = indices[i];
-      end = indices[i];
-    }
-  }
-  ranges.push(
-    start === end ? dayLabel(start) : `${dayLabel(start)} - ${dayLabel(end)}`,
-  );
-
-  return ranges.join(", ");
+function resolveDayKey(token: string): DayKey | undefined {
+  return DAY_ALIASES[normalizeDayToken(token)];
 }
 
 export function formatSchedule(value: ScheduleValue): string {
   if (value.days.length === 0) return "";
-  const daysPart = compressDayRange(
-    [...value.days].sort((a, b) => DAY_ORDER.indexOf(a) - DAY_ORDER.indexOf(b)),
-  );
+  const daysPart = [...value.days]
+    .sort((a, b) => DAY_ORDER.indexOf(a) - DAY_ORDER.indexOf(b))
+    .map((day) => WEEK_DAYS.find((item) => item.key === day)?.label ?? day)
+    .join(", ");
   const start = formatTime12h(value.startTime);
   const end = formatTime12h(value.endTime);
   return `${daysPart} · ${start} - ${end}`;
@@ -92,14 +77,13 @@ const DAY_ALIASES: Record<string, DayKey> = {
 };
 
 export function parseSchedule(text: string): ScheduleValue {
-  const defaultValue: ScheduleValue = {
-    days: ["mon", "tue", "wed", "thu", "fri"],
+  const defaultTimeRange = {
     startTime: "08:00",
     endTime: "16:00",
   };
 
   if (!text?.trim()) {
-    return { days: [], startTime: "08:00", endTime: "16:00" };
+    return { days: [], ...defaultTimeRange };
   }
 
   const parts = text.split("·").map((p) => p.trim());
@@ -107,24 +91,34 @@ export function parseSchedule(text: string): ScheduleValue {
   const timePart = parts[1] ?? "";
 
   const days: DayKey[] = [];
-  const dayTokens = daysPart.split(/[,·]/).map((t) => t.trim());
+  const dayTokens = daysPart
+    .split(",")
+    .map((t) => t.trim())
+    .filter(Boolean);
 
   for (const token of dayTokens) {
-    const rangeMatch = token.match(/(\w+)\s*[-–]\s*(\w+)/i);
-    if (rangeMatch) {
-      const startKey = DAY_ALIASES[rangeMatch[1].toLowerCase().slice(0, 3)];
-      const endKey = DAY_ALIASES[rangeMatch[2].toLowerCase().slice(0, 3)];
+    const [startToken, endToken] = token
+      .split(/\s*[-–]\s*/)
+      .map((part) => part.trim());
+
+    if (endToken) {
+      const startKey = resolveDayKey(startToken);
+      const endKey = resolveDayKey(endToken);
+
       if (startKey && endKey) {
         const startIdx = DAY_ORDER.indexOf(startKey);
         const endIdx = DAY_ORDER.indexOf(endKey);
-        for (let i = startIdx; i <= endIdx; i++) {
-          if (!days.includes(DAY_ORDER[i])) days.push(DAY_ORDER[i]);
+        for (let i = startIdx; i <= endIdx; i += 1) {
+          const day = DAY_ORDER[i];
+          if (day && !days.includes(day)) days.push(day);
         }
       }
-    } else {
-      const key = DAY_ALIASES[token.toLowerCase().slice(0, 3)];
-      if (key && !days.includes(key)) days.push(key);
+
+      continue;
     }
+
+    const key = resolveDayKey(startToken);
+    if (key && !days.includes(key)) days.push(key);
   }
 
   const timeMatch = timePart.match(
@@ -132,9 +126,13 @@ export function parseSchedule(text: string): ScheduleValue {
   );
 
   return {
-    days: days.length > 0 ? days : defaultValue.days,
-    startTime: timeMatch ? parseTimeTo24h(timeMatch[1]) : defaultValue.startTime,
-    endTime: timeMatch ? parseTimeTo24h(timeMatch[2]) : defaultValue.endTime,
+    days,
+    startTime: timeMatch
+      ? parseTimeTo24h(timeMatch[1])
+      : defaultTimeRange.startTime,
+    endTime: timeMatch
+      ? parseTimeTo24h(timeMatch[2])
+      : defaultTimeRange.endTime,
   };
 }
 
